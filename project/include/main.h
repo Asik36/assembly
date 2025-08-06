@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <math.h>
+#include <stdbool.h>
 #define MEMORY_MAX_SIZE 8192
 #define MEMORY_ADRESS_MAX_BITS 12
 #define SYMBOL_MAX_SIZE 16
@@ -12,6 +13,9 @@
 #define FUNCT_MAX_BIT_SIZE 4
 #define OPERAND_MAX_BIT_SIZE 4
 #define OPERAND_TYPE_MAX_BIT_SIZE 2
+#define ADDRESSING_TYPES_AMONT 4
+#define COMMAND_AMONT 16
+
 enum attribute_access_type_e
 {
     
@@ -30,8 +34,8 @@ typedef struct instruction_s
     uint16_t offset       : MEMORY_ADRESS_MAX_BITS;
     uint8_t label           [SYMBOL_MAX_SIZE];
     uint8_t commnand        [COMMAND_MAX_SIZE];
-    uint8_t operand1        [SYMBOL_MAX_SIZE];
-    uint8_t operand2        [SYMBOL_MAX_SIZE];
+    uint8_t src_operand        [SYMBOL_MAX_SIZE];
+    uint8_t dest_operand        [SYMBOL_MAX_SIZE];
 
 } instruction;
 
@@ -63,17 +67,17 @@ typedef struct symbol_s
 
 typedef enum are
 {
-    Absolute    = 1 << 0, /*word is a value*/
-    Relocatable = 1 << 1, /*word value is taken from a memory address*/
-    External    = 1 << 2  /*word value is taken from a diffrent file*/
+    ABSOLUTE    = 1 << 0, /*word is a value*/
+    RELOCATABLE = 1 << 1, /*word value is taken from a memory address*/
+    EXTERNAL    = 1 << 2  /*word value is taken from a diffrent file*/
 } are_e;
 
 typedef enum addressing_modes_e
 {
-    immediate,  
-    direct,
-    index,
-    register_direct
+    ADDRESSING_MODES_IMMEDIATE,  
+    ADDRESSING_MODES_DIRECT,
+    ADDRESSING_MODES_INDEX,
+    ADDRESSING_MODES_REGISTER_DIRECT
 }addressing_modes;
 
 
@@ -85,10 +89,10 @@ typedef uint16_t base_address_content;  /*Data location in memory*/
 typedef struct operand_content_s
 {
     uint16_t funct                  : FUNCT_MAX_BIT_SIZE;
-    uint16_t operand1               : OPERAND_MAX_BIT_SIZE;         /*first operand*/
-    addressing_modes operand1_type  : OPERAND_TYPE_MAX_BIT_SIZE;    /*first operand's type*/
-    uint16_t operand2               : OPERAND_MAX_BIT_SIZE;         /*second operand*/
-    addressing_modes operand2_type  : OPERAND_TYPE_MAX_BIT_SIZE;    /*second operand's type*/
+    uint16_t src_operand               : OPERAND_MAX_BIT_SIZE;         /*first operand*/
+    addressing_modes src_operand_type  : OPERAND_TYPE_MAX_BIT_SIZE;    /*first operand's type*/
+    uint16_t dest_operand               : OPERAND_MAX_BIT_SIZE;         /*second operand*/
+    addressing_modes dest_operand_type  : OPERAND_TYPE_MAX_BIT_SIZE;    /*second operand's type*/
     
 }operand_content;
 
@@ -135,16 +139,35 @@ typedef struct machine_code_s
 
 
 
+typedef struct command_s 
+{
+    opcode_types opcode;
+    uint16_t funct;
+    uint8_t command_name[COMMAND_MAX_SIZE];
+    bool src_operand_types[ADDRESSING_TYPES_AMONT];
+    bool dest_operand_types[ADDRESSING_TYPES_AMONT];
+}command;
 
+const command commands[COMMAND_AMONT] =
+{
+    {.opcode = OPCODE_MOV,.funct = 0,.command_name = "mov",.src_operand_types = {1,1,1,1} ,.dest_operand_types = {0,1,1,1}},
+    {.opcode = OPCODE_CMP,.funct = 0,.command_name = "cmp",.src_operand_types = {1,1,1,1} ,.dest_operand_types = {1,1,1,1}},
+    {.opcode = OPCODE_MATH_OPERATION,.funct = 10,.command_name = "add",.src_operand_types = {1,1,1,1} ,.dest_operand_types = {0,1,1,1}},
+    {.opcode = OPCODE_MATH_OPERATION,.funct = 11,.command_name = "add",.src_operand_types = {1,1,1,1} ,.dest_operand_types = {0,1,1,1}},
+    {.opcode = OPCODE_LEA,.funct = 0,.command_name = "lea",.src_operand_types = {0,1,1,0} ,.dest_operand_types = {0,1,1,1}},
+    {.opcode = OPCODE_CHANGE_VALUE,.funct = 10,.command_name = "clr",.src_operand_types = {0} ,.dest_operand_types = {0,1,1,1}},
+    {.opcode = OPCODE_CHANGE_VALUE,.funct = 11,.command_name = "not",.src_operand_types = {0} ,.dest_operand_types = {0,1,1,1}},
+    {.opcode = OPCODE_CHANGE_VALUE,.funct = 12,.command_name = "inc",.src_operand_types = {0} ,.dest_operand_types = {0,1,1,1}},
+    {.opcode = OPCODE_CHANGE_VALUE,.funct = 13,.command_name = "dec",.src_operand_types = {0} ,.dest_operand_types = {0,1,1,1}},
+    {.opcode = OPCODE_JUMPS,.funct = 0,.command_name = "jmp",.src_operand_types = {0} ,.dest_operand_types = {0,1,1,0}},
+    {.opcode = OPCODE_JUMPS,.funct = 0,.command_name = "bne",.src_operand_types = {0} ,.dest_operand_types = {0,1,1,0}},
+    {.opcode = OPCODE_JUMPS,.funct = 0,.command_name = "jsr",.src_operand_types = {0} ,.dest_operand_types = {0,1,1,0}},
+    {.opcode = OPCODE_RED,.funct = 0,.command_name = "red",.src_operand_types = {0} ,.dest_operand_types = {0,1,1,1}},
+    {.opcode = OPCODE_PRN,.funct = 0,.command_name = "prn",.src_operand_types = {0} ,.dest_operand_types = {0,1,1,1}},
+    {.opcode = OPCODE_RTS,.funct = 0,.command_name = "rts",.src_operand_types = {0} ,.dest_operand_types = {0}},
+    {.opcode = OPCODE_STOP,.funct = 0,.command_name = "stop",.src_operand_types = {0} ,.dest_operand_types = {0}}
 
-
-
-
-
-
-
-
-
+}
 
 
 
@@ -160,3 +183,7 @@ typedef struct machine_code_s
  * 
  * 
  */
+
+
+
+/* add hello , r2 */
