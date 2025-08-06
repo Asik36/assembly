@@ -18,7 +18,7 @@
 
 enum attribute_access_type_e
 {
-    
+
     ATTRIBUTE_DATA = 1,
     ATTRIBUTE_STRING
 
@@ -43,7 +43,7 @@ typedef struct directive_s
 {
     uint8_t label       [SYMBOL_MAX_SIZE];   /* extern and entry shou*/
     uint8_t name        [SYMBOL_MAX_SIZE];
-    uint32_t data_length; 
+    uint32_t data_length;
     void * data;                                   /* chars or ints*/
     enum attribute_access_type_e access_attribute; /* extern or entry */
     enum attribute_data_type_e data_attribute;   /* data or string */
@@ -54,7 +54,7 @@ typedef struct symbol_s
     uint8_t  name           [SYMBOL_MAX_SIZE];
     uint16_t base_address : MEMORY_ADRESS_MAX_BITS;
     uint16_t offset       : MEMORY_ADRESS_MAX_BITS;
-    uint32_t data_length; 
+    uint32_t data_length;
     void * data;
     /* value is calculated by adding the offset to the base address */
     enum attribute_access_type_e access_attribute; /* extern or entry */
@@ -74,7 +74,7 @@ typedef enum are
 
 typedef enum addressing_modes_e
 {
-    ADDRESSING_MODES_IMMEDIATE,  
+    ADDRESSING_MODES_IMMEDIATE,
     ADDRESSING_MODES_DIRECT,
     ADDRESSING_MODES_INDEX,
     ADDRESSING_MODES_REGISTER_DIRECT
@@ -93,17 +93,17 @@ typedef struct operand_content_s
     addressing_modes src_operand_type  : OPERAND_TYPE_MAX_BIT_SIZE;    /*first operand's type*/
     uint16_t dest_operand               : OPERAND_MAX_BIT_SIZE;         /*second operand*/
     addressing_modes dest_operand_type  : OPERAND_TYPE_MAX_BIT_SIZE;    /*second operand's type*/
-    
+
 }operand_content;
 
-typedef enum opcode_types_e 
+typedef enum opcode_types_e
 {
     OPCODE_MOV              = 1 << 0,
     OPCODE_CMP              = 1 << 1,
     OPCODE_MATH_OPERATION   = 1 << 2,
-    OPCODE_LEA              = 1 << 4, 
+    OPCODE_LEA              = 1 << 4,
     OPCODE_CHANGE_VALUE     = 1 << 5,
-    OPCODE_JUMPS            = 1 << 9, 
+    OPCODE_JUMPS            = 1 << 9,
     OPCODE_RED              = 1 << 12,
     OPCODE_PRN              = 1 << 13,
     OPCODE_RTS              = 1 << 14,
@@ -116,7 +116,7 @@ typedef enum opcode_types_e
 typedef union word_content_u
 {
     opcode_content opcode;
-    operand_content operand;   
+    operand_content operand;
     base_address_content data_address;
     offset_content offset;
     value_content value;
@@ -139,7 +139,7 @@ typedef struct machine_code_s
 
 
 
-typedef struct command_s 
+typedef struct command_s
 {
     opcode_types opcode;
     uint16_t funct;
@@ -171,7 +171,7 @@ const command commands[COMMAND_AMONT] =
 
 
 
-#endif 
+#endif
 
 // HELLO : mov #3, r1
 /**
@@ -179,9 +179,9 @@ const command commands[COMMAND_AMONT] =
  * COMMAND = mov
  * op1 = #3
  * op2 = r1
- * 
- * 
- * 
+ *
+ *
+ *
  */
 
 
