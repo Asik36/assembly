@@ -6,8 +6,12 @@
 #define MEMORY_MAX_SIZE 8192
 #define MEMORY_ADRESS_MAX_BITS 12
 #define SYMBOL_MAX_SIZE 16
-#define COMMAND_MAX_SIZE 3
+#define COMMAND_MAX_SIZE 5
 #define ATTRIBUTE_NONE 0
+#define ARE_MAX_BIT_SIZE 4
+#define FUNCT_MAX_BIT_SIZE 4
+#define OPERAND_MAX_BIT_SIZE 4
+#define OPERAND_TYPE_MAX_BIT_SIZE 2
 enum attribute_access_type_e
 {
     
@@ -24,10 +28,10 @@ typedef struct instruction_s
 {
     uint16_t base_address : MEMORY_ADRESS_MAX_BITS;
     uint16_t offset       : MEMORY_ADRESS_MAX_BITS;
-    uint8_t label   [SYMBOL_MAX_SIZE];
-    uint8_t commnand[COMMAND_MAX_SIZE];
-    uint8_t operand1[SYMBOL_MAX_SIZE];
-    uint8_t operand2[SYMBOL_MAX_SIZE];
+    uint8_t label           [SYMBOL_MAX_SIZE];
+    uint8_t commnand        [COMMAND_MAX_SIZE];
+    uint8_t operand1        [SYMBOL_MAX_SIZE];
+    uint8_t operand2        [SYMBOL_MAX_SIZE];
 
 } instruction;
 
@@ -36,21 +40,21 @@ typedef struct directive_s
     uint8_t label       [SYMBOL_MAX_SIZE];   /* extern and entry shou*/
     uint8_t name        [SYMBOL_MAX_SIZE];
     uint32_t data_length; 
-    void * data;
+    void * data;                                   /* chars or ints*/
     enum attribute_access_type_e access_attribute; /* extern or entry */
-    enum attribute_data_type_e access_attribute;   /* data or string */
+    enum attribute_data_type_e data_attribute;   /* data or string */
 } directive;
 
 typedef struct symbol_s
 {
-    uint8_t  name  [SYMBOL_MAX_SIZE];
+    uint8_t  name           [SYMBOL_MAX_SIZE];
     uint16_t base_address : MEMORY_ADRESS_MAX_BITS;
     uint16_t offset       : MEMORY_ADRESS_MAX_BITS;
     uint32_t data_length; 
     void * data;
     /* value is calculated by adding the offset to the base address */
     enum attribute_access_type_e access_attribute; /* extern or entry */
-    enum attribute_data_type_e access_attribute;   /* data or string */
+    enum attribute_data_type_e data_attribute;   /* data or string */
 
 
 } symbol;
@@ -59,31 +63,32 @@ typedef struct symbol_s
 
 typedef enum are
 {
-    Absolute    = 1 << 0,
-    Relocatable = 1 << 1,
-    External    = 1 << 2
+    Absolute    = 1 << 0, /*word is a value*/
+    Relocatable = 1 << 1, /*word value is taken from a memory address*/
+    External    = 1 << 2  /*word value is taken from a diffrent file*/
 } are_e;
 
 typedef enum addressing_modes_e
 {
-    immediate,
+    immediate,  
     direct,
     index,
     register_direct
 }addressing_modes;
 
 
-typedef int16_t value_content;
-typedef uint16_t opcode_content;
-typedef uint16_t offset_content;
-typedef uint16_t base_address_content;
+typedef int16_t value_content;          /*Value data such as number or char */
+typedef uint16_t opcode_content;        /*Opcode of command*/
+typedef uint16_t offset_content;        /*Size of data in memory*/
+typedef uint16_t base_address_content;  /*Data location in memory*/
+/*Info about the operands of the command*/
 typedef struct operand_content_s
 {
-    uint16_t funct                  : 4;
-    uint16_t operand1               : 4;
-    addressing_modes operand1_type  : 2; 
-    uint16_t operand2               : 4; 
-    addressing_modes operand2_type  : 2; 
+    uint16_t funct                  : FUNCT_MAX_BIT_SIZE;
+    uint16_t operand1               : OPERAND_MAX_BIT_SIZE;         /*first operand*/
+    addressing_modes operand1_type  : OPERAND_TYPE_MAX_BIT_SIZE;    /*first operand's type*/
+    uint16_t operand2               : OPERAND_MAX_BIT_SIZE;         /*second operand*/
+    addressing_modes operand2_type  : OPERAND_TYPE_MAX_BIT_SIZE;    /*second operand's type*/
     
 }operand_content;
 
@@ -115,16 +120,16 @@ typedef union word_content_u
 
 typedef struct word_data_s
 {
-    are_e are_attribute : 4;
-    word_content content;
+    are_e are_attribute : ARE_MAX_BIT_SIZE; /*ARE flag*/
+    word_content content;                   /*can be : opcode/operand/adress/offset/value*/
 }word_data;
 
 
 
 typedef struct machine_code_s
 {
-    uint32_t word_count;
-    word_data * words;
+    uint32_t word_count; /*number of words*/
+    word_data * words; /*Array of words*/
 
 }machine_code;
 
