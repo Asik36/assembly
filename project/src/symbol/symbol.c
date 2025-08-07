@@ -25,12 +25,12 @@ void symbol_read_instruction_table(instruction * instruction_table,int instructi
         }
         if(current_symbol != NULL)
         {
-            
+
         }
-        
+
 
     }
-     
+
 }
 
 
@@ -48,17 +48,17 @@ symbol * symbol_get_by_name(symbol * symbol_table, char * name, int name_length)
 
         }
     }
-    
+
 
     return selected_symbol;
-    
+
 }
 
 
 
 void symbol_assign_memmory_address(instruction * ins)
 {
-    
+
 
 }
 
@@ -69,7 +69,7 @@ int symbol_get_instruction_offset(instruction * ins)
     {
         offset = 1;
     }
-    else 
+    else
     {
 
     }
@@ -79,7 +79,7 @@ int symbol_get_instruction_offset(instruction * ins)
 addressing_modes symbol_get_address_mode(char * operand)
 {
     addressing_modes mode;
-    
+
     if(*operand == '#')
     {
         mode = ADDRESSING_MODES_IMMEDIATE;
@@ -95,7 +95,7 @@ bool symbol_is_operand(char * operand)
 {
     int i;
     bool flag = false;
-    for (i = 0; i < OPERAND_AMONT && flag == false; i++)
+    for (i = 0; i < REGISTER_AMONT && flag == false; i++)
     {
         flag = strncmp(operand,register_names[i],SYMBOL_MAX_SIZE) == 0;
     }
