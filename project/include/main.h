@@ -11,15 +11,17 @@
 #define ATTRIBUTE_NONE 0
 #define ARE_MAX_BIT_SIZE 4
 #define FUNCT_MAX_BIT_SIZE 4
-#define OPERAND_MAX_BIT_SIZE 4
+#define REGISTER_MAX_BIT_SIZE 4
 #define OPERAND_TYPE_MAX_BIT_SIZE 2
 #define ADDRESSING_TYPES_AMONT 4
 #define COMMAND_AMONT 16
-#define OPERAND_AMONT 12
+#define REGISTER_AMONT 16
+
+#define PROGRAM_STATUS_EORD_REGISTER_NAME "PSW"
 
 enum attribute_access_type_e
 {
-    
+
     ATTRIBUTE_DATA = 1,
     ATTRIBUTE_STRING
 
@@ -44,7 +46,7 @@ typedef struct instruction_s
 typedef struct operand_data_s
 {
     addressing_modes operand_mode;
-    char * varible_name;    
+    char * varible_name;
     int operand_data;       /* Number value OR register index */
 
 }operand_data;
@@ -54,7 +56,7 @@ typedef struct directive_s
 {
     uint8_t label       [SYMBOL_MAX_SIZE];   /* extern and entry shou*/
     uint8_t name        [SYMBOL_MAX_SIZE];
-    uint32_t data_length; 
+    uint32_t data_length;
     void * data;                                   /* chars or ints*/
     enum attribute_access_type_e access_attribute; /* extern or entry */
     enum attribute_data_type_e data_attribute;   /* data or string */
@@ -62,7 +64,7 @@ typedef struct directive_s
 
 
 
-typedef struct instuction_data_s
+typedef struct instruction_data_s
 {
     uint16_t address : MEMORY_ADRESS_MAX_BITS;
     uint16_t size : MEMORY_ADRESS_MAX_BITS;
@@ -70,33 +72,34 @@ typedef struct instuction_data_s
     operand_data dest_operand_data;
     operand_data src_operand_data;
 
-}instuction_data;
+}instruction_data;
 
 
 /**
  *  mov [2], inc , dec
  *  hello = 1,2,3 | a = "ay"
- * 
+ *
  * mov
- * 
- * 
+ *
+ *
  * inc
- * 
- * 
+ *
+ *
  * dec
- * 
- * 
- * 
- * 
+ *
+ *
+ *
+ *
  */
 
 typedef struct symbol_s
 {
-    uint16_t address : MEMORY_ADRESS_MAX_BITS;
-    uint16_t size    : MEMORY_ADRESS_MAX_BITS;
-
-    uint8_t  name    [SYMBOL_MAX_SIZE];
-    void * data; /*if data type int / if string type char*/
+    uint8_t  name           [SYMBOL_MAX_SIZE];
+    uint16_t base_address : MEMORY_ADRESS_MAX_BITS;
+    uint16_t offset       : MEMORY_ADRESS_MAX_BITS;
+    uint32_t data_length;
+    void * data;
+    /* value is calculated by adding the offset to the base address */
     enum attribute_access_type_e access_attribute; /* extern or entry */
     enum attribute_data_type_e data_attribute;   /* data or string */
 
@@ -113,7 +116,7 @@ typedef enum are_e
 
 typedef enum addressing_modes_e
 {
-    ADDRESSING_MODES_IMMEDIATE,  
+    ADDRESSING_MODES_IMMEDIATE,
     ADDRESSING_MODES_DIRECT,
     ADDRESSING_MODES_INDEX,
     ADDRESSING_MODES_REGISTER_DIRECT
@@ -128,21 +131,21 @@ typedef uint16_t base_address_content;  /*Data location in memory*/
 typedef struct operand_content_s
 {
     uint16_t funct                  : FUNCT_MAX_BIT_SIZE;
-    uint16_t src_operand               : OPERAND_MAX_BIT_SIZE;         /*first operand*/
+    uint16_t src_register               : REGISTER_MAX_BIT_SIZE;         /*first operand*/
     addressing_modes src_operand_type  : OPERAND_TYPE_MAX_BIT_SIZE;    /*first operand's type*/
-    uint16_t dest_operand               : OPERAND_MAX_BIT_SIZE;         /*second operand*/
+    uint16_t dest_register               : REGISTER_MAX_BIT_SIZE;         /*second operand*/
     addressing_modes dest_operand_type  : OPERAND_TYPE_MAX_BIT_SIZE;    /*second operand's type*/
-    
+
 }operand_content;
 
-typedef enum opcode_types_e 
+typedef enum opcode_types_e
 {
     OPCODE_MOV              = 1 << 0,
     OPCODE_CMP              = 1 << 1,
     OPCODE_MATH_OPERATION   = 1 << 2,
-    OPCODE_LEA              = 1 << 4, 
+    OPCODE_LEA              = 1 << 4,
     OPCODE_CHANGE_VALUE     = 1 << 5,
-    OPCODE_JUMPS            = 1 << 9, 
+    OPCODE_JUMPS            = 1 << 9,
     OPCODE_RED              = 1 << 12,
     OPCODE_PRN              = 1 << 13,
     OPCODE_RTS              = 1 << 14,
@@ -155,7 +158,7 @@ typedef enum opcode_types_e
 typedef union word_content_u
 {
     opcode_content opcode;
-    operand_content operand;   
+    operand_content operand;
     base_address_content data_address;
     offset_content offset;
     value_content value;
@@ -178,7 +181,7 @@ typedef struct machine_code_s
 
 
 
-typedef struct command_s 
+typedef struct command_s
 {
     opcode_types opcode;
     uint16_t funct;
@@ -207,12 +210,12 @@ const command commands[COMMAND_AMONT] =
     {.opcode = OPCODE_STOP,.funct = 0,.command_name = "stop",.src_operand_types = {0} ,.dest_operand_types = {0}}
 
 };
-const char * register_names[OPERAND_AMONT] = 
+const char * register_names[REGISTER_AMONT] =
 {
-    "r1",   "r2",   "r3",
-    "r4",   "r5",   "r6",
-    "r7",   "r8",   "r9",
-    "r10",  "r11",  "r12"
+    "r0",   "r1",   "r2",   "r3",
+    "r4",   "r5",  "r6",  "r7",
+    "r8",   "r9",  "r10",  "r11",
+    "r12",   "r13",  "r14",  "r15",
 };
 
 typedef enum status_e
@@ -221,7 +224,7 @@ typedef enum status_e
     FAILURE = -1
 }status;
 
-#endif 
+#endif
 
 // HELLO : mov #3, r1
 /**
@@ -229,9 +232,9 @@ typedef enum status_e
  * COMMAND = mov
  * op1 = #3
  * op2 = r1
- * 
- * 
- * 
+ *
+ *
+ *
  */
 
 
