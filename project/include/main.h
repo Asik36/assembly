@@ -11,11 +11,13 @@
 #define ATTRIBUTE_NONE 0
 #define ARE_MAX_BIT_SIZE 4
 #define FUNCT_MAX_BIT_SIZE 4
-#define OPERAND_MAX_BIT_SIZE 4
+#define REGISTER_MAX_BIT_SIZE 4
 #define OPERAND_TYPE_MAX_BIT_SIZE 2
 #define ADDRESSING_TYPES_AMONT 4
 #define COMMAND_AMONT 16
-#define OPERAND_AMONT 12
+#define REGISTER_AMONT 16
+
+#define PROGRAM_STATUS_EORD_REGISTER_NAME "PSW"
 
 enum attribute_access_type_e
 {
@@ -62,7 +64,7 @@ typedef struct directive_s
 
 
 
-typedef struct instuction_data_s
+typedef struct instruction_data_s
 {
     uint16_t address : MEMORY_ADRESS_MAX_BITS;
     uint16_t size : MEMORY_ADRESS_MAX_BITS;
@@ -70,7 +72,7 @@ typedef struct instuction_data_s
     operand_data dest_operand_data;
     operand_data src_operand_data;
 
-}instuction_data;
+}instruction_data;
 
 
 /**
@@ -129,9 +131,9 @@ typedef uint16_t base_address_content;  /*Data location in memory*/
 typedef struct operand_content_s
 {
     uint16_t funct                  : FUNCT_MAX_BIT_SIZE;
-    uint16_t src_operand               : OPERAND_MAX_BIT_SIZE;         /*first operand*/
+    uint16_t src_register               : REGISTER_MAX_BIT_SIZE;         /*first operand*/
     addressing_modes src_operand_type  : OPERAND_TYPE_MAX_BIT_SIZE;    /*first operand's type*/
-    uint16_t dest_operand               : OPERAND_MAX_BIT_SIZE;         /*second operand*/
+    uint16_t dest_register               : REGISTER_MAX_BIT_SIZE;         /*second operand*/
     addressing_modes dest_operand_type  : OPERAND_TYPE_MAX_BIT_SIZE;    /*second operand's type*/
 
 }operand_content;
@@ -208,12 +210,12 @@ const command commands[COMMAND_AMONT] =
     {.opcode = OPCODE_STOP,.funct = 0,.command_name = "stop",.src_operand_types = {0} ,.dest_operand_types = {0}}
 
 };
-const char * register_names[OPERAND_AMONT] =
+const char * register_names[REGISTER_AMONT] =
 {
-    "r1",   "r2",   "r3",
-    "r4",   "r5",   "r6",
-    "r7",   "r8",   "r9",
-    "r10",  "r11",  "r12"
+    "r0",   "r1",   "r2",   "r3",
+    "r4",   "r5",  "r6",  "r7",
+    "r8",   "r9",  "r10",  "r11",
+    "r12",   "r13",  "r14",  "r15",
 };
 
 typedef enum status_e
