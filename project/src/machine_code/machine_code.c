@@ -5,21 +5,6 @@ const bool NO_DEST_OPERAND[ADDRESSING_TYPES_AMONT] = {0};
 int g_memory_word_index = STARTING_MEMORY_ADDRESS;
 word_data g_memory [MEMORY_MAX_SIZE];
 
-
-command * machine_code_get_command(char * command_name)
-{
-    command * ret = NULL;
-    for(int i = 0; (i < COMMAND_AMONT) && (!ret); i++)
-    {
-        if(strncmp(commands[i].command_name, command_name, COMMAND_MAX_SIZE) == 0)
-        {
-            ret = &commands[i];
-        }
-    }
-
-    return ret;
-}
-
 void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction * instruction_list, int instruction_list_length)
 {
 
@@ -44,6 +29,8 @@ void machine_code_handle_instructions(symbol * symbol_list, instruction * instru
     command curr_command;
     word_data curr_word;
 
+
+
     for(int instruction_index = 0; instruction_index < instruction_list_length; instruction_index++)
     {
         /* every instruction consists of atleast 1 word */
@@ -63,6 +50,9 @@ void machine_code_handle_instructions(symbol * symbol_list, instruction * instru
         }
 
         curr_code.word_count++;
-        curr_code.words[curr_code.word_count - 1].
+        curr_word = curr_code.words[curr_code.word_count - 1];
+        curr_word.content.operand.funct = curr_command.funct;
+        curr_word.content.operand.dest_operand = current_instruction.dest_operand;
+        curr_word.content.operand.dest_operand_type = current_instruction.dest_operand
     }
 }
