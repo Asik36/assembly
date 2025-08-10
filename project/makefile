@@ -1,12 +1,12 @@
 CC = gcc
 
 CFLAGS = -Wall -Wextra -g -ansi -pedantic -std=c99
-INCLUDES = -I./include -Isrc/format -Isrc/machine_code -Isrc/preassembly -Isrc/sentence -Isrc/symbol
+INCLUDES = -I./include -Isrc/format -Isrc/machine_code -Isrc/preassembly -Isrc/sentence -Isrc/symbol -Isrc/memory_manager
 CFLAGS+= $(INCLUDES)
 
 
 
-SRC_DIRS = src/format src/machine_code src/preassembly src/sentence src/symbol	
+SRC_DIRS = src/format src/machine_code src/preassembly src/sentence src/symbol src/memory_manager src
 SRCS=$(wildcard *.c)
 OBJS = main.c $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 
