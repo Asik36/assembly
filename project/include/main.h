@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <math.h>
+#include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 #define MEMORY_MAX_SIZE 8192
 #define MEMORY_ADRESS_MAX_BITS 12
 #define SYMBOL_MAX_SIZE 16
@@ -15,7 +17,7 @@
 #define OPERAND_TYPE_MAX_BIT_SIZE 2
 #define ADDRESSING_TYPES_AMONT 4
 #define COMMAND_AMONT 16
-#define OPERAND_AMONT 12
+#define OPERAND_AMONT 16
 
 enum attribute_access_type_e
 {
@@ -29,13 +31,29 @@ enum attribute_data_type_e
     ATTRIBUTE_EXTERN = 1,
     ATTRIBUTE_ENTERY
 };
+
+typedef enum are_e
+{
+    ABSOLUTE    = 1 << 0, /*word is a value*/
+    RELOCATABLE = 1 << 1, /*word value is taken from a memory address*/
+    EXTERNAL    = 1 << 2  /*word value is taken from a diffrent file*/
+} are;
+
+typedef enum addressing_modes_e
+{
+    ADDRESSING_MODES_IMMEDIATE,  
+    ADDRESSING_MODES_DIRECT,
+    ADDRESSING_MODES_INDEX,
+    ADDRESSING_MODES_REGISTER_DIRECT
+}addressing_modes;
+
 typedef struct instruction_s
 {
 
-    uint8_t label          [SYMBOL_MAX_SIZE];
-    uint8_t commnand       [COMMAND_MAX_SIZE];
-    uint8_t src_operand    [SYMBOL_MAX_SIZE];
-    uint8_t dest_operand   [SYMBOL_MAX_SIZE];
+    char label          [SYMBOL_MAX_SIZE];
+    char commnand       [COMMAND_MAX_SIZE];
+    char src_operand    [SYMBOL_MAX_SIZE];
+    char dest_operand   [SYMBOL_MAX_SIZE];
 
 } instruction;
 
@@ -43,8 +61,8 @@ typedef struct instruction_s
 
 typedef struct operand_data_s
 {
-    addressing_modes operand_mode;
-    char * varible_name;    
+    addressing_modes addressing_mode;
+    char varible_name[SYMBOL_MAX_SIZE];    
     int operand_data;       /* Number value OR register index */
 
 }operand_data;
@@ -52,8 +70,8 @@ typedef struct operand_data_s
 
 typedef struct directive_s
 {
-    uint8_t label       [SYMBOL_MAX_SIZE];   /* extern and entry shou*/
-    uint8_t name        [SYMBOL_MAX_SIZE];
+    char label       [SYMBOL_MAX_SIZE];   /* extern and entry shou*/
+    char name        [SYMBOL_MAX_SIZE];
     uint32_t data_length; 
     void * data;                                   /* chars or ints*/
     enum attribute_access_type_e access_attribute; /* extern or entry */
@@ -62,7 +80,7 @@ typedef struct directive_s
 
 
 
-typedef struct instuction_data_s
+typedef struct instruction_data_s
 {
     uint16_t address : MEMORY_ADRESS_MAX_BITS;
     uint16_t size : MEMORY_ADRESS_MAX_BITS;
@@ -70,7 +88,9 @@ typedef struct instuction_data_s
     operand_data dest_operand_data;
     operand_data src_operand_data;
 
-}instuction_data;
+}instruction_data;
+
+
 
 
 /**
@@ -95,7 +115,7 @@ typedef struct symbol_s
     uint16_t address : MEMORY_ADRESS_MAX_BITS;
     uint16_t size    : MEMORY_ADRESS_MAX_BITS;
 
-    uint8_t  name    [SYMBOL_MAX_SIZE];
+    char  name    [SYMBOL_MAX_SIZE];
     void * data; /*if data type int / if string type char*/
     enum attribute_access_type_e access_attribute; /* extern or entry */
     enum attribute_data_type_e data_attribute;   /* data or string */
@@ -104,20 +124,7 @@ typedef struct symbol_s
 
 
 
-typedef enum are_e
-{
-    ABSOLUTE    = 1 << 0, /*word is a value*/
-    RELOCATABLE = 1 << 1, /*word value is taken from a memory address*/
-    EXTERNAL    = 1 << 2  /*word value is taken from a diffrent file*/
-} are;
 
-typedef enum addressing_modes_e
-{
-    ADDRESSING_MODES_IMMEDIATE,  
-    ADDRESSING_MODES_DIRECT,
-    ADDRESSING_MODES_INDEX,
-    ADDRESSING_MODES_REGISTER_DIRECT
-}addressing_modes;
 
 
 typedef int16_t value_content;          /*Value data such as number or char */
@@ -182,12 +189,12 @@ typedef struct command_s
 {
     opcode_types opcode;
     uint16_t funct;
-    uint8_t command_name[COMMAND_MAX_SIZE];
+    char command_name[COMMAND_MAX_SIZE];
     bool src_operand_types[ADDRESSING_TYPES_AMONT];
     bool dest_operand_types[ADDRESSING_TYPES_AMONT];
 }command;
 
-const command commands[COMMAND_AMONT] =
+static const command commands[COMMAND_AMONT] =
 {
     {.opcode = OPCODE_MOV,.funct = 0,.command_name = "mov",.src_operand_types = {1,1,1,1} ,.dest_operand_types = {0,1,1,1}},
     {.opcode = OPCODE_CMP,.funct = 0,.command_name = "cmp",.src_operand_types = {1,1,1,1} ,.dest_operand_types = {1,1,1,1}},
@@ -207,19 +214,21 @@ const command commands[COMMAND_AMONT] =
     {.opcode = OPCODE_STOP,.funct = 0,.command_name = "stop",.src_operand_types = {0} ,.dest_operand_types = {0}}
 
 };
-const char * register_names[OPERAND_AMONT] = 
-{
-    "r1",   "r2",   "r3",
-    "r4",   "r5",   "r6",
-    "r7",   "r8",   "r9",
-    "r10",  "r11",  "r12"
-};
 
 typedef enum status_e
 {
     SUCCESS = 0,
     FAILURE = -1
 }status;
+
+
+
+
+
+
+
+
+int get_command_index(char * command_name);
 
 #endif 
 
@@ -231,7 +240,7 @@ typedef enum status_e
  * op2 = r1
  * 
  * 
- * 
+ * mov _ , r1
  */
 
 
