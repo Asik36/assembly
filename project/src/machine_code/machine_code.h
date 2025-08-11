@@ -7,6 +7,9 @@
 
 #define MEMORY_WORD_LENGTH  20
 #define STARTING_MEMORY_ADDRESS 100
+
+word_data g_memory [MEMORY_MAX_SIZE];
+
 /**
  * @brief the function creates the machine code memory aarray and calls fnctions that fill in the instructions and declarations into it
  *

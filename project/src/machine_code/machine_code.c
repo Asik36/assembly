@@ -3,7 +3,6 @@
 const bool NO_DEST_OPERAND[ADDRESSING_TYPES_AMONT] = {0};
 
 int g_memory_word_index = STARTING_MEMORY_ADDRESS;
-word_data g_memory [MEMORY_MAX_SIZE];
 
 void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction * instruction_list, int instruction_list_length)
 {
@@ -38,6 +37,17 @@ void machine_code_handle_instructions(symbol * symbol_list, int symbol_list_leng
     for(int instruction_index = 0; instruction_index < instruction_list_length; instruction_index++)
     {
         if(machine_code_add_instruction_code(symbol_list, symbol_list_length, instruction_list[instruction_index]) == FAILURE)
+        {
+            break;
+        }
+    }
+}
+
+void machine_code_handle_symbols(symbol * symbol_list, int symbol_list_length)
+{
+    for(int symbol_index = 0; symbol_index < symbol_list_length; symbol_index++)
+    {
+        if(machine_code_add_symbol_code(symbol_list[symbol_index]) == FAILURE)
         {
             break;
         }
@@ -95,6 +105,33 @@ status machine_code_add_instruction_code(symbol * symbol_list, int symbol_list_l
     return ret;
 }
 
+status machine_code_add_symbol_code(symbol current_symbol)
+{
+    status ret = SUCCESS;
+    if(current_symbol.access_attribute != ATTRIBUTE_EXTERN && (current_symbol.data_attribute == ATTRIBUTE_DATA || current_symbol.data_attribute == ATTRIBUTE_STRING) )
+    {
+        machine_code symbol_code;
+        symbol_code.word_count = current_symbol.data_length;
+
+        symbol_code.words = malloc(sizeof(word_data) * symbol_code.word_count);
+        if(!symbol_code.words)
+        {
+            ret = FAILURE;
+            printf("%s error: malloc failed\n", __func__);
+        }
+        else
+        {
+            for(int word_index = 0; word_index < symbol_code.word_count; word_index++)
+            {
+                symbol_code.words[word_index].are_attribute = ABSOLUTE;
+                symbol_code.words[word_index].content.value;
+            }
+            machine_code_write_machine_code(symbol_code);
+            free(symbol_code.words);
+        }
+    }
+    return ret;
+}
 symbol* machine_code_find_symbol(symbol * symbol_list, int symbol_list_length, const char * symbol_name)
 {
     symbol * ret = NULL;
@@ -139,12 +176,12 @@ int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, opera
         {
             are_attribute = RELOCATABLE;
         }
-        instruction_code->words[curr_word_index].are_attribute = RELOCATABLE;
+        instruction_code->words[curr_word_index].are_attribute = are_attribute;
 
         instruction_code->words[curr_word_index].content.data_address = operand_symbol->base_address;
 
         curr_word_index++;
-        instruction_code->words[curr_word_index].are_attribute = RELOCATABLE;
+        instruction_code->words[curr_word_index].are_attribute = are_attribute;
         instruction_code->words[curr_word_index].content.offset = operand_symbol->offset;
         curr_word_index++;
 
