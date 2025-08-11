@@ -22,11 +22,11 @@ void print_word(word_data word)
 {
     for(int i = 0; i < 4; i++)
     {
-        printf("%d")
+        printf("%d", (word << 1));
     }
     for(int i = 0; i < 16; i++)
     {
-        printf("%d")
+        printf("%d", (word << 1));
     }
     printf("\n");
 }
