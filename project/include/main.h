@@ -23,14 +23,14 @@
 
 #define PROGRAM_STATUS_EORD_REGISTER_NAME "PSW"
 
-enum attribute_access_type_e
+enum attribute_data_type_e
 {
 
     ATTRIBUTE_DATA = 1,
     ATTRIBUTE_STRING
 
 };
-enum attribute_data_type_e
+enum attribute_access_type_e
 {
     ATTRIBUTE_EXTERN = 1,
     ATTRIBUTE_ENTERY
