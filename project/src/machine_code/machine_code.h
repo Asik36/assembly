@@ -10,6 +10,42 @@
 
 word_data g_memory [MEMORY_MAX_SIZE];
 
+const char * function_names [] =
+{
+    "machine_code_main",
+    "machine_code_write_machine_code",
+    "machine_code_handle_instructions",
+    "machine_code_handle_symbols",
+    "machine_code_add_instruction_code",
+    "machine_code_add_symbol_code",
+    "machine_code_find_symbol",
+    "machine_code_add_operand",
+    "machine_code_get_operands_register",
+    "machine_code_func_handler"
+};
+
+typedef enum machine_code_success_e
+{
+    MACHINE_CODE_STATUS_SUCCESS ,
+    MACHINE_CODE_STATUS_ERROR_MALLOC,
+    MACHINE_CODE_STATUS_ERROR_SYMBOL_NOT_FOUND,
+
+}machine_code_status;
+
+typedef enum machine_code_func_type_e
+{
+    FUNC_TYPE_MAIN,
+    FUNC_TYPE_WRITE_MACHINE_CODE,
+    FUNC_TYPE_HANDLE_INSTRUCTIONS,
+    FUNC_TYPE_HANDLE_SYMBOLS,
+    FUNC_TYPE_ADD_INSTRUCTION_CODE,
+    FUNC_TYPE_ADD_SYMBOL_CODE,
+    FUNC_TYPE_FIND_SYMBOL,
+    FUNC_TYPE_ADD_OPPERAND,
+    FUNC_TYPE_GET_OPERANDS_REGISTER,
+    FUNC_TYPE_FUNC_HANDLER,
+} func_type;
+
 /**
  * @brief the function creates the machine code memory aarray and calls fnctions that fill in the instructions and declarations into it
  *
@@ -24,10 +60,10 @@ void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction
  * @brief the function tryies to write machine code into the memory array
  *
  * @param code the machine code to add to the memory
- * @return status FAILURE if there isn't enough space for the machine code (and doesnt add enything to the memory),
+ * @return machine_code_status FAILURE if there isn't enough space for the machine code (and doesnt add enything to the memory),
  * otherwise adds machine code to memory and return SUCCESS
  */
-status machine_code_write_machine_code(machine_code code);
+machine_code_status machine_code_write_machine_code(machine_code code);
 
 /**
  * @brief the function adds instructions to memory one by one, until there are no more instructions left or the addition of one of the instructions is failed
@@ -40,14 +76,30 @@ status machine_code_write_machine_code(machine_code code);
 void machine_code_handle_instructions(symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length);
 
 /**
+ * @brief the function adds instructions to memory one by one, until there are no more instructions left or the addition of one of the symbols is failed
+ *
+ * @param symbol_list  an array of all the symbols
+ * @param symbol_list_lengththe amount of symbols in the symbol array
+ */
+void machine_code_handle_symbols(symbol * symbol_list, int symbol_list_length);
+
+/**
  * @brief the function adds one instruction to the memory array
  *
  * @param symbol_list an array of all the symbols
  * @param symbol_list_lengththe amount of symbols in the symbol array
  * @param current_instruction the instruction to be added to the memory
- * @return status SUCCESS if the instruction was added to the memory, otherwise FAILURE
+ * @return machine_code_status SUCCESS if the instruction was added to the memory, otherwise FAILURE
  */
-status machine_code_add_instruction_code(symbol * symbol_list, int symbol_list_length, instruction_data current_instruction);
+machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int symbol_list_length, instruction_data current_instruction);
+
+/**
+ * @brief the function adds one symbol to the memory array
+ *
+ * @param current_symbol the symbol to be added to the memory
+ * @return machine_code_status SUCCESS if the instruction was added to the memory, otherwise FAILURE
+ */
+machine_code_status machine_code_add_symbol_code(symbol current_symbol);
 
 /**
  * @brief the function saerches for a symbol by name in the symbol table
@@ -71,9 +123,6 @@ symbol* machine_code_find_symbol(symbol * symbol_list, int symbol_list_length, c
  */
 int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, operand_data operand, machine_code * instruction_code, int curr_word_index);
 
-
-
-
 /**
  * @brief the function gets an operand and returns what needs to be stored in it's corresponding register
  *
@@ -81,5 +130,13 @@ int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, opera
  * @return uint16_t if the operands mode uses a register return the register(the operand data), otherwise retrun 0
  */
 uint16_t machine_code_get_operands_register(operand_data operand);
+
+/**
+ * @brief the function prints an error message, that includes the type of error and the function it happend in
+ *
+ * @param ret the status value of the function
+ * @param func the function that returned the status
+ */
+void machine_code_func_handler(machine_code_status ret, func_type func);
 
 #endif

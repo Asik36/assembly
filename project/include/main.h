@@ -18,7 +18,7 @@
 #define ADDRESSING_TYPES_AMONT 4
 #define COMMAND_AMONT 16
 #define OPERAND_AMONT 16
-=======
+
 #define REGISTER_AMONT 16
 
 #define PROGRAM_STATUS_EORD_REGISTER_NAME "PSW"
@@ -45,7 +45,7 @@ typedef enum are_e
 
 typedef enum addressing_modes_e
 {
-    ADDRESSING_MODES_IMMEDIATE,  
+    ADDRESSING_MODES_IMMEDIATE,
     ADDRESSING_MODES_DIRECT,
     ADDRESSING_MODES_INDEX,
     ADDRESSING_MODES_REGISTER_DIRECT
@@ -66,7 +66,7 @@ typedef struct instruction_s
 typedef struct operand_data_s
 {
     addressing_modes addressing_mode;
-    char varible_name[SYMBOL_MAX_SIZE];    
+    char varible_name[SYMBOL_MAX_SIZE];
     int operand_data;       /* Number value OR register index */
 
 }operand_data;
@@ -76,7 +76,7 @@ typedef struct directive_s
 {
     char label       [SYMBOL_MAX_SIZE];   /* extern and entry shou*/
     char name        [SYMBOL_MAX_SIZE];
-    uint32_t data_length; 
+    uint32_t data_length;
 
     void * data;                                   /* chars or ints*/
     enum attribute_access_type_e access_attribute; /* extern or entry */
@@ -226,23 +226,7 @@ static const command commands[COMMAND_AMONT] =
 
 };
 
-typedef enum status_e
-{
-    SUCCESS = 0,
-    FAILURE = -1
-}status;
-
-
-
-
-
-
-
-
 
 int get_command_index(char * command_name);
 
-#endif 
-=======
 #endif
-

@@ -14,12 +14,12 @@ void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction
         exit(1);
     }
     machine_code_handle_instructions(symbol_list, instruction_list, instruction_list_length, instruction_list_length);
-
+    machine_code_handle_symbols(symbol_list, symbol_list_length);
 }
 
-status machine_code_write_machine_code(machine_code code)
+machine_code_status machine_code_write_machine_code(machine_code code)
 {
-    status ret = SUCCESS;
+    machine_code_status ret = SUCCESS;
     if(g_memory_word_index + code.word_count >= MEMORY_MAX_SIZE)
     {
         printf("%s error: machine code not added because of memory overflow!\n", __func__);
@@ -34,12 +34,16 @@ status machine_code_write_machine_code(machine_code code)
 
 void machine_code_handle_instructions(symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length)
 {
+    machine_code_status adding_instruction_status;
+
     for(int instruction_index = 0; instruction_index < instruction_list_length; instruction_index++)
     {
-        if(machine_code_add_instruction_code(symbol_list, symbol_list_length, instruction_list[instruction_index]) == FAILURE)
+        adding_instruction_status = machine_code_add_instruction_code(symbol_list, symbol_list_length, instruction_list[instruction_index]);
+        if(adding_instruction_status == MACHINE_CODE_STATUS_SUCCESS)
         {
             break;
         }
+        machine_code_func_handler(adding_instruction_status, FUNC_TYPE_ADD_INSTRUCTION_CODE);
     }
 }
 
@@ -54,9 +58,9 @@ void machine_code_handle_symbols(symbol * symbol_list, int symbol_list_length)
     }
 }
 
-status machine_code_add_instruction_code(symbol * symbol_list, int symbol_list_length, instruction_data current_instruction)
+machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int symbol_list_length, instruction_data current_instruction)
 {
-    status ret = SUCCESS;
+    machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
 
     machine_code instruction_code;
     command curr_command;
@@ -69,8 +73,8 @@ status machine_code_add_instruction_code(symbol * symbol_list, int symbol_list_l
     instruction_code.words = (word_data *) malloc(sizeof(word_data) * instruction_code.word_count);
     if(!instruction_code.words)
     {
-        printf("%s error: malloc failed\n", __func__);
-        ret = FAILURE;
+
+        ret = MACHINE_CODE_STATUS_ERROR_MALLOC;
     }
     else
     {
@@ -88,9 +92,9 @@ status machine_code_add_instruction_code(symbol * symbol_list, int symbol_list_l
 
             op = curr_word.content.operand;
             op.funct = curr_command.funct;
-            op.dest_operand_type = current_instruction.dest_operand_data.operand_mode;
+            op.dest_operand_type = current_instruction.dest_operand_data.addressing_mode;
             op.dest_register = machine_code_get_operands_register(current_instruction.dest_operand_data);
-            op.src_operand_type = current_instruction.src_operand_data.operand_mode;
+            op.src_operand_type = current_instruction.src_operand_data.addressing_mode;
             op.src_register = machine_code_get_operands_register(current_instruction.src_operand_data);
 
 
@@ -100,18 +104,24 @@ status machine_code_add_instruction_code(symbol * symbol_list, int symbol_list_l
             curr_word_index = machine_code_add_operand(symbol_list,symbol_list_length,current_instruction.dest_operand_data,&instruction_code,curr_word_index);
         }
         ret = machine_code_write_machine_code(instruction_code);
+
+        if(ret != MACHINE_CODE_STATUS_SUCCESS)
+        {
+            machine_code_func_handler(ret, FUNC_TYPE_WRITE_MACHINE_CODE);
+        }
         free(instruction_code.words);
     }
     return ret;
 }
 
-status machine_code_add_symbol_code(symbol current_symbol)
+machine_code_status machine_code_add_symbol_code(symbol current_symbol)
 {
-    status ret = SUCCESS;
-    if(current_symbol.access_attribute != ATTRIBUTE_EXTERN && (current_symbol.data_attribute == ATTRIBUTE_DATA || current_symbol.data_attribute == ATTRIBUTE_STRING) )
+    machine_code_status ret = SUCCESS;
+    /* check if symbol isnt external or label*/
+    if(current_symbol.access_attribute != ATTRIBUTE_EXTERN && (current_symbol.size != 0) )
     {
         machine_code symbol_code;
-        symbol_code.word_count = current_symbol.data_length;
+        symbol_code.word_count = current_symbol.size;
 
         symbol_code.words = malloc(sizeof(word_data) * symbol_code.word_count);
         if(!symbol_code.words)
@@ -132,6 +142,7 @@ status machine_code_add_symbol_code(symbol current_symbol)
     }
     return ret;
 }
+
 symbol* machine_code_find_symbol(symbol * symbol_list, int symbol_list_length, const char * symbol_name)
 {
     symbol * ret = NULL;
@@ -148,7 +159,7 @@ symbol* machine_code_find_symbol(symbol * symbol_list, int symbol_list_length, c
 
 int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, operand_data operand, machine_code * instruction_code, int curr_word_index)
 {
-    switch (operand.operand_mode)
+    switch (operand.addressing_mode)
     {
     case ADDRESSING_MODES_IMMEDIATE:
         instruction_code->words[curr_word_index].are_attribute = ABSOLUTE;
@@ -178,11 +189,11 @@ int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, opera
         }
         instruction_code->words[curr_word_index].are_attribute = are_attribute;
 
-        instruction_code->words[curr_word_index].content.data_address = operand_symbol->base_address;
+        instruction_code->words[curr_word_index].content.data_address = (operand_symbol->address / 16) * 16;
 
         curr_word_index++;
         instruction_code->words[curr_word_index].are_attribute = are_attribute;
-        instruction_code->words[curr_word_index].content.offset = operand_symbol->offset;
+        instruction_code->words[curr_word_index].content.offset = operand_symbol->address % 16;
         curr_word_index++;
 
         break;
@@ -209,3 +220,22 @@ uint16_t machine_code_get_operands_register(operand_data operand)
 }
 
 
+void machine_code_func_handler(machine_code_status ret, func_type func)
+{
+    switch (ret)
+    {
+    case MACHINE_CODE_STATUS_SUCCESS:
+        /* (no error) */
+        break;
+    case MACHINE_CODE_STATUS_ERROR_MALLOC:
+        printf("malloc error in function: %s\n", function_names[func]);
+        break;
+    case MACHINE_CODE_STATUS_ERROR_SYMBOL_NOT_FOUND:
+        printf("symbol not found error in function: %s\n", function_names[func]);
+        break;
+    default:
+        printf("unhandled error, in %s\n", function_names[func]);
+        break;
+    }
+
+}
