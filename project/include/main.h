@@ -15,7 +15,7 @@
 #define FUNCT_MAX_BIT_SIZE 4
 #define REGISTER_MAX_BIT_SIZE 4
 #define OPERAND_TYPE_MAX_BIT_SIZE 2
-#define ADDRESSING_TYPES_AMONT 4
+#define ADDRESSING_TYPES_AMOUNT 4
 #define COMMAND_AMONT 16
 #define OPERAND_AMONT 16
 
@@ -38,9 +38,9 @@ enum attribute_access_type_e
 
 typedef enum are_e
 {
-    ABSOLUTE    = 1 << 0, /*word is a value*/
+    ABSOLUTE    = 1 << 2, /*word is a value*/
     RELOCATABLE = 1 << 1, /*word value is taken from a memory address*/
-    EXTERNAL    = 1 << 2  /*word value is taken from a diffrent file*/
+    EXTERNAL    = 1 << 0  /*word value is taken from a diffrent file*/
 } are;
 
 typedef enum addressing_modes_e
@@ -129,14 +129,6 @@ typedef struct symbol_s
 
 
 
-typedef enum addressing_modes_e
-{
-    ADDRESSING_MODES_IMMEDIATE,
-    ADDRESSING_MODES_DIRECT,
-    ADDRESSING_MODES_INDEX,
-    ADDRESSING_MODES_REGISTER_DIRECT
-}addressing_modes;
-
 
 typedef int16_t value_content;          /*Value data such as number or char */
 typedef uint16_t opcode_content;        /*Opcode of command*/
@@ -201,8 +193,8 @@ typedef struct command_s
     opcode_types opcode;
     uint16_t funct;
     char command_name[COMMAND_MAX_SIZE];
-    bool src_operand_types[ADDRESSING_TYPES_AMONT];
-    bool dest_operand_types[ADDRESSING_TYPES_AMONT];
+    bool src_operand_types[ADDRESSING_TYPES_AMOUNT];
+    bool dest_operand_types[ADDRESSING_TYPES_AMOUNT];
 }command;
 
 static const command commands[COMMAND_AMONT] =
