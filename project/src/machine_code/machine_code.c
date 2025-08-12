@@ -116,7 +116,7 @@ machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int 
 
 machine_code_status machine_code_add_symbol_code(symbol current_symbol)
 {
-    machine_code_status ret = SUCCESS;
+    machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
     /* check if symbol isnt external or label*/
     if(current_symbol.access_attribute != ATTRIBUTE_EXTERN && (current_symbol.size != 0) )
     {
@@ -126,7 +126,7 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol)
         symbol_code.words = malloc(sizeof(word_data) * symbol_code.word_count);
         if(!symbol_code.words)
         {
-            ret = FAILURE;
+            ret = MACHINE_CODE_STATUS_ERROR_MALLOC;
             printf("%s error: malloc failed\n", __func__);
         }
         else
