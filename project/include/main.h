@@ -19,14 +19,15 @@
 #define COMMAND_AMONT 16
 #define OPERAND_AMONT 16
 
-enum attribute_access_type_e
+enum attribute_data_type_e
 {
     
     ATTRIBUTE_DATA = 1,
-    ATTRIBUTE_STRING
+    ATTRIBUTE_STRING,
+    ATTRIBUTE_CODE
 
 };
-enum attribute_data_type_e
+enum attribute_access_type_e
 {
     ATTRIBUTE_EXTERN = 1,
     ATTRIBUTE_ENTERY
@@ -70,8 +71,7 @@ typedef struct operand_data_s
 
 typedef struct directive_s
 {
-    char label       [SYMBOL_MAX_SIZE];   /* extern and entry shou*/
-    char name        [SYMBOL_MAX_SIZE];
+    char variable_name        [SYMBOL_MAX_SIZE];
     uint32_t data_length; 
     void * data;                                   /* chars or ints*/
     enum attribute_access_type_e access_attribute; /* extern or entry */
