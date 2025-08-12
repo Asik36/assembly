@@ -1,28 +1,17 @@
 #ifndef MACHINE_CODE_H
 #define MACHINE_CODE_H
 #include <stdio.h>
-#include "main.h"
+#include "../../include/main.h"
 #include <stdlib.h>
 #include <string.h>
 
 #define MEMORY_WORD_LENGTH  20
 #define STARTING_MEMORY_ADDRESS 100
 
-word_data g_memory [MEMORY_MAX_SIZE];
+extern word_data g_memory[MEMORY_MAX_SIZE];
 
-const char * function_names [] =
-{
-    "machine_code_main",
-    "machine_code_write_machine_code",
-    "machine_code_handle_instructions",
-    "machine_code_handle_symbols",
-    "machine_code_add_instruction_code",
-    "machine_code_add_symbol_code",
-    "machine_code_find_symbol",
-    "machine_code_add_operand",
-    "machine_code_get_operands_register",
-    "machine_code_func_handler"
-};
+
+extern const char * function_names [];
 
 typedef enum machine_code_success_e
 {
@@ -41,7 +30,7 @@ typedef enum machine_code_func_type_e
     FUNC_TYPE_ADD_INSTRUCTION_CODE,
     FUNC_TYPE_ADD_SYMBOL_CODE,
     FUNC_TYPE_FIND_SYMBOL,
-    FUNC_TYPE_ADD_OPPERAND,
+    FUNC_TYPE_ADD_OPERAND,
     FUNC_TYPE_GET_OPERANDS_REGISTER,
     FUNC_TYPE_FUNC_HANDLER,
 } func_type;
@@ -54,7 +43,7 @@ typedef enum machine_code_func_type_e
  * @param instruction_list an array of all the instructions
  * @param instruction_list_length the amount of instructions in the symbol array
  */
-void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction * instruction_list, int instruction_list_length);
+void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length);
 
 /**
  * @brief the function tryies to write machine code into the memory array

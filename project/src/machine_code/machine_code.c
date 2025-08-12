@@ -1,19 +1,30 @@
 #include "machine_code.h"
 
-const bool NO_DEST_OPERAND[ADDRESSING_TYPES_AMONT] = {0};
+const bool NO_DEST_OPERAND[ADDRESSING_TYPES_AMOUNT] = {0};
 
+word_data g_memory [MEMORY_MAX_SIZE];
 int g_memory_word_index = STARTING_MEMORY_ADDRESS;
 
-void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction * instruction_list, int instruction_list_length)
+const char * function_names [] =
 {
+    "machine_code_main",
+    "machine_code_write_machine_code",
+    "machine_code_handle_instructions",
+    "machine_code_handle_symbols",
+    "machine_code_add_instruction_code",
+    "machine_code_add_symbol_code",
+    "machine_code_find_symbol",
+    "machine_code_add_operand",
+    "machine_code_get_operands_register",
+    "machine_code_func_handler"
+};
 
+void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length)
+{
     memset(g_memory, 0, sizeof(g_memory));
-    if(g_memory)
-    {
-        perror("machine code allocating memory error\n");
-        exit(1);
-    }
-    machine_code_handle_instructions(symbol_list, instruction_list, instruction_list_length, instruction_list_length);
+    g_memory_word_index = STARTING_MEMORY_ADDRESS;
+
+    machine_code_handle_instructions(symbol_list, symbol_list_length, instruction_list, instruction_list_length);
     machine_code_handle_symbols(symbol_list, symbol_list_length);
 }
 
@@ -25,9 +36,12 @@ machine_code_status machine_code_write_machine_code(machine_code code)
         printf("%s error: machine code not added because of memory overflow!\n", __func__);
         ret = MACHINE_CODE_STATUS_ERROR_MALLOC;
     }
-    for(int word_index = 0; (word_index < code.word_count); word_index++)
+    else
     {
-        g_memory[g_memory_word_index ++] = code.words[word_index];
+        for(int word_index = 0; (word_index < (int)code.word_count); word_index++)
+        {
+            g_memory[g_memory_word_index ++] = code.words[word_index];
+        }
     }
     return ret;
 }
@@ -39,11 +53,11 @@ void machine_code_handle_instructions(symbol * symbol_list, int symbol_list_leng
     for(int instruction_index = 0; instruction_index < instruction_list_length; instruction_index++)
     {
         adding_instruction_status = machine_code_add_instruction_code(symbol_list, symbol_list_length, instruction_list[instruction_index]);
-        if(adding_instruction_status == MACHINE_CODE_STATUS_SUCCESS)
+        if(adding_instruction_status != MACHINE_CODE_STATUS_SUCCESS)
         {
+            machine_code_func_handler(adding_instruction_status, FUNC_TYPE_ADD_INSTRUCTION_CODE);
             break;
         }
-        machine_code_func_handler(adding_instruction_status, FUNC_TYPE_ADD_INSTRUCTION_CODE);
     }
 }
 
@@ -65,47 +79,44 @@ machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int 
     machine_code instruction_code;
     command curr_command;
     int curr_word_index = 0;
-    word_data curr_word;
-    operand_content op;
-
+    word_data *curr_word;
+    operand_content *op;
 
     instruction_code.word_count = current_instruction.size;
     instruction_code.words = (word_data *) malloc(sizeof(word_data) * instruction_code.word_count);
-    if(!instruction_code.words)
+    if (!instruction_code.words)
     {
-
         ret = MACHINE_CODE_STATUS_ERROR_MALLOC;
     }
     else
     {
         curr_command = commands[current_instruction.command_index];
 
-        instruction_code.words[curr_word_index].are_attribute = ABSOLUTE;
-        instruction_code.words[curr_word_index].content.opcode = curr_command.opcode;
+        curr_word = &instruction_code.words[curr_word_index];
+        curr_word->are_attribute = ABSOLUTE;
+        curr_word->content.opcode = curr_command.opcode;
 
-        /* check if this action has operands or not */
-        if(instruction_code.word_count > 1)
+        if (instruction_code.word_count > 1)
         {
             curr_word_index++;
-            curr_word = instruction_code.words[curr_word_index];
-            curr_word.are_attribute = ABSOLUTE;
+            curr_word = &instruction_code.words[curr_word_index];
+            curr_word->are_attribute = ABSOLUTE;
 
-            op = curr_word.content.operand;
-            op.funct = curr_command.funct;
-            op.dest_operand_type = current_instruction.dest_operand_data.addressing_mode;
-            op.dest_register = machine_code_get_operands_register(current_instruction.dest_operand_data);
-            op.src_operand_type = current_instruction.src_operand_data.addressing_mode;
-            op.src_register = machine_code_get_operands_register(current_instruction.src_operand_data);
-
+            op = &curr_word->content.operand;
+            op->funct = curr_command.funct;
+            op->dest_operand_type = current_instruction.dest_operand_data.addressing_mode;
+            op->dest_register = machine_code_get_operands_register(current_instruction.dest_operand_data);
+            op->src_operand_type = current_instruction.src_operand_data.addressing_mode;
+            op->src_register = machine_code_get_operands_register(current_instruction.src_operand_data);
 
             curr_word_index++;
-            curr_word = instruction_code.words[curr_word_index];
-            curr_word_index = machine_code_add_operand(symbol_list,symbol_list_length,current_instruction.src_operand_data,&instruction_code,curr_word_index);
-            curr_word_index = machine_code_add_operand(symbol_list,symbol_list_length,current_instruction.dest_operand_data,&instruction_code,curr_word_index);
+            curr_word_index = machine_code_add_operand(symbol_list, symbol_list_length, current_instruction.src_operand_data, &instruction_code, curr_word_index);
+            curr_word_index = machine_code_add_operand(symbol_list, symbol_list_length, current_instruction.dest_operand_data, &instruction_code, curr_word_index);
         }
+
         ret = machine_code_write_machine_code(instruction_code);
 
-        if(ret != MACHINE_CODE_STATUS_SUCCESS)
+        if (ret != MACHINE_CODE_STATUS_SUCCESS)
         {
             machine_code_func_handler(ret, FUNC_TYPE_WRITE_MACHINE_CODE);
         }
@@ -117,6 +128,7 @@ machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int 
 machine_code_status machine_code_add_symbol_code(symbol current_symbol)
 {
     machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
+
     /* check if symbol isnt external or label*/
     if(current_symbol.access_attribute != ATTRIBUTE_EXTERN && (current_symbol.size != 0) )
     {
@@ -131,10 +143,10 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol)
         }
         else
         {
-            for(int word_index = 0; word_index < symbol_code.word_count; word_index++)
+            for(int word_index = 0; word_index < (int)symbol_code.word_count; word_index++)
             {
-                symbol_code.words[word_index].are_attribute = ABSOLUTE;
-                symbol_code.words[word_index].content.value;
+                symbol_code.words[word_index].are_attribute =  ABSOLUTE;
+                symbol_code.words[word_index].content.value = ((value_content *)current_symbol.data)[word_index];
             }
             machine_code_write_machine_code(symbol_code);
             free(symbol_code.words);
@@ -159,6 +171,8 @@ symbol* machine_code_find_symbol(symbol * symbol_list, int symbol_list_length, c
 
 int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, operand_data operand, machine_code * instruction_code, int curr_word_index)
 {
+    are are_attribute = ABSOLUTE;
+    symbol * operand_symbol;
     switch (operand.addressing_mode)
     {
     case ADDRESSING_MODES_IMMEDIATE:
@@ -171,9 +185,8 @@ int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, opera
     case ADDRESSING_MODES_DIRECT:
     case ADDRESSING_MODES_INDEX:
 
-        are are_attribute;
 
-        symbol * operand_symbol = machine_code_find_symbol(symbol_list,symbol_list_length, operand.varible_name);
+        operand_symbol = machine_code_find_symbol(symbol_list,symbol_list_length, operand.varible_name);
         if(!operand_symbol)
         {
             printf("%s error: non declared variabel: %s\n",__func__ , operand.varible_name);
@@ -212,7 +225,7 @@ int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, opera
 uint16_t machine_code_get_operands_register(operand_data operand)
 {
     uint16_t ret = 0;
-    if((operand.operand_mode == ADDRESSING_MODES_REGISTER_DIRECT) || (operand.operand_mode == ADDRESSING_MODES_INDEX))
+    if((operand.addressing_mode == ADDRESSING_MODES_REGISTER_DIRECT) || (operand.addressing_mode == ADDRESSING_MODES_INDEX))
     {
         ret = operand.operand_data;
     }
@@ -222,7 +235,7 @@ uint16_t machine_code_get_operands_register(operand_data operand)
 
 void machine_code_func_handler(machine_code_status ret, func_type func)
 {
-    switch (ret)
+    switch (ret)//__func__ __LINE__
     {
     case MACHINE_CODE_STATUS_SUCCESS:
         /* (no error) */
