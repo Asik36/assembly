@@ -19,11 +19,11 @@ void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction
 
 machine_code_status machine_code_write_machine_code(machine_code code)
 {
-    machine_code_status ret = SUCCESS;
+    machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
     if(g_memory_word_index + code.word_count >= MEMORY_MAX_SIZE)
     {
         printf("%s error: machine code not added because of memory overflow!\n", __func__);
-        ret = FAILURE;
+        ret = MACHINE_CODE_STATUS_ERROR_MALLOC;
     }
     for(int word_index = 0; (word_index < code.word_count); word_index++)
     {
@@ -51,7 +51,7 @@ void machine_code_handle_symbols(symbol * symbol_list, int symbol_list_length)
 {
     for(int symbol_index = 0; symbol_index < symbol_list_length; symbol_index++)
     {
-        if(machine_code_add_symbol_code(symbol_list[symbol_index]) == FAILURE)
+        if(machine_code_add_symbol_code(symbol_list[symbol_index]) != MACHINE_CODE_STATUS_SUCCESS)
         {
             break;
         }
