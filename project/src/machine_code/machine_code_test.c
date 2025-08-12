@@ -11,10 +11,12 @@ static void print_word(word_data w);
 
 int main(void)
 {
+    value_content k_storage[1] = { 31 };
+
     symbol symbols[1] = {0};
     symbols[0].access_attribute=0;
     symbols[0].address = 105;
-    symbols[0].data = (void *)31;
+    symbols[0].data = k_storage;
     symbols[0].data_attribute = ATTRIBUTE_DATA;
     strcpy(symbols[0].name, "k");
     symbols[0].size = 1;
