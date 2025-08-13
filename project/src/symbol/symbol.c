@@ -7,30 +7,25 @@ status_e symbol_create(instruction_data *instruction_data_table, instruction *in
                        symbol **symbol_table, int *symbol_num)
 {
     status_e retval = STATUS_SUCCESS;
-    int symbol_counter = 0;
-    int start_address;
-    *symbol_table = (symbol *)malloc(sizeof(symbol));
-
-
-    start_address = symbol_get_varibles_start_address(instruction_data_table, instruction_num);
-    printf("START ADDRESS : %d\n",start_address);
+    int starter_address;
     hcreate(MEMORY_MAX_SIZE);
-    
 
-    /*instructions symbols */
-    retval = symbol_instructions(instruction_data_table, instruction_table, instruction_num, symbol_table, &symbol_counter);
-    /*directive symbols*/
-    if (retval == STATUS_SUCCESS)
-    {
-        retval = symbol_directive(directive_table, directive_num, symbol_table, &symbol_counter);
+    *symbol_table = NULL;
 
-    }
-    if (retval == STATUS_SUCCESS)
+    if ((retval = symbol_instructions(instruction_data_table, instruction_table, instruction_num, symbol_table, symbol_num)) < STATUS_SUCCESS)
     {
-        retval = symbol_complete_table(*symbol_table, symbol_counter, start_address);
+        symbol_error_handle(retval);  
     }
-    hdestroy();
-    *symbol_num = symbol_counter;
+    else if((retval = symbol_directive(directive_table, directive_num, symbol_table, symbol_num)) < STATUS_SUCCESS)
+    {
+        symbol_error_handle(retval);  
+    }
+    else 
+    {
+        starter_address = symbol_get_varibles_start_address(instruction_data_table,instruction_num);
+        symbol_complete_table(*symbol_table,*symbol_num,starter_address);
+    }
+
     return retval;
 }
 int symbol_get_varibles_start_address(instruction_data *instruction_data_table, int instruction_num)
@@ -38,7 +33,7 @@ int symbol_get_varibles_start_address(instruction_data *instruction_data_table, 
     int start_address = START_ADDRESS;
     if (instruction_num != 0)
     {
-        start_address = instruction_data_table[instruction_num-1].address + instruction_data_table[instruction_num-1].size;
+        start_address = instruction_data_table[instruction_num - 1].address + instruction_data_table[instruction_num - 1].size;
     }
     return start_address;
 }
@@ -48,75 +43,60 @@ status_e symbol_instructions(instruction_data *instruction_data_table, instructi
 {
     status_e retval = STATUS_SUCCESS;
     int symbol_counter = *p_symbol_counter;
+    symbol *symbol_table = *p_symbol_table;
     int i;
-    symbol * tmp;
-    symbol * symbol_table = *p_symbol_table;
-
-    for (i = 0; i < instruction_num && (retval == STATUS_SUCCESS || retval == STATUS_NO_LABEL); i++)
+    for (i = 0; i < instruction_num && retval != STATUS_ERR_DATA_ALREADY_DEFINED; i++)
     {
-
-        if (retval != STATUS_NO_LABEL)
+        if (retval != STATUS_ERR_DATA_ALREADY_DEFINED)
         {
-            tmp = (symbol*) realloc((symbol*) symbol_table, (symbol_counter + 1) * sizeof(symbol));
-            if(tmp == NULL)
+            symbol_table = (symbol *)realloc(symbol_table, (symbol_counter + 1) * sizeof(symbol));
+            if (symbol_table == NULL)
             {
-                fprintf(stderr,"reallocation failed\n");
+                fprintf(stderr, "Realloc error");
                 exit(1);
             }
             else
             {
-            
-                memset(&tmp[symbol_counter], 0, sizeof(symbol));
                 symbol_counter++;
-
+                retval = symbol_get_instruction_labels(instruction_table + i, instruction_data_table + i, &symbol_table[symbol_counter - 1]);
+                printf("NAME : %s\n", (symbol_table[symbol_counter - 1]).name);
             }
-
         }
-
-        retval = symbol_get_instruction_labels(&instruction_table[i], &instruction_data_table[i], &tmp[symbol_counter]);
-        symbol_error_handle(retval);
     }
     *p_symbol_counter = symbol_counter;
-    if (retval > 0)
-    {
-        retval = STATUS_SUCCESS;
-    }
+    *p_symbol_table = symbol_table;
+
     return retval;
 }
+
 status_e symbol_directive(directive *directive_table, int directive_num,
                           symbol **p_symbol_table, int *p_symbol_counter)
 {
     status_e retval = STATUS_SUCCESS;
     int symbol_counter = *p_symbol_counter;
-    symbol * tmp;
-    symbol * symbol_table = *p_symbol_table;
-    int i = 0;
-    for (i = 0; i < directive_num && retval < 0; i++)
+    symbol *symbol_table = *p_symbol_table;
+    int i;
+    for (i = 0; i < directive_num && retval != STATUS_ERR_DATA_ALREADY_DEFINED; i++)
     {
-        if (retval == STATUS_SYMBOL_ENTER)
+        if (retval >= 0)
         {
-            tmp = (symbol*) realloc((symbol*) symbol_table, (symbol_counter + 1) * sizeof(symbol));
-            if(tmp == NULL)
+            symbol_table = (symbol *)realloc(symbol_table, (symbol_counter + 1) * sizeof(symbol));
+            if (symbol_table == NULL)
             {
-                fprintf(stderr,"reallocation failed\n");
+                fprintf(stderr, "Realloc Error");
                 exit(1);
             }
             else
             {
-                memset(&tmp[symbol_counter], 0, sizeof(symbol));
                 symbol_counter++;
-
+                retval = symbol_get_directive_labels(directive_table+i, &symbol_table[symbol_counter - 1]);
+                printf("NAME : %s\n", (symbol_table[symbol_counter - 1]).name);
             }
-
         }
-        retval = symbol_get_directive_labels(&directive_table[i], &tmp[symbol_counter]);
-        symbol_error_handle(retval);
     }
     *p_symbol_counter = symbol_counter;
-    if (retval > 0)
-    {
-        retval = STATUS_SUCCESS;
-    }
+    *p_symbol_table = symbol_table;
+
     return retval;
 }
 
@@ -126,10 +106,10 @@ status_e symbol_complete_table(symbol *symbol_table, int symbol_counter, int sta
     status_e retval = STATUS_SUCCESS;
     int current_address = start_address;
     int i;
-    printf("CONTER : %d \n",symbol_counter);
+    printf("CONTER : %d \n", symbol_counter);
     for (i = 0; i < symbol_counter && retval == STATUS_SUCCESS; i++)
     {
-        //printf("NAME : %s\n",symbol_table[0].name);
+        // printf("NAME : %s\n",symbol_table[0].name);
         current_address += symbol_assign_memory(&symbol_table[i], current_address);
         retval = symbol_is_uninitilized_entery(&symbol_table[i]);
     }
@@ -185,6 +165,7 @@ status_e symbol_get_directive_labels(directive *dir, symbol *new_symbol)
     symbol *old_symbol = symbol_find(dir->variable_name);
 
     symbol_extract_directive(new_symbol, dir); /* copy data from dir to symbol */
+    printf("AKAFPKAP : %s\n",new_symbol->name);
 
     if (old_symbol == NULL)
     {
@@ -211,14 +192,24 @@ void symbol_extract_directive(symbol *new_symbol, directive *dir)
 symbol *symbol_find(char *symbol_name)
 {
     ENTRY item;
-    ENTRY *found;
-    item.key = symbol_name;
-    found = hsearch(item, FIND);
+    ENTRY *found = NULL;
+    symbol *s = NULL;
+    if(symbol_name != NULL)
+    {
+        item.key = symbol_name;
+        found = hsearch(item, FIND); 
+    }
+
     if (found == NULL)
     {
         printf("Symbol [%s] not found\n", symbol_name);
     }
-    return found->data;
+    else
+    {
+        s = found->data;
+
+    }
+    return s;
 }
 symbol *symbol_enter(symbol *s)
 {
@@ -233,9 +224,7 @@ symbol *symbol_enter(symbol *s)
         printf("Symbol [%s] entered\n", s->name);
     }
 
-
-
-    return (symbol* )found->data;
+    return (symbol *)found->data;
 }
 
 status_e symbol_handle_extern_attribute(symbol *old_symbol)
