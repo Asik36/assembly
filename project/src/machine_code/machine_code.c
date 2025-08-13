@@ -234,11 +234,15 @@ int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, opera
         case ADDRESSING_MODES_DIRECT:
         case ADDRESSING_MODES_INDEX:
 
-
+            if(*operand.varible_name == "\0")
+            {
+                fprintf(stderr, "%s error: empty varieble name\n",__func__);
+                break;
+            }
             operand_symbol = machine_code_find_symbol(symbol_list,symbol_list_length, operand.varible_name);
             if(!operand_symbol)
             {
-                printf("%s error: non declared variabel: %s\n",__func__ , operand.varible_name);
+                fprintf(stderr, "%s error: non declared variabel: %s\n",__func__ , operand.varible_name);
                 break;
             }
             if(operand_symbol->access_attribute == ATTRIBUTE_EXTERN)
