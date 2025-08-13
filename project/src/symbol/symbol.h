@@ -26,15 +26,15 @@ typedef enum
 
 status_e symbol_create(instruction_data *instruction_data_table, instruction *instruction_table, int instruction_num,
                        directive *directive_table, int directive_num,
-                       symbol *symbol_table, int *symbol_num);
+                       symbol **symbol_table, int *symbol_num);
 
-status_e symbol_directive(directive * directive_table , int directive_num,
-                          symbol    * symbol_table    , int * p_symbol_counter);
+status_e symbol_directive(directive *directive_table, int directive_num,
+                          symbol **p_symbol_table, int *p_symbol_counter);
 
 status_e symbol_complete_table(symbol * symbol_table, int symbol_counter, int start_address);
 
 status_e symbol_instructions(   instruction_data * instruction_data_table, instruction * instruction_table, int instruction_num,
-                                symbol           * symbol_table          , int * p_symbol_counter);
+                                symbol           ** symbol_table          , int * p_symbol_counter);
 
 status_e symbol_get_instruction_labels(instruction * ins,instruction_data * ins_data , symbol * new_symbol);
 
