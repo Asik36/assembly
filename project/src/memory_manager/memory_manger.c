@@ -2,19 +2,19 @@
 #include "main.h"
 #include "memory_manager.h"
 
-status memory(instruction *instruction_line_table,int n, instruction_data * instruction_info_table)
+status memory(instruction *instruction_line_table,int n, instruction_data ** instruction_info_table)
 {
     
     status retval = SUCCESS;
+    *instruction_info_table = (instruction_data*) calloc(1,n*sizeof(instruction_data));
     for (int i = 0; i < n && retval == SUCCESS; i++)
     {
-        if(memory_instruction_assign(instruction_line_table,instruction_info_table) == FAILURE)
+        if(memory_instruction_assign(instruction_line_table+i,*instruction_info_table+i) == FAILURE)
         {
             retval = FAILURE;
             fprintf(stderr,"Error at line %d\n",i);
         }
-        instruction_line_table++;
-        instruction_info_table++;
+
     }
 
     return retval;
@@ -57,7 +57,6 @@ void memory_operand_get_info(instruction *ins ,operand_data * src_operand, opera
  
     src_operand->addressing_mode = memory_operand_get_addressing_mode(ins->src_operand);
     memory_operand_get_data(src_operand,ins->src_operand,src_operand->addressing_mode);
-
 
     
     /*destination operand*/
