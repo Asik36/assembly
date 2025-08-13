@@ -318,14 +318,3 @@ void symbol_error_handle(status_e status)
         break;
     }
 }
-
-/**
- *
- * STR : mov a,b
- *
- *
- *
- *
- *
- *
- */

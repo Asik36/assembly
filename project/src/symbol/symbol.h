@@ -64,13 +64,3 @@ int symbol_get_varibles_start_address(instruction_data *instruction_data_table, 
 
 #endif 
 
-/*
- * macro m1
- * inc r2
- * endm
- * mov m1, r3
- * 
- * 
- * 
- *
- */
