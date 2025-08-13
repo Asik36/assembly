@@ -19,6 +19,46 @@ const char * function_names [] =
     "machine_code_func_handler"
 };
 
+/**
+ * @brief a helper functio that adds a certian amount of bits to a uint16_t after shifting its current value
+ *
+ * @param curr_val the uint16_t that we want to add new bits to
+ * @param new_arg the new bits we want to add at the end of the curr_val
+ * @param new_length the anount of the new bits
+ * @return uint16_t the result of adding the new bits at the end of the existing ones
+ */
+static uint16_t machine_code_append_arg_to_word(uint16_t curr_val, uint16_t new_arg, int new_length)
+{
+    curr_val = curr_val << new_length;
+    curr_val |= new_arg;
+    return curr_val;
+}
+
+/**
+ * @brief a helper function that is responsible that the fields of the word_content line are ordered correctly in the memmory
+ *
+ * @param operand_data_word the instruction operand before correct memory ordering
+ * @return uint16_t the instruction operand after correct memory ordering
+ */
+
+static uint16_t machine_code_reorder_operand_word_content(operand_content operand_data_word)
+{
+    uint16_t ret = 0;
+
+    /* reorder to : funct, src_reg, src_type, dest_reg, dest_type */
+    ret = machine_code_append_arg_to_word(ret, operand_data_word.funct, FUNCT_MAX_BIT_SIZE);
+
+    ret = machine_code_append_arg_to_word(ret, operand_data_word.src_register, REGISTER_MAX_BIT_SIZE);
+    ret = machine_code_append_arg_to_word(ret, operand_data_word.src_operand_type, OPERAND_TYPE_MAX_BIT_SIZE);
+
+    ret = machine_code_append_arg_to_word(ret, operand_data_word.dest_register, REGISTER_MAX_BIT_SIZE);
+    ret = machine_code_append_arg_to_word(ret, operand_data_word.dest_operand_type, OPERAND_TYPE_MAX_BIT_SIZE);
+
+    return ret;
+}
+
+
+
 void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length)
 {
     memset(g_memory, 0, sizeof(g_memory));
@@ -108,6 +148,7 @@ machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int 
             op->dest_register = machine_code_get_operands_register(current_instruction.dest_operand_data);
             op->src_operand_type = current_instruction.src_operand_data.addressing_mode;
             op->src_register = machine_code_get_operands_register(current_instruction.src_operand_data);
+            curr_word->content.value = machine_code_reorder_operand_word_content(*op);
 
             curr_word_index++;
             curr_word_index = machine_code_add_operand(symbol_list, symbol_list_length, current_instruction.src_operand_data, &instruction_code, curr_word_index);
