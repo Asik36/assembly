@@ -131,21 +131,14 @@ int is_comment(char *line)
 
 int is_empty(char *line)
 {
-    int length_line = strlen(line);
-    int retval = -1;
-    int counter = 0;
-    while(*line != '\0' && *line != '\n')
+    int retval = SENTENCE_TYPE_EMPTY;
+    while(*line != '\0' && *line != '\n' &&retval == SENTENCE_TYPE_EMPTY)
     {
-        if(isspace(*line))
+        if(!isspace(*line))
         {
-            counter++;
-            
+            retval = SENTENCE_TYPE_UNKNOWN;    
         }
         line++;
-    }
-    if(counter == length_line)
-    {
-        retval = SENTENCE_TYPE_EMPTY;
     }
     return retval;
 }
