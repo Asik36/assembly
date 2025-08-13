@@ -169,56 +169,66 @@ symbol* machine_code_find_symbol(symbol * symbol_list, int symbol_list_length, c
     return ret;
 }
 
+static bool operand_is_empty(const operand_data *op)
+{
+    return (op && op->addressing_mode == 0 && op->operand_data == 0 && op->varible_name[0] == '\0');
+}
+
 int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, operand_data operand, machine_code * instruction_code, int curr_word_index)
 {
-    are are_attribute = ABSOLUTE;
-    symbol * operand_symbol;
-    switch (operand.addressing_mode)
+
+    if(!operand_is_empty(&operand))
     {
-    case ADDRESSING_MODES_IMMEDIATE:
-        instruction_code->words[curr_word_index].are_attribute = ABSOLUTE;
-
-        instruction_code->words[curr_word_index].content.value = operand.operand_data;
-        curr_word_index++;
-        break;
-
-    case ADDRESSING_MODES_DIRECT:
-    case ADDRESSING_MODES_INDEX:
-
-
-        operand_symbol = machine_code_find_symbol(symbol_list,symbol_list_length, operand.varible_name);
-        if(!operand_symbol)
+        are are_attribute = ABSOLUTE;
+        symbol * operand_symbol;
+        switch (operand.addressing_mode)
         {
-            printf("%s error: non declared variabel: %s\n",__func__ , operand.varible_name);
+        case ADDRESSING_MODES_IMMEDIATE:
+            instruction_code->words[curr_word_index].are_attribute = ABSOLUTE;
+
+            instruction_code->words[curr_word_index].content.value = operand.operand_data;
+            curr_word_index++;
+            break;
+
+        case ADDRESSING_MODES_DIRECT:
+        case ADDRESSING_MODES_INDEX:
+
+
+            operand_symbol = machine_code_find_symbol(symbol_list,symbol_list_length, operand.varible_name);
+            if(!operand_symbol)
+            {
+                printf("%s error: non declared variabel: %s\n",__func__ , operand.varible_name);
+                break;
+            }
+            if(operand_symbol->access_attribute == ATTRIBUTE_EXTERN)
+            {
+                are_attribute = EXTERNAL;
+            }
+            else
+            {
+                are_attribute = RELOCATABLE;
+            }
+            instruction_code->words[curr_word_index].are_attribute = are_attribute;
+
+            instruction_code->words[curr_word_index].content.data_address = (operand_symbol->address / 16) * 16;
+
+            curr_word_index++;
+            instruction_code->words[curr_word_index].are_attribute = are_attribute;
+            instruction_code->words[curr_word_index].content.offset = operand_symbol->address % 16;
+            curr_word_index++;
+
+            break;
+
+        case ADDRESSING_MODES_REGISTER_DIRECT:
+            break;
+
+        default:
+            printf("%s: unhandled addressing mode operand: %s\n",__func__ ,operand.varible_name);
             break;
         }
-        if(operand_symbol->access_attribute == ATTRIBUTE_EXTERN)
-        {
-            are_attribute = EXTERNAL;
-        }
-        else
-        {
-            are_attribute = RELOCATABLE;
-        }
-        instruction_code->words[curr_word_index].are_attribute = are_attribute;
-
-        instruction_code->words[curr_word_index].content.data_address = (operand_symbol->address / 16) * 16;
-
-        curr_word_index++;
-        instruction_code->words[curr_word_index].are_attribute = are_attribute;
-        instruction_code->words[curr_word_index].content.offset = operand_symbol->address % 16;
-        curr_word_index++;
-
-        break;
-
-    case ADDRESSING_MODES_REGISTER_DIRECT:
-        break;
-
-    default:
-        printf("%s: unhandled addressing mode operand: %s\n",__func__ ,operand.varible_name);
-        break;
     }
     return curr_word_index;
+
 }
 
 

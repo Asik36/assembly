@@ -28,7 +28,7 @@ int main(void)
     ins[0].address = 101;
     ins[0].dest_operand_data.addressing_mode = ADDRESSING_MODES_DIRECT;
     strcpy(ins[0].dest_operand_data.varible_name, "k");
-    ins[0].src_operand_data = (operand_data){0};
+    memset(&ins[0].src_operand_data, 0, sizeof(ins[0].src_operand_data));
 
     machine_code_main(symbols, 1, ins, 1);
 
