@@ -72,9 +72,14 @@ typedef struct operand_data_s
 
 typedef struct directive_s
 {
+<<<<<<< HEAD
     char variable_name        [SYMBOL_MAX_SIZE];
     uint32_t data_length; 
 
+=======
+    uint8_t variable_name       [SYMBOL_MAX_SIZE];   /* extern and entry shou*/
+    uint32_t data_length;
+>>>>>>> 52299b7 (directive change)
     void * data;                                   /* chars or ints*/
     enum attribute_access_type_e access_attribute; /* extern or entry */
     enum attribute_data_type_e data_attribute;   /* data or string */
