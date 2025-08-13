@@ -15,10 +15,10 @@
 #define FUNCT_MAX_BIT_SIZE 4
 #define REGISTER_MAX_BIT_SIZE 4
 #define OPERAND_TYPE_MAX_BIT_SIZE 2
-#define ADDRESSING_TYPES_AMONT 4
+#define ADDRESSING_TYPES_AMOUNT 4
 #define COMMAND_AMONT 16
 #define OPERAND_AMONT 16
-=======
+
 #define REGISTER_AMONT 16
 
 #define PROGRAM_STATUS_EORD_REGISTER_NAME "PSW"
@@ -38,14 +38,14 @@ enum attribute_access_type_e
 
 typedef enum are_e
 {
-    ABSOLUTE    = 1 << 0, /*word is a value*/
+    ABSOLUTE    = 1 << 2, /*word is a value*/
     RELOCATABLE = 1 << 1, /*word value is taken from a memory address*/
-    EXTERNAL    = 1 << 2  /*word value is taken from a diffrent file*/
+    EXTERNAL    = 1 << 0  /*word value is taken from a diffrent file*/
 } are;
 
 typedef enum addressing_modes_e
 {
-    ADDRESSING_MODES_IMMEDIATE,  
+    ADDRESSING_MODES_IMMEDIATE,
     ADDRESSING_MODES_DIRECT,
     ADDRESSING_MODES_INDEX,
     ADDRESSING_MODES_REGISTER_DIRECT
@@ -66,7 +66,7 @@ typedef struct instruction_s
 typedef struct operand_data_s
 {
     addressing_modes addressing_mode;
-    char varible_name[SYMBOL_MAX_SIZE];    
+    char varible_name[SYMBOL_MAX_SIZE];
     int operand_data;       /* Number value OR register index */
 
 }operand_data;
@@ -76,7 +76,7 @@ typedef struct directive_s
 {
     char label       [SYMBOL_MAX_SIZE];   /* extern and entry shou*/
     char name        [SYMBOL_MAX_SIZE];
-    uint32_t data_length; 
+    uint32_t data_length;
 
     void * data;                                   /* chars or ints*/
     enum attribute_access_type_e access_attribute; /* extern or entry */
@@ -128,14 +128,6 @@ typedef struct symbol_s
 
 
 
-
-typedef enum addressing_modes_e
-{
-    ADDRESSING_MODES_IMMEDIATE,
-    ADDRESSING_MODES_DIRECT,
-    ADDRESSING_MODES_INDEX,
-    ADDRESSING_MODES_REGISTER_DIRECT
-}addressing_modes;
 
 
 typedef int16_t value_content;          /*Value data such as number or char */
@@ -201,8 +193,8 @@ typedef struct command_s
     opcode_types opcode;
     uint16_t funct;
     char command_name[COMMAND_MAX_SIZE];
-    bool src_operand_types[ADDRESSING_TYPES_AMONT];
-    bool dest_operand_types[ADDRESSING_TYPES_AMONT];
+    bool src_operand_types[ADDRESSING_TYPES_AMOUNT];
+    bool dest_operand_types[ADDRESSING_TYPES_AMOUNT];
 }command;
 
 static const command commands[COMMAND_AMONT] =
@@ -226,23 +218,7 @@ static const command commands[COMMAND_AMONT] =
 
 };
 
-typedef enum status_e
-{
-    SUCCESS = 0,
-    FAILURE = -1
-}status;
-
-
-
-
-
-
-
-
 
 int get_command_index(char * command_name);
 
-#endif 
-=======
 #endif
-
