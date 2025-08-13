@@ -24,6 +24,13 @@ typedef enum sign_e
     MINUS = -1
 }sign;
 
+typedef enum status_s
+{
+    FAILURE = -1,
+    SUCCESS = 0
+    
+};
+
 #define MAX_LINE 80
 
 
