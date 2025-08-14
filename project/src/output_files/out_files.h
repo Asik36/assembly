@@ -6,7 +6,7 @@
 
 #define SIZE_OF_SPETIAL_BITS_GROUP 4
 #define AMOUNT_OF_SPETIAL_BITS_GROUPS 5
-#define FILE_NAME_LENGTH 255
+
 
 typedef struct special_bits_group_s
 {
@@ -25,7 +25,7 @@ typedef enum out_filetype_e
     OUT_FILE_TYPE_ENTRIES
 }out_file_type;
 
-void out_files_main(int machine_code_instructions_length, int machine_code_symbols_length, symbol * symbol_list, int symbol_list_length, char* base_file_name);
+void out_files_main( int machine_code_instructions_length, int machine_code_symbols_length, char* base_file_name);
 
 void out_files_machine_code(int machine_code_instructions_length, int machine_code_symbols_length, char* base_file_name);
 

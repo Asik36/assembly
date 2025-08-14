@@ -7,6 +7,7 @@
 
 #define MEMORY_WORD_LENGTH  20
 #define STARTING_MEMORY_ADDRESS 100
+#define FILE_NAME_LENGTH 255
 
 extern word_data g_memory[MEMORY_MAX_SIZE];
 
@@ -14,7 +15,7 @@ extern word_data g_memory[MEMORY_MAX_SIZE];
 extern const char * function_names [];
 typedef struct machine_code_symbol_call_s
 {
-    char * symbol_name;
+    char symbol_name[FILE_NAME_LENGTH];
     int base_address;
 }symbol_call;
 

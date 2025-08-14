@@ -1,15 +1,21 @@
 #include "machine_code.h"
+#include "../output_files/out_files.h"
 
 const bool NO_DEST_OPERAND[ADDRESSING_TYPES_AMOUNT] = {0};
 
 word_data g_memory [MEMORY_MAX_SIZE];
 int g_memory_word_index = STARTING_MEMORY_ADDRESS;
 
-symbol_call * g_externals;
-symbol_call * g_entrys;
+symbol_call * g_externals = NULL;
+symbol_call * g_entrys = NULL;
 
 int g_extern_call_length = 0;
 int g_entry_defenition_length = 0;
+
+int g_instructions_word_count = 0;
+int g_symbols_word_count = 0;
+
+bool error_flag = false;
 
 const char * function_names [] =
 {
@@ -104,6 +110,15 @@ void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction
 
     machine_code_handle_instructions(symbol_list, symbol_list_length, instruction_list, instruction_list_length);
     machine_code_handle_symbols(symbol_list, symbol_list_length);
+
+    if(error_flag == false)
+    {
+        out_files_main(g_instructions_word_count, g_symbols_word_count, "file_name");
+    }
+
+    free(g_memory);
+    free(g_entrys);
+    free(g_externals);
 }
 
 machine_code_status machine_code_write_machine_code(machine_code code)
@@ -181,6 +196,9 @@ machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int 
 
     instruction_code.word_count = current_instruction.size;
     instruction_code.words = (word_data *) malloc(sizeof(word_data) * instruction_code.word_count);
+
+    g_instructions_word_count += instruction_code.word_count;
+
     if (!instruction_code.words)
     {
         ret = MACHINE_CODE_STATUS_ERROR_MALLOC;
@@ -240,6 +258,8 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol)
         machine_code symbol_code;
         symbol_code.word_count = current_symbol.size;
 
+        g_symbols_word_count += symbol_code.word_count;
+
         symbol_code.words = malloc(sizeof(word_data) * symbol_code.word_count);
         if(!symbol_code.words)
         {
@@ -251,7 +271,8 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol)
             if(current_symbol.access_attribute == ATTRIBUTE_ENTERY)
             {
                 symbol_call entry_item;
-                entry_item.symbol_name = current_symbol.name;
+                strncpy(entry_item.symbol_name, current_symbol.name, FILE_NAME_LENGTH - 1);
+                entry_item.symbol_name[FILE_NAME_LENGTH - 1] = '\0';
                 entry_item.base_address = current_symbol.address;
                 add_item(entry_item, ATTRIBUTE_ENTERY);
             }
@@ -320,7 +341,8 @@ int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, opera
             {
                 are_attribute = EXTERNAL;
                 symbol_call extern_item;
-                extern_item.symbol_name = operand_symbol->name;
+                strncpy(extern_item.symbol_name,operand_symbol->name, FILE_NAME_LENGTH - 1);
+                extern_item.symbol_name[FILE_NAME_LENGTH - 1] = '\0';
                 extern_item.base_address = curr_word_index + g_memory_word_index;
                 add_item(extern_item, ATTRIBUTE_EXTERN);
             }

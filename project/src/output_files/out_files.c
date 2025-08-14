@@ -3,7 +3,7 @@
 #define STARTING_GROUP_NAME 'A'
 
 
-void out_files_main( int machine_code_instructions_length, int machine_code_symbols_length, symbol * symbol_list, int symbol_list_length, char* base_file_name)
+void out_files_main( int machine_code_instructions_length, int machine_code_symbols_length, char* base_file_name)
 {
     out_files_machine_code(  machine_code_instructions_length,  machine_code_symbols_length, base_file_name);
     out_files_symbol_files(base_file_name, OUT_FILE_TYPE_EXTERNALS);
@@ -124,6 +124,9 @@ void out_files_write_line(FILE * out_file, out_file_type file_type, int symbol_i
         fprintf(out_file, "%s BASE %d\n", symbol_to_write.symbol_name, symbol_to_write.base_address);
         fprintf(out_file, "%s OFFSET %d\n\n", symbol_to_write.symbol_name, symbol_to_write.base_address + 1);
         break;
+    default:
+        fprintf(stderr, "%s error: not a supported out file type: %d\n",__func__, file_type);
+        break;
     }
 
 
@@ -171,7 +174,7 @@ void out_files_symbol_files(char * base_file_name, out_file_type file_type)
                 {
                     out_files_write_line(out_file, file_type, call_index);
                 }
-                fclose(out_file)
+                fclose(out_file);
             }
         }
     }
