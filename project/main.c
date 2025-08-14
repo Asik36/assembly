@@ -36,10 +36,15 @@ int main(void)
         fprintf(stderr,"MEMORY ERROR\n");
     }
 
+    else if (machine_code_main("test", symbol_list, symbol_counter, instruction_data_list, instruction_counter))
+    {
+        fprintf(stderr, "MACHINE CODE ERROR\n");
+    }
 
 
 
-    
+
+
     for (int i = 0; i < directive_counter; i++)
     {
         if(directive_list != NULL && directive_list[i].data != NULL)

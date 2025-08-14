@@ -7,11 +7,23 @@
 
 #define MEMORY_WORD_LENGTH  20
 #define STARTING_MEMORY_ADDRESS 100
+#define FILE_NAME_LENGTH 255
 
 extern word_data g_memory[MEMORY_MAX_SIZE];
 
 
 extern const char * function_names [];
+typedef struct machine_code_symbol_call_s
+{
+    char symbol_name[FILE_NAME_LENGTH];
+    int base_address;
+}symbol_call;
+
+extern symbol_call * g_externals;
+extern symbol_call * g_entrys;
+
+extern int g_extern_call_length ;
+extern int g_entry_defenition_length ;
 
 typedef enum machine_code_success_e
 {
@@ -43,7 +55,7 @@ typedef enum machine_code_func_type_e
  * @param instruction_list an array of all the instructions
  * @param instruction_list_length the amount of instructions in the symbol array
  */
-void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length);
+bool machine_code_main(char * base_file_name,symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length);
 
 /**
  * @brief the function tryies to write machine code into the memory array

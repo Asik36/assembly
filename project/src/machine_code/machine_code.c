@@ -1,9 +1,21 @@
 #include "machine_code.h"
+#include "../output_files/out_files.h"
 
 const bool NO_DEST_OPERAND[ADDRESSING_TYPES_AMOUNT] = {0};
 
 word_data g_memory [MEMORY_MAX_SIZE];
 int g_memory_word_index = STARTING_MEMORY_ADDRESS;
+
+symbol_call * g_externals = NULL;
+symbol_call * g_entrys = NULL;
+
+int g_extern_call_length = 0;
+int g_entry_defenition_length = 0;
+
+int g_instructions_word_count = 0;
+int g_symbols_word_count = 0;
+
+bool error_flag = false;
 
 const char * function_names [] =
 {
@@ -19,19 +31,107 @@ const char * function_names [] =
     "machine_code_func_handler"
 };
 
-void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length)
+/**
+ * @brief a helper functio that adds a certian amount of bits to a uint16_t after shifting its current value
+ *
+ * @param curr_val the uint16_t that we want to add new bits to
+ * @param new_arg the new bits we want to add at the end of the curr_val
+ * @param new_length the anount of the new bits
+ * @return uint16_t the result of adding the new bits at the end of the existing ones
+ */
+static uint16_t machine_code_append_arg_to_word(uint16_t curr_val, uint16_t new_arg, int new_length)
+{
+    curr_val = curr_val << new_length;
+    curr_val |= new_arg;
+    return curr_val;
+}
+
+/**
+ * @brief a helper function that is responsible that the fields of the word_content line are ordered correctly in the memmory
+ *
+ * @param operand_data_word the instruction operand before correct memory ordering
+ * @return uint16_t the instruction operand after correct memory ordering
+ */
+
+static uint16_t machine_code_reorder_operand_word_content(operand_content operand_data_word)
+{
+    uint16_t ret = 0;
+
+    /* reorder to : funct, src_reg, src_type, dest_reg, dest_type */
+    ret = machine_code_append_arg_to_word(ret, operand_data_word.funct, FUNCT_MAX_BIT_SIZE);
+
+    ret = machine_code_append_arg_to_word(ret, operand_data_word.src_register, REGISTER_MAX_BIT_SIZE);
+    ret = machine_code_append_arg_to_word(ret, operand_data_word.src_operand_type, OPERAND_TYPE_MAX_BIT_SIZE);
+
+    ret = machine_code_append_arg_to_word(ret, operand_data_word.dest_register, REGISTER_MAX_BIT_SIZE);
+    ret = machine_code_append_arg_to_word(ret, operand_data_word.dest_operand_type, OPERAND_TYPE_MAX_BIT_SIZE);
+
+    return ret;
+}
+
+static void add_item(symbol_call new_item, enum attribute_access_type_e type)
+{
+    symbol_call **array;
+    int *array_length;
+
+    if (type == ATTRIBUTE_EXTERN)
+    {
+        array = &g_externals;
+        array_length = &g_extern_call_length;
+    }
+    else if(type == ATTRIBUTE_ENTERY)
+    {
+        array = &g_entrys;
+        array_length = &g_entry_defenition_length;
+    }
+    else
+    {
+        fprintf(stderr, "%s: unknown attribute_access_type, symbol:%s, attr:%d\n", __func__, new_item.symbol_name, type);
+        exit(1);
+    }
+
+    symbol_call *temp = realloc(*array, (*array_length + 1) * sizeof (**array));
+    if (!temp)
+    {
+        fprintf(stderr, "%s: realloc failed\n", __func__);
+        exit(1);
+    }
+
+    *array = temp;
+    (*array)[*array_length] = new_item;
+    (*array_length)++;
+}
+
+
+bool machine_code_main(char * base_file_name,symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length)
 {
     memset(g_memory, 0, sizeof(g_memory));
     g_memory_word_index = STARTING_MEMORY_ADDRESS;
 
+    g_externals = NULL;
+    g_extern_call_length = 0;
+    g_entrys = NULL;
+    g_entry_defenition_length = 0;
+
+
     machine_code_handle_instructions(symbol_list, symbol_list_length, instruction_list, instruction_list_length);
     machine_code_handle_symbols(symbol_list, symbol_list_length);
+
+    if(error_flag == false)
+    {
+        out_files_main(g_instructions_word_count, g_symbols_word_count, base_file_name);
+    }
+
+    free(g_entrys);
+    free(g_externals);
+
+    return (error_flag);
 }
 
 machine_code_status machine_code_write_machine_code(machine_code code)
 {
     machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
-    if(g_memory_word_index + code.word_count >= MEMORY_MAX_SIZE)
+    if(g_memory_word_index + code.word_count > MEMORY_MAX_SIZE)
     {
         printf("%s error: machine code not added because of memory overflow!\n", __func__);
         ret = MACHINE_CODE_STATUS_ERROR_MALLOC;
@@ -72,6 +172,25 @@ void machine_code_handle_symbols(symbol * symbol_list, int symbol_list_length)
     }
 }
 
+/**
+ * @brief a helper function that gets a flag array and checks if all the flags in the array are set to false
+ *
+ * @param flag_array the bool array to check
+ * @param arr_length the length of the bool array / amount of flags to check
+ * @return true in the given range all of the arrays items are set to false
+ * @return false the array has at least one flag in the range of the given length that true
+ *
+ */
+static bool flag_array_is_empty(bool flag_array[], int arr_length)
+{
+    bool ret = true;
+    for(int i = 0; (i < arr_length) && (ret == true); i++)
+    {
+        ret = !flag_array[i];
+    }
+    return ret;
+}
+
 machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int symbol_list_length, instruction_data current_instruction)
 {
     machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
@@ -79,11 +198,17 @@ machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int 
     machine_code instruction_code;
     command curr_command;
     int curr_word_index = 0;
-    word_data *curr_word;
+    word_data *curr_word = NULL ;
+
     operand_content *op;
 
     instruction_code.word_count = current_instruction.size;
-    instruction_code.words = (word_data *) malloc(sizeof(word_data) * instruction_code.word_count);
+    instruction_code.words = calloc(instruction_code.word_count, sizeof *instruction_code.words);
+
+
+
+    g_instructions_word_count += instruction_code.word_count;
+
     if (!instruction_code.words)
     {
         ret = MACHINE_CODE_STATUS_ERROR_MALLOC;
@@ -108,10 +233,18 @@ machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int 
             op->dest_register = machine_code_get_operands_register(current_instruction.dest_operand_data);
             op->src_operand_type = current_instruction.src_operand_data.addressing_mode;
             op->src_register = machine_code_get_operands_register(current_instruction.src_operand_data);
+            curr_word->content.value = machine_code_reorder_operand_word_content(*op);
 
             curr_word_index++;
-            curr_word_index = machine_code_add_operand(symbol_list, symbol_list_length, current_instruction.src_operand_data, &instruction_code, curr_word_index);
-            curr_word_index = machine_code_add_operand(symbol_list, symbol_list_length, current_instruction.dest_operand_data, &instruction_code, curr_word_index);
+
+            if(!flag_array_is_empty(curr_command.src_operand_types, ADDRESSING_TYPES_AMOUNT))
+            {
+                curr_word_index = machine_code_add_operand(symbol_list, symbol_list_length, current_instruction.src_operand_data, &instruction_code, curr_word_index);
+            }
+            if(!flag_array_is_empty(curr_command.dest_operand_types, ADDRESSING_TYPES_AMOUNT))
+            {
+                curr_word_index = machine_code_add_operand(symbol_list, symbol_list_length, current_instruction.dest_operand_data, &instruction_code, curr_word_index);
+            }
         }
 
         ret = machine_code_write_machine_code(instruction_code);
@@ -135,7 +268,10 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol)
         machine_code symbol_code;
         symbol_code.word_count = current_symbol.size;
 
-        symbol_code.words = malloc(sizeof(word_data) * symbol_code.word_count);
+        g_symbols_word_count += symbol_code.word_count;
+
+        symbol_code.words = calloc(symbol_code.word_count, sizeof *symbol_code.words);
+
         if(!symbol_code.words)
         {
             ret = MACHINE_CODE_STATUS_ERROR_MALLOC;
@@ -143,6 +279,14 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol)
         }
         else
         {
+            if(current_symbol.access_attribute == ATTRIBUTE_ENTERY)
+            {
+                symbol_call entry_item;
+                strncpy(entry_item.symbol_name, current_symbol.name, FILE_NAME_LENGTH - 1);
+                entry_item.symbol_name[FILE_NAME_LENGTH - 1] = '\0';
+                entry_item.base_address = current_symbol.address;
+                add_item(entry_item, ATTRIBUTE_ENTERY);
+            }
             for(int word_index = 0; word_index < (int)symbol_code.word_count; word_index++)
             {
                 symbol_code.words[word_index].are_attribute =  ABSOLUTE;
@@ -181,6 +325,8 @@ int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, opera
     {
         are are_attribute = ABSOLUTE;
         symbol * operand_symbol;
+        instruction_code->words[curr_word_index] = (word_data){0};
+
         switch (operand.addressing_mode)
         {
         case ADDRESSING_MODES_IMMEDIATE:
@@ -193,16 +339,25 @@ int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, opera
         case ADDRESSING_MODES_DIRECT:
         case ADDRESSING_MODES_INDEX:
 
-
+            if(*operand.varible_name == '\0')
+            {
+                fprintf(stderr, "%s error: empty varieble name\n",__func__);
+                break;
+            }
             operand_symbol = machine_code_find_symbol(symbol_list,symbol_list_length, operand.varible_name);
             if(!operand_symbol)
             {
-                printf("%s error: non declared variabel: %s\n",__func__ , operand.varible_name);
+                fprintf(stderr, "%s error: non declared variabel: %s\n",__func__ , operand.varible_name);
                 break;
             }
             if(operand_symbol->access_attribute == ATTRIBUTE_EXTERN)
             {
                 are_attribute = EXTERNAL;
+                symbol_call extern_item;
+                strncpy(extern_item.symbol_name,operand_symbol->name, FILE_NAME_LENGTH - 1);
+                extern_item.symbol_name[FILE_NAME_LENGTH - 1] = '\0';
+                extern_item.base_address = curr_word_index + g_memory_word_index;
+                add_item(extern_item, ATTRIBUTE_EXTERN);
             }
             else
             {
@@ -213,6 +368,8 @@ int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, opera
             instruction_code->words[curr_word_index].content.data_address = (operand_symbol->address / 16) * 16;
 
             curr_word_index++;
+
+            instruction_code->words[curr_word_index] = (word_data){0};
             instruction_code->words[curr_word_index].are_attribute = are_attribute;
             instruction_code->words[curr_word_index].content.offset = operand_symbol->address % 16;
             curr_word_index++;
