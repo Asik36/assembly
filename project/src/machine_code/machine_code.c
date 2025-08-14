@@ -5,6 +5,8 @@ const bool NO_DEST_OPERAND[ADDRESSING_TYPES_AMOUNT] = {0};
 word_data g_memory [MEMORY_MAX_SIZE];
 int g_memory_word_index = STARTING_MEMORY_ADDRESS;
 
+#define NO_OPERAND {0,0,0,0}
+
 const char * function_names [] =
 {
     "machine_code_main",
@@ -112,6 +114,25 @@ void machine_code_handle_symbols(symbol * symbol_list, int symbol_list_length)
     }
 }
 
+/**
+ * @brief a helper function that gets a flag array and checks if all the flags in the array are set to false
+ *
+ * @param flag_array the bool array to check
+ * @param arr_length the length of the bool array / amount of flags to check
+ * @return true in the given range all of the arrays items are set to false
+ * @return false the array has at least one flag in the range of the given length that true
+ *
+ */
+static bool flag_array_is_empty(bool flag_array[], int arr_length)
+{
+    bool ret = true;
+    for(int i = 0; (i < arr_length) && (ret == true); i++)
+    {
+        ret = !flag_array[i];
+    }
+    return ret;
+}
+
 machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int symbol_list_length, instruction_data current_instruction)
 {
     machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
@@ -151,8 +172,15 @@ machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int 
             curr_word->content.value = machine_code_reorder_operand_word_content(*op);
 
             curr_word_index++;
-            curr_word_index = machine_code_add_operand(symbol_list, symbol_list_length, current_instruction.src_operand_data, &instruction_code, curr_word_index);
-            curr_word_index = machine_code_add_operand(symbol_list, symbol_list_length, current_instruction.dest_operand_data, &instruction_code, curr_word_index);
+
+            if(!flag_array_is_empty(curr_command.src_operand_types, ADDRESSING_TYPES_AMOUNT))
+            {
+                curr_word_index = machine_code_add_operand(symbol_list, symbol_list_length, current_instruction.src_operand_data, &instruction_code, curr_word_index);
+            }
+            if(!flag_array_is_empty(curr_command.dest_operand_types, ADDRESSING_TYPES_AMOUNT))
+            {
+                curr_word_index = machine_code_add_operand(symbol_list, symbol_list_length, current_instruction.dest_operand_data, &instruction_code, curr_word_index);
+            }
         }
 
         ret = machine_code_write_machine_code(instruction_code);
