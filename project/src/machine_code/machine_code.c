@@ -108,6 +108,12 @@ void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction
     memset(g_memory, 0, sizeof(g_memory));
     g_memory_word_index = STARTING_MEMORY_ADDRESS;
 
+    g_externals = NULL;
+    g_extern_call_length = 0;
+    g_entrys = NULL;
+    g_entry_defenition_length = 0;
+
+
     machine_code_handle_instructions(symbol_list, symbol_list_length, instruction_list, instruction_list_length);
     machine_code_handle_symbols(symbol_list, symbol_list_length);
 
@@ -116,7 +122,6 @@ void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction
         out_files_main(g_instructions_word_count, g_symbols_word_count, "file_name");
     }
 
-    free(g_memory);
     free(g_entrys);
     free(g_externals);
 }
@@ -124,7 +129,7 @@ void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction
 machine_code_status machine_code_write_machine_code(machine_code code)
 {
     machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
-    if(g_memory_word_index + code.word_count >= MEMORY_MAX_SIZE)
+    if(g_memory_word_index + code.word_count > MEMORY_MAX_SIZE)
     {
         printf("%s error: machine code not added because of memory overflow!\n", __func__);
         ret = MACHINE_CODE_STATUS_ERROR_MALLOC;
