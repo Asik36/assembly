@@ -46,9 +46,6 @@ static void out_files_write_machine_code_line(FILE * machine_code_f, int word_in
         {
             ending_char = '\n';
         }
-        printf("%c", STARTING_GROUP_NAME + group_index);
-        printf("%x", line.groups[group_index].val);
-        printf("%c", ending_char);
 
         fprintf(machine_code_f, "%c%x%c", STARTING_GROUP_NAME + group_index,line.groups[group_index].val, ending_char);
     }
