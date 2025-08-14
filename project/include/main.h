@@ -18,6 +18,8 @@
 #define COMMAND_AMONT 16
 #define OPERAND_AMONT 16
 #define ATTRIBUTE_NONE 0
+#define is_error(s) ((s) < 0)
+
 
 typedef enum status_e
 {

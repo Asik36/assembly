@@ -35,7 +35,20 @@ int main(void)
     {
         fprintf(stderr,"MEMORY ERROR\n");
     }
+    else if(symbol_create(instruction_data_list,instruction_list,instruction_counter,directive_list,directive_counter,&symbol_list,&symbol_counter) == FAILURE)
+    {
+        fprintf(stderr,"SYMBOL ERROR\n");
+    }
+        else if(machine_code_main("dude.txt",symbol_list,symbol_counter,instruction_data_list,instruction_counter)== false)
+    {
+        fprintf(stderr,"MACHINE CODE ERROR\n");
+    }
 
+
+
+
+
+    
 
 
 

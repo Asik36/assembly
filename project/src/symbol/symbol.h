@@ -4,11 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <search.h>
-#define is_error(s) ((s) < 0)
 #define START_ADDRESS 100
 #define MSG_SUCCESS                         ""
 #define MSG_ERR_EXTERN_DEFINED_IN_FILE      "ERROR : Extern can't be defined in a file.\n"
-#define MSG_ERR_ALREADY_EXTERN              "ERROR : The Variable is already defined as extern.\n"
+#define MSG_ERR_ALREADY_EXTERN              "ERROR : A entery symbol is already defined as extern.\n"
 #define MSG_ERR_DATA_ALREADY_DEFINED        "ERROR : Multiple labels with the same name\n"
 #define MSG_ERR_UNINITILIZED_ENTRY          "ERROR : Entry is uninitialized\n"
 #define MSG_ERR_MEMORY_ALLOCATION           "ERROR : Memory allocation failed\n"

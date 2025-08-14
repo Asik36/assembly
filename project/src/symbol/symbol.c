@@ -29,6 +29,7 @@ status_e symbol_create(instruction_data *instruction_data_table, instruction *in
     }
     for (int i = 0; i < hasmap_index; i++)
     {
+
         if(hashmap_data[i]->data != NULL)
         {
             free(hashmap_data[i]->data);
@@ -65,13 +66,12 @@ status_e symbol_instructions(instruction_data *instruction_data_table, instructi
         if (retval != STATUS_NO_LABEL)
         {
             retval = symbol_table_grow(&symbol_table, &symbol_counter);
-            if (is_error(retval))
-            {
-                exit(1); /* Keep your current exit behavior here */
-            }
+    
         }
-
-        retval = symbol_get_instruction_labels(instruction_table + i, instruction_data_table + i, symbol_table,symbol_counter-1);
+        if (!is_error(retval))
+        {
+            retval = symbol_get_instruction_labels(instruction_table + i, instruction_data_table + i, symbol_table,symbol_counter-1);
+        }
         
     }
     if(retval == STATUS_NO_LABEL)
@@ -94,19 +94,21 @@ status_e symbol_directive(directive *directive_table, int directive_num,
     status_e retval = STATUS_SUCCESS;
     int symbol_counter = *p_symbol_counter;
     symbol *symbol_table = *p_symbol_table;
+    directive *cur_directive;
     int i;
     for (i = 0; i < directive_num && !is_error(retval); i++)
     {
         if (retval != STATUS_SYMBOL_UPDATE)
         {
             retval = symbol_table_grow(&symbol_table, &symbol_counter);
-            if (is_error(retval))
-            {
-                exit(1); /* Keep your current exit behavior here */
-            }
 
         }
-        retval = symbol_get_directive_labels(directive_table, symbol_table,symbol_counter-1);
+        if (!is_error(retval))
+        {
+            cur_directive = directive_table + i;
+            retval = symbol_get_directive_labels(cur_directive, symbol_table,symbol_counter-1);
+            printf("MY I %d\n",i);
+        }
       
     }
     if(retval == STATUS_SYMBOL_UPDATE)
@@ -173,9 +175,14 @@ status_e symbol_get_instruction_labels(instruction *ins, instruction_data *ins_d
         strncpy(new_symbol->name, ins->label, SYMBOL_MAX_SIZE);
         new_symbol->address = ins_data->address;
         new_symbol->data_attribute = ATTRIBUTE_CODE;
-        if (symbol_enter(new_symbol->name,index) == -1)
+        if (symbol_find(new_symbol->name) != NULL)
         {
+            
             retval = STATUS_ERR_DATA_ALREADY_DEFINED;
+        }
+        else
+        {
+            symbol_enter(new_symbol->name,index);
         }
     }
     else
@@ -194,24 +201,22 @@ status_e symbol_get_directive_labels(directive *dir, symbol *symbol_table,int in
 
     if (p_old_symbol_index == NULL)
     {
+        printf("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB %s\n",new_symbol->name);
+
         symbol_enter(new_symbol->name,index);
         retval = STATUS_SYMBOL_ENTER;
     }
     else
     {
         old_symbol = symbol_table+*p_old_symbol_index;
-        if(old_symbol!= NULL)
+        if(old_symbol != NULL)
         {
-
-
             retval = symbol_update(old_symbol, new_symbol);
-        
-
+            printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA %s\n",new_symbol->name);
         }
 
+
     }
-   
-    
 
     return retval;
 }
@@ -247,7 +252,7 @@ int * symbol_find(char *symbol_name)
 int symbol_enter(char *symbol_name,int index)
 {
     ENTRY item;
-    ENTRY *found;
+    ENTRY *found =NULL;
     int * p_index = malloc(sizeof(int));
     *p_index = index;
     item.key = my_strdup(symbol_name);
@@ -257,7 +262,6 @@ int symbol_enter(char *symbol_name,int index)
     {
         hashmap_data[hasmap_index] = found;
         hasmap_index++;
-
     }
     else
     {

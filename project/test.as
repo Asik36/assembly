@@ -1,13 +1,12 @@
 
 HELLO: mov r3,r4
 
-.entry staff
 
-LABEL: .string "HELLO"
-
+;LABEL: .string "HELLO"
+.extern LABEL
+.entry LABEL
 staff: mov a , b
+GOODYBYE: cp r2,#3
 
-
-
-;.extern LABEL
+.data 1,2,3,4,5
 

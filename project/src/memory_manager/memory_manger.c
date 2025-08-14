@@ -2,29 +2,31 @@
 #include "main.h"
 #include "memory_manager.h"
 
-status memory(instruction *instruction_line_table,int n, instruction_data ** instruction_info_table)
+memory_status memory(instruction *instruction_line_table, int n, instruction_data **instruction_info_table)
 {
-    
-    status retval = SUCCESS;
-    *instruction_info_table = (instruction_data*) calloc(1,n*sizeof(instruction_data));
-    for (int i = 0; i < n && retval == SUCCESS; i++)
-    {
-        if(memory_instruction_assign(instruction_line_table+i,*instruction_info_table+i) == FAILURE)
-        {
-            retval = FAILURE;
-            fprintf(stderr,"Error at line %d\n",i);
-        }
 
+    memory_status retval = MEMORY_STATUS_SUCCESS;
+    *instruction_info_table = (instruction_data *)calloc(1, n * sizeof(instruction_data));
+    instruction_data *cur_instruction_data;
+    for (int i = 0; i < n && retval == MEMORY_STATUS_SUCCESS; i++)
+    {
+        cur_instruction_data = *instruction_info_table + i;
+        retval = memory_instruction_assign(instruction_line_table + i, cur_instruction_data);
+        if (is_error(retval))
+        {
+            fprintf(stderr, " Error at instruction [%d]\n", i);
+            memory_error_handle(retval);
+        }
     }
 
     return retval;
 }
-status memory_instruction_assign(instruction *instruction_line, instruction_data * instruction_info)
+memory_status memory_instruction_assign(instruction *instruction_line, instruction_data *instruction_info)
 {
-    operand_data src_operand ={0},dest_operand ={0};
+    operand_data src_operand = {0}, dest_operand = {0};
     instruction_info->command_index = memory_instruction_get_command_index(instruction_line);
 
-    memory_operand_get_info(instruction_line,&src_operand,&dest_operand);
+    memory_operand_get_info(instruction_line, &src_operand, &dest_operand);
 
     instruction_info->src_operand_data = src_operand;
     instruction_info->dest_operand_data = dest_operand;
@@ -33,16 +35,13 @@ status memory_instruction_assign(instruction *instruction_line, instruction_data
     instruction_info->address = memory_instruction_get_address(instruction_info->size);
 
     return memory_instruction_validation(instruction_info);
-
-
 }
 uint16_t memory_instruction_get_address(int instruction_size)
 {
     static uint16_t address_count = 100;
     uint16_t new_address = address_count;
-    address_count+=instruction_size;
+    address_count += instruction_size;
     return new_address;
-    
 }
 
 int memory_instruction_get_command_index(instruction *ins)
@@ -50,33 +49,29 @@ int memory_instruction_get_command_index(instruction *ins)
     return get_command_index(ins->commnand);
 }
 
-void memory_operand_get_info(instruction *ins ,operand_data * src_operand, operand_data * dest_operand)
+void memory_operand_get_info(instruction *ins, operand_data *src_operand, operand_data *dest_operand)
 {
 
     /*source operand*/
     src_operand->addressing_mode = memory_operand_get_addressing_mode(ins->src_operand);
-    memory_operand_get_data(src_operand,ins->src_operand,src_operand->addressing_mode);
+    memory_operand_get_data(src_operand, ins->src_operand, src_operand->addressing_mode);
 
-    
     /*destination operand*/
 
     dest_operand->addressing_mode = memory_operand_get_addressing_mode(ins->dest_operand);
-    memory_operand_get_data(dest_operand,ins->dest_operand,dest_operand->addressing_mode);
-    
+    memory_operand_get_data(dest_operand, ins->dest_operand, dest_operand->addressing_mode);
 }
-
 
 int memory_operand_get_register_index(char *op)
 {
 
     int i;
     int index = -1;
- 
-    
+
     for (i = 0; i < OPERAND_AMONT && index == -1; i++)
     {
 
-        if(strncmp(op,register_names[i],SYMBOL_MAX_SIZE) == 0)
+        if (strncmp(op, register_names[i], SYMBOL_MAX_SIZE) == 0)
         {
             index = i;
         }
@@ -84,7 +79,7 @@ int memory_operand_get_register_index(char *op)
     return index;
 }
 
-int memory_operand_get_data(operand_data *op_data,char * op ,addressing_modes addr_mode)
+int memory_operand_get_data(operand_data *op_data, char *op, addressing_modes addr_mode)
 {
     switch (addr_mode)
     {
@@ -92,11 +87,11 @@ int memory_operand_get_data(operand_data *op_data,char * op ,addressing_modes ad
         op_data->operand_data = memory_addressing_mode_immediate_extract_data(op);
         break;
     case ADDRESSING_MODES_DIRECT:
-        strcpy(op_data->varible_name , op);
+        strcpy(op_data->varible_name, op);
         break;
     case ADDRESSING_MODES_INDEX:
         op_data->operand_data = memory_operand_addressing_mode_index_data(op);
-        memory_operand_addressing_mode_index_varible_name(op,op_data->varible_name);
+        memory_operand_addressing_mode_index_varible_name(op, op_data->varible_name);
         break;
     case ADDRESSING_MODES_REGISTER_DIRECT:
         op_data->operand_data = memory_operand_get_register_index(op);
@@ -107,121 +102,115 @@ int memory_operand_get_data(operand_data *op_data,char * op ,addressing_modes ad
     }
     return 0;
 }
-void memory_operand_addressing_mode_index_varible_name(char *op, char * dest_str)
+void memory_operand_addressing_mode_index_varible_name(char *op, char *dest_str)
 {
-    char * next = op;
-    while(*next != '\0' && *next != '[')
+    char *next = op;
+    while (*next != '\0' && *next != '[')
     {
         next++;
     }
-    strncpy(dest_str,op,next-op);
+    strncpy(dest_str, op, next - op);
 }
 
 int memory_operand_addressing_mode_index_data(char *op)
 {
     char reg[SYMBOL_MAX_SIZE] = {0};
-    get_substring_between_brackets(op,reg,SYMBOL_MAX_SIZE); 
+    get_substring_between_brackets(op, reg, SYMBOL_MAX_SIZE);
     return memory_operand_get_register_index(reg);
-    
 }
 
 uint16_t memory_instruction_get_size(instruction_data *ins_data)
 {
     uint16_t size = 1; /*defualt size , each command is at least one word long*/
-    operand_data * op_data;
+    operand_data *op_data;
 
     op_data = &ins_data->dest_operand_data;
-    if(op_data != NULL)
+    if (op_data != NULL)
     {
         switch (op_data->addressing_mode)
         {
         case ADDRESSING_MODES_IMMEDIATE:
-            size +=2;
+            size += 2;
             break;
         case ADDRESSING_MODES_DIRECT:
-            size +=2;
+            size += 2;
             break;
         case ADDRESSING_MODES_INDEX:
-            size +=2;
+            size += 2;
             break;
         case ADDRESSING_MODES_REGISTER_DIRECT:
-            size +=1;
+            size += 1;
             break;
         default:
             break;
         }
     }
 
-
-    op_data = &ins_data->src_operand_data; 
-    if(op_data != NULL)  
+    op_data = &ins_data->src_operand_data;
+    if (op_data != NULL)
     {
-    switch (op_data->addressing_mode)
-    {
-    case ADDRESSING_MODES_IMMEDIATE:
-        size +=2;
-        break;
-    case ADDRESSING_MODES_DIRECT:
-        size +=2;
-        break;
-    case ADDRESSING_MODES_INDEX:
-        size +=2;
-        break;
-    case ADDRESSING_MODES_REGISTER_DIRECT:
-        size +=1;
-        break;
-    default:
-        break;
+        switch (op_data->addressing_mode)
+        {
+        case ADDRESSING_MODES_IMMEDIATE:
+            size += 2;
+            break;
+        case ADDRESSING_MODES_DIRECT:
+            size += 2;
+            break;
+        case ADDRESSING_MODES_INDEX:
+            size += 2;
+            break;
+        case ADDRESSING_MODES_REGISTER_DIRECT:
+            size += 1;
+            break;
+        default:
+            break;
+        }
     }
 
-    }
-    
     return size;
 }
-
 
 addressing_modes memory_operand_get_addressing_mode(char *op)
 {
     addressing_modes mode;
-    if(*op == '\0')
+    if (*op == '\0')
     {
         mode = ADDRESSING_MODES_NONE;
     }
-    else if(memory_is_addressing_mode_immediate(op))
+    else if (memory_is_addressing_mode_immediate(op))
     {
         mode = ADDRESSING_MODES_IMMEDIATE;
     }
-    else if(memory_is_addressing_mode_index(op))
+    else if (memory_is_addressing_mode_index(op))
     {
         mode = ADDRESSING_MODES_INDEX;
     }
-    else if(memory_is_addressing_mode_register_direct(op))
+    else if (memory_is_addressing_mode_register_direct(op))
     {
         mode = ADDRESSING_MODES_REGISTER_DIRECT;
     }
-    else if(memory_is_addressing_mode_direct(op))
+    else if (memory_is_addressing_mode_direct(op))
     {
         mode = ADDRESSING_MODES_DIRECT;
     }
     return mode;
-    
-
 }
 
-bool memory_is_addressing_mode_immediate(char * op)
+bool memory_is_addressing_mode_immediate(char *op)
 {
     bool is_immeditate = true;
-    if(*op == SIGN_ADDRESSING_MODES_IMMEDIATE)
-    {   
+    if (*op == SIGN_ADDRESSING_MODES_IMMEDIATE)
+    {
         op++;
-        while(*op != '\0' && is_immeditate)
+        while (*op != '\0' && is_immeditate)
         {
-            if(!isdigit(*op))
+            if (!isdigit(*op))
             {
                 is_immeditate = false;
             }
             op++;
-        }   
+        }
     }
     else
     {
@@ -229,22 +218,22 @@ bool memory_is_addressing_mode_immediate(char * op)
     }
     return is_immeditate;
 }
-int memory_addressing_mode_immediate_extract_data(char * op)
+int memory_addressing_mode_immediate_extract_data(char *op)
 {
     op++; /* skip # charcter */
-    return (int) strtol(op,NULL,10);
+    return (int)strtol(op, NULL, 10);
 }
-bool memory_is_addressing_mode_direct(char * op)
+bool memory_is_addressing_mode_direct(char *op)
 {
     bool is_direct = true;
-    if(isdigit(*op))
+    if (isdigit(*op))
     {
         is_direct = false;
     }
     op++;
-    while(*op != '\0' && is_direct)
+    while (*op != '\0' && is_direct)
     {
-        if(!isalnum(*op))
+        if (!isalnum(*op))
         {
             is_direct = false;
         }
@@ -253,80 +242,70 @@ bool memory_is_addressing_mode_direct(char * op)
     return is_direct;
 }
 
-status memory_instruction_validation(instruction_data * ins_data)
+memory_status memory_instruction_validation(instruction_data *ins_data)
 {
-    status retval = SUCCESS;
+    memory_status retval = MEMORY_STATUS_SUCCESS;
     int command_index = ins_data->command_index;
     int dest_addressing_mode = ins_data->dest_operand_data.addressing_mode;
     int src_addressing_mode = ins_data->src_operand_data.addressing_mode;
 
-    if(command_index > COMMAND_AMONT || command_index < 0)
+    if (command_index > COMMAND_AMONT || command_index < 0)
     {
-        retval = FAILURE;
+        retval = MEMORY_STATUS_ERR_INVALID_COMMAND;
     }
-    else if(src_addressing_mode == ADDRESSING_MODES_NONE || commands[command_index].src_operand_types[src_addressing_mode] == false)
+    else if (src_addressing_mode == ADDRESSING_MODES_NONE || commands[command_index].src_operand_types[src_addressing_mode] == false)
     {
-
-        retval = FAILURE;
+        retval = MEMORY_STATUS_ERR_INVALID_SOURCE_ADRESSING_MODE;
     }
-    else if(dest_addressing_mode == ADDRESSING_MODES_NONE || commands[command_index].dest_operand_types[dest_addressing_mode] == false)
+    else if (dest_addressing_mode == ADDRESSING_MODES_NONE || commands[command_index].dest_operand_types[dest_addressing_mode] == false)
     {
-        retval = FAILURE;
+        retval = MEMORY_STATUS_ERR_INVALID_DESTINATION_ADDRESSING_MODE;
     }
-
-
 
     return retval;
-
-    
 }
 
-bool memory_is_addressing_mode_index(char * op)
+bool memory_is_addressing_mode_index(char *op)
 {
     bool is_direct = true;
     bool is_register = false;
 
-
     int i;
-    char brackets_sub_str[SYMBOL_MAX_SIZE] = {0}; 
-    if(get_substring_between_brackets(op,brackets_sub_str,SYMBOL_MAX_SIZE) == FAILURE)
+    char brackets_sub_str[SYMBOL_MAX_SIZE] = {0};
+    if (get_substring_between_brackets(op, brackets_sub_str, SYMBOL_MAX_SIZE) == false)
     {
         is_direct = false;
-
     }
     /* if the first charcter is a number or if there is no varible name*/
-    else if(isdigit(*op) || *op == '[')
+    else if (isdigit(*op) || *op == '[')
     {
         is_direct = false;
-    }   
+    }
 
     for (i = 0; i < OPERAND_AMONT && is_register == false && is_direct == true; i++)
     {
-        is_register = strncmp(register_names[i],brackets_sub_str,SYMBOL_MAX_SIZE) == 0;
-    } 
-        
+        is_register = strncmp(register_names[i], brackets_sub_str, SYMBOL_MAX_SIZE) == 0;
+    }
 
     return is_direct && is_register;
 }
 
-bool memory_is_addressing_mode_register_direct(char * op)
+bool memory_is_addressing_mode_register_direct(char *op)
 {
     return memory_operand_get_register_index(op) != -1;
 }
 
-
-
-status get_substring_between_brackets(const char *src, char *dest, size_t dest_size) 
+bool get_substring_between_brackets(const char *src, char *dest, size_t dest_size)
 {
-    status return_status = FAILURE;
+    bool retval = false;
     const char *start = strchr(src, '[');
     const char *end = NULL;
     size_t len = 0;
 
-    if (start) 
+    if (start)
     {
         end = strchr(start, ']');
-        if (end) 
+        if (end)
         {
             len = end - start - 1;
             if (len >= dest_size)
@@ -335,13 +314,27 @@ status get_substring_between_brackets(const char *src, char *dest, size_t dest_s
             }
             strncpy(dest, start + 1, len);
             dest[len] = '\0';
-            return_status = SUCCESS;
+            retval = true;
         }
     }
-    return return_status;
+    return retval;
 }
 
-/**
- * LABEL : COMMAND OP1, OP2
- * LABEL : .DIRECTIVE [DATA]
- */
+void memory_error_handle(memory_status m_status)
+{
+   switch (m_status)
+    {
+    case MEMORY_STATUS_ERR_INVALID_SOURCE_ADRESSING_MODE:
+        fprintf(stderr, MSG_MEM_ERR_INVALID_SRC_ADDR_MODE);
+        break;
+    case MEMORY_STATUS_ERR_INVALID_DESTINATION_ADDRESSING_MODE:
+        fprintf(stderr, MSG_MEM_ERR_INVALID_DEST_ADDR_MODE);
+        break;
+    case MEMORY_STATUS_ERR_INVALID_COMMAND:
+        fprintf(stderr, MSG_MEM_ERR_INVALID_COMMAND);
+        break;
+    default:
+        fprintf(stderr, MSG_MEM_ERR_UNDEFINED);
+        break;
+    }
+}
