@@ -259,6 +259,7 @@ int fill_directive_struct(char *line, directive ** list, int * directive_counter
     }
     if(retval == SUCCESS)
     {
+        memset(*list+*directive_counter,0,sizeof(directive));
         if(is_directive_data(line) == SENTENCE_TYPE_DIRECTIVE)
         {
             int counter = 0;
@@ -423,43 +424,52 @@ int fill_directive_struct(char *line, directive ** list, int * directive_counter
 
 int fill_instruction_struct(char *line, instruction **list_instructions, int * instruction_counter)
 {
+    status retval = SUCCESS;
     *list_instructions = (instruction *)realloc(*list_instructions, (*instruction_counter + 1) * sizeof(instruction));
-    char * is_label = strstr(line,":");
-    if(is_label)
+    if(list_instructions == NULL)
     {
-        int label_len = (char *) is_label - (char*) line;
-        strncpy((*list_instructions)[*instruction_counter].label,line,label_len);
-        (*list_instructions)[*instruction_counter].label[label_len] = '\0';
-        line = is_label + 1;
+        retval = FAILURE;
     }
-    int index_arr = 0;
-    while(isspace(*line)) line++;
-    while(isalpha(*line))
-    {
-        (*list_instructions)[*instruction_counter].commnand[index_arr++] = *line++;
-    }
-    (*list_instructions)[*instruction_counter].commnand[index_arr] = '\0';
-    index_arr = 0;
-    while(isspace(*line)) line++;
-    while(!isspace(*line) && *line != ',' && *line != '\n' && *line != '\0')
-    {
-        (*list_instructions)[*instruction_counter].src_operand[index_arr++] = *line++;
-    }
-    (*list_instructions)[*instruction_counter].src_operand[index_arr] = '\0';
-    index_arr = 0;
-    char * comma = strstr(line,",");
-    if(comma)
-    {
-        line = comma + 1;
-        while(isspace(*line)) line++;
-        while(!isspace(*line) && *line != '\n' && *line != '\0')
+    else
+    {  
+        memset(*list_instructions+ *instruction_counter,0,sizeof(instruction));
+        char * is_label = strstr(line,":");
+        if(is_label)
         {
-            (*list_instructions)[*instruction_counter].dest_operand[index_arr++] = *line++;
+            int label_len = (char *) is_label - (char*) line;
+            strncpy((*list_instructions)[*instruction_counter].label,line,label_len);
+            (*list_instructions)[*instruction_counter].label[label_len] = '\0';
+            line = is_label + 1;
         }
-        (*list_instructions)[*instruction_counter].dest_operand[index_arr] = '\0';
+        int index_arr = 0;
+        while(isspace(*line)) line++;
+        while(isalpha(*line))
+        {
+            (*list_instructions)[*instruction_counter].commnand[index_arr++] = *line++;
+        }
+        (*list_instructions)[*instruction_counter].commnand[index_arr] = '\0';
+        index_arr = 0;
+        while(isspace(*line)) line++;
+        while(!isspace(*line) && *line != ',' && *line != '\n' && *line != '\0')
+        {
+            (*list_instructions)[*instruction_counter].src_operand[index_arr++] = *line++;
+        }
+        (*list_instructions)[*instruction_counter].src_operand[index_arr] = '\0';
+        index_arr = 0;
+        char * comma = strstr(line,",");
+        if(comma)
+        {
+            line = comma + 1;
+            while(isspace(*line)) line++;
+            while(!isspace(*line) && *line != '\n' && *line != '\0')
+            {
+                (*list_instructions)[*instruction_counter].dest_operand[index_arr++] = *line++;
+            }
+            (*list_instructions)[*instruction_counter].dest_operand[index_arr] = '\0';
+        }
+        (*instruction_counter) ++;
     }
-    (*instruction_counter) ++;
-    return 1; // FIX ME
+    return retval; // FIX ME
 }
 
 int sentence_decider(char *file_am, instruction **list_instructions, directive **list_directives,
