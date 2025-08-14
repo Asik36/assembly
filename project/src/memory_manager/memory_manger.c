@@ -205,7 +205,7 @@ bool memory_is_addressing_mode_immediate(char *op)
         op++;
         while (*op != '\0' && is_immeditate)
         {
-            if (!isdigit(*op))
+            if (!isdigit(*op) && !(*op == '-' && isdigit(*(op+1) )))
             {
                 is_immeditate = false;
             }
@@ -253,12 +253,14 @@ memory_status memory_instruction_validation(instruction_data *ins_data)
     {
         retval = MEMORY_STATUS_ERR_INVALID_COMMAND;
     }
-    else if (src_addressing_mode == ADDRESSING_MODES_NONE || commands[command_index].src_operand_types[src_addressing_mode] == false)
+    else if (dest_addressing_mode != ADDRESSING_MODES_NONE  && commands[command_index].src_operand_types[src_addressing_mode] == false)
     {
         retval = MEMORY_STATUS_ERR_INVALID_SOURCE_ADRESSING_MODE;
     }
-    else if (dest_addressing_mode == ADDRESSING_MODES_NONE || commands[command_index].dest_operand_types[dest_addressing_mode] == false)
+    else if (dest_addressing_mode != ADDRESSING_MODES_NONE  && commands[command_index].dest_operand_types[dest_addressing_mode] == false)
     {
+        printf("DEST OPERAND : %s %d %d\n",commands[command_index].command_name ,src_addressing_mode,dest_addressing_mode);
+
         retval = MEMORY_STATUS_ERR_INVALID_DESTINATION_ADDRESSING_MODE;
     }
 
@@ -337,4 +339,14 @@ void memory_error_handle(memory_status m_status)
         fprintf(stderr, MSG_MEM_ERR_UNDEFINED);
         break;
     }
+}
+
+bool memory_have_operand(const bool addressing_modes[ADDRESSING_TYPES_AMOUNT])
+{
+    bool operand_exits = true;
+    for (int i = 0; i < ADDRESSING_TYPES_AMOUNT; i++)
+    {
+        operand_exits &= addressing_modes[i];
+    }
+    return operand_exits;
 }

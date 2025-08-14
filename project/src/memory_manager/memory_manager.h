@@ -169,4 +169,6 @@ bool get_substring_between_brackets(const char *src, char *dest, size_t dest_siz
  */
 void memory_error_handle(memory_status m_status);
 
+
+bool memory_have_operand(const bool addressing_modes[ADDRESSING_TYPES_AMOUNT]);
 #endif

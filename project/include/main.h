@@ -101,23 +101,6 @@ typedef struct instruction_data_s
 
 
 
-/**
- *  mov [2], inc , dec
- *  hello = 1,2,3 | a = "ay"
- *
- * mov
- *
- *
- * inc
- *
- *
- * dec
- *
- *
- *
- *
- */
-
 typedef struct symbol_s
 {
     uint16_t address : MEMORY_ADRESS_MAX_BITS;
@@ -206,7 +189,7 @@ static const command commands[COMMAND_AMONT] =
     {.opcode = OPCODE_MOV,.funct = 0,.command_name = "mov",.src_operand_types = {1,1,1,1} ,.dest_operand_types = {0,1,1,1}},
     {.opcode = OPCODE_CMP,.funct = 0,.command_name = "cmp",.src_operand_types = {1,1,1,1} ,.dest_operand_types = {1,1,1,1}},
     {.opcode = OPCODE_MATH_OPERATION,.funct = 10,.command_name = "add",.src_operand_types = {1,1,1,1} ,.dest_operand_types = {0,1,1,1}},
-    {.opcode = OPCODE_MATH_OPERATION,.funct = 11,.command_name = "add",.src_operand_types = {1,1,1,1} ,.dest_operand_types = {0,1,1,1}},
+    {.opcode = OPCODE_MATH_OPERATION,.funct = 11,.command_name = "sub",.src_operand_types = {1,1,1,1} ,.dest_operand_types = {0,1,1,1}},
     {.opcode = OPCODE_LEA,.funct = 0,.command_name = "lea",.src_operand_types = {0,1,1,0} ,.dest_operand_types = {0,1,1,1}},
     {.opcode = OPCODE_CHANGE_VALUE,.funct = 10,.command_name = "clr",.src_operand_types = {0} ,.dest_operand_types = {0,1,1,1}},
     {.opcode = OPCODE_CHANGE_VALUE,.funct = 11,.command_name = "not",.src_operand_types = {0} ,.dest_operand_types = {0,1,1,1}},
@@ -216,7 +199,7 @@ static const command commands[COMMAND_AMONT] =
     {.opcode = OPCODE_JUMPS,.funct = 0,.command_name = "bne",.src_operand_types = {0} ,.dest_operand_types = {0,1,1,0}},
     {.opcode = OPCODE_JUMPS,.funct = 0,.command_name = "jsr",.src_operand_types = {0} ,.dest_operand_types = {0,1,1,0}},
     {.opcode = OPCODE_RED,.funct = 0,.command_name = "red",.src_operand_types = {0} ,.dest_operand_types = {0,1,1,1}},
-    {.opcode = OPCODE_PRN,.funct = 0,.command_name = "prn",.src_operand_types = {0} ,.dest_operand_types = {0,1,1,1}},
+    {.opcode = OPCODE_PRN,.funct = 0,.command_name = "prn",.src_operand_types = {0} ,.dest_operand_types = {1,1,1,1}},
     {.opcode = OPCODE_RTS,.funct = 0,.command_name = "rts",.src_operand_types = {0} ,.dest_operand_types = {0}},
     {.opcode = OPCODE_STOP,.funct = 0,.command_name = "stop",.src_operand_types = {0} ,.dest_operand_types = {0}}
 
