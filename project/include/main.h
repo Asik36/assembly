@@ -10,7 +10,6 @@
 #define MEMORY_ADRESS_MAX_BITS 12
 #define SYMBOL_MAX_SIZE 16
 #define COMMAND_MAX_SIZE 5
-#define ATTRIBUTE_NONE 0
 #define ARE_MAX_BIT_SIZE 4
 #define FUNCT_MAX_BIT_SIZE 4
 #define REGISTER_MAX_BIT_SIZE 4
@@ -18,6 +17,7 @@
 #define ADDRESSING_TYPES_AMOUNT 4
 #define COMMAND_AMONT 16
 #define OPERAND_AMONT 16
+#define ATTRIBUTE_NONE 0
 
 typedef enum status_e
 {
@@ -27,6 +27,7 @@ typedef enum status_e
 enum attribute_data_type_e
 {
 
+    ATTRIBUTE_DATA_NONE = 0,
     ATTRIBUTE_DATA = 1,
     ATTRIBUTE_STRING,
     ATTRIBUTE_CODE
@@ -34,7 +35,8 @@ enum attribute_data_type_e
 };
 enum attribute_access_type_e
 {
-    ATTRIBUTE_EXTERN = 1,
+    ATTRIBUTE_ACCESS_NONE = 0,
+    ATTRIBUTE_EXTERN,
     ATTRIBUTE_ENTERY
 };
 

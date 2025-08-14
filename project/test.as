@@ -1,4 +1,13 @@
-mov r1,r2
-mov a , b
+
+HELLO: mov r3,r4
+
+.entry staff
 
 LABEL: .string "HELLO"
+
+staff: mov a , b
+
+
+
+;.extern LABEL
+

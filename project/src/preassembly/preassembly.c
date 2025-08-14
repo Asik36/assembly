@@ -4,7 +4,6 @@
 #include <ctype.h>
 #include <search.h>
 #include "preassembly.h"
-
 typedef enum status_e
 {
     FAILURE = -1,

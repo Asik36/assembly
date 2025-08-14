@@ -23,11 +23,11 @@ status memory_instruction_assign(instruction *instruction_line, instruction_data
 {
     operand_data src_operand ={0},dest_operand ={0};
     instruction_info->command_index = memory_instruction_get_command_index(instruction_line);
+
     memory_operand_get_info(instruction_line,&src_operand,&dest_operand);
 
     instruction_info->src_operand_data = src_operand;
     instruction_info->dest_operand_data = dest_operand;
-
 
     instruction_info->size = memory_instruction_get_size(instruction_info);
     instruction_info->address = memory_instruction_get_address(instruction_info->size);
@@ -54,7 +54,6 @@ void memory_operand_get_info(instruction *ins ,operand_data * src_operand, opera
 {
 
     /*source operand*/
- 
     src_operand->addressing_mode = memory_operand_get_addressing_mode(ins->src_operand);
     memory_operand_get_data(src_operand,ins->src_operand,src_operand->addressing_mode);
 
