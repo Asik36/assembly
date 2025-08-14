@@ -25,7 +25,7 @@ static const char * register_names[OPERAND_AMONT] =
  * @param instruction_info_table list of instruction data
  * @return SUCCESS if all lines are valid otherwise if one line is invalid returns FAILURE
  */
-status memory(instruction *instruction_line_table, int n, instruction_data *instruction_info_table);
+status memory(instruction *instruction_line_table,int n, instruction_data ** instruction_info_table);
 
 /**
  * @brief extract info from instruction line into instruction data

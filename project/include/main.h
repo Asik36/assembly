@@ -19,7 +19,11 @@
 #define COMMAND_AMONT 16
 #define OPERAND_AMONT 16
 
-
+typedef enum status_e
+{
+    FAILURE = -1,
+    SUCCESS = 0
+}status;
 enum attribute_data_type_e
 {
 
@@ -72,7 +76,7 @@ typedef struct operand_data_s
 
 typedef struct directive_s
 {
-    uint8_t variable_name       [SYMBOL_MAX_SIZE];   /* extern and entry shou*/
+    char variable_name       [SYMBOL_MAX_SIZE];   /* extern and entry shou*/
     uint32_t data_length;
     void * data;                                   /* chars or ints*/
     enum attribute_access_type_e access_attribute; /* extern or entry */

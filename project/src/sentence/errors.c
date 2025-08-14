@@ -34,6 +34,7 @@ line_status_e instruction_error_check(char *line)
             retval = LINE_CORRECT;
         }
     }
+    regfree(&regex);
     return retval;
 }
 
@@ -64,6 +65,7 @@ line_status_e direction_entry_error_check(char *line)
             retval = LINE_CORRECT;
         }
     }
+    regfree(&regex);
     return retval;
 }
 
@@ -95,6 +97,7 @@ line_status_e direction_extern_error_check(char *line)
             retval = LINE_CORRECT;
         }
     }
+    regfree(&regex);
     return retval;
 }
 
@@ -125,6 +128,8 @@ line_status_e direction_data_error_check(char *line)
             retval = LINE_CORRECT;
         }
     }
+    regfree(&regex);
+
     return retval;
 }
 
@@ -156,5 +161,6 @@ line_status_e direction_string_error_check(char *line)
             retval = LINE_CORRECT;
         }
     }
+    regfree(&regex);
     return retval;
 }
