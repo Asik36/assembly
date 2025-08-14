@@ -3,13 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "main.h"
-#define  ADDRESSING_MODES_NONE -1  
+#define ADDRESSING_MODES_NONE -1 
+#define SIGN_ADDRESSING_MODES_IMMEDIATE '#'
 
-enum operand_station
-{
-    OPERAND_SRC,
-    OPERAND_DEST
-};
+
 
 static const char * register_names[OPERAND_AMONT] = 
 {
@@ -28,7 +25,7 @@ static const char * register_names[OPERAND_AMONT] =
  * @param instruction_info_table list of instruction data
  * @return SUCCESS if all lines are valid otherwise if one line is invalid returns FAILURE
  */
-status memory(instruction *instruction_line_table, int n, instruction_data *instruction_info_table);
+status memory(instruction *instruction_line_table,int n, instruction_data ** instruction_info_table);
 
 /**
  * @brief extract info from instruction line into instruction data
@@ -57,7 +54,7 @@ int memory_instruction_get_command_index(instruction *ins);
  * @param src_operand source operand
  * @param dest_operand destination operand
  */
-void *memory_operand_get_info(instruction *ins, operand_data *src_operand, operand_data *dest_operand);
+void memory_operand_get_info(instruction *ins, operand_data *src_operand, operand_data *dest_operand);
 
 /** 
  * @brief get addressing mode of operand

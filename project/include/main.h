@@ -19,15 +19,17 @@
 #define COMMAND_AMONT 16
 #define OPERAND_AMONT 16
 
-#define REGISTER_AMONT 16
-
-#define PROGRAM_STATUS_EORD_REGISTER_NAME "PSW"
-
+typedef enum status_e
+{
+    FAILURE = -1,
+    SUCCESS = 0
+}status;
 enum attribute_data_type_e
 {
 
     ATTRIBUTE_DATA = 1,
-    ATTRIBUTE_STRING
+    ATTRIBUTE_STRING,
+    ATTRIBUTE_CODE
 
 };
 enum attribute_access_type_e
@@ -74,10 +76,8 @@ typedef struct operand_data_s
 
 typedef struct directive_s
 {
-    char label       [SYMBOL_MAX_SIZE];   /* extern and entry shou*/
-    char name        [SYMBOL_MAX_SIZE];
+    char variable_name       [SYMBOL_MAX_SIZE];   /* extern and entry shou*/
     uint32_t data_length;
-
     void * data;                                   /* chars or ints*/
     enum attribute_access_type_e access_attribute; /* extern or entry */
     enum attribute_data_type_e data_attribute;   /* data or string */

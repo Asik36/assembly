@@ -1,0 +1,4 @@
+mov r1,r2
+mov a , b
+
+LABEL: .string "HELLO"

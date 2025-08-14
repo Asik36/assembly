@@ -5,12 +5,19 @@
 #include <search.h>
 #include "preassembly.h"
 
+typedef enum status_e
+{
+    FAILURE = -1,
+    SUCCESS = 0
+};
+
+
 int check_memory_allocation(char *arr)
 {
     int retval = SUCCESS;
     if(arr == NULL)
     {
-        retval = FAIL;
+        retval = FAILURE;
     }
     return retval;
 }
@@ -43,7 +50,7 @@ int add_to_content(macro *macro_ptr, char *line)
     char *tmp = realloc(macro_ptr->content, new_size);
     if (tmp == NULL)
     {
-        retval = FAIL;
+        retval = FAILURE;
     }
     else
     {
@@ -67,44 +74,45 @@ int list_macros(char *file_as_path)
     if(!file_as)
     {
         perror("Couldn't open file\n");
-        retval = FAIL;
+        retval = FAILURE;
     }
-    if(retval)
+    if(retval == SUCCESS)
     {
         hcreate(MACRO_TABLE_SIZE);
-        char line[MAX_LINE];
-        while(fgets(line,MAX_LINE,file_as)!= NULL && retval)
+        char line[MAX_LINE] = {0};
+        while(fgets(line,MAX_LINE,file_as)!= NULL && retval == SUCCESS)
         {
-            printf("first while\n");
             char *pointer_to_macro = strstr(line, "macro");
             if(pointer_to_macro != NULL)
             {
-                printf("Found macro in line: %s\n", line);
 
                 if(strncmp(pointer_to_macro, "macro ", MACRO_WORD_LEN + 1) != 0)
                 {
-                    printf("skiped\n");
                     continue;
                 }
                 macro *new_macro = malloc(sizeof(macro));
                 if (!new_macro)
                 {
+                    printf("allocation faild\n");
                     break;
+                    
                 }
                 new_macro->name = malloc(MAX_NAME_LEN);
                 retval = check_memory_allocation(new_macro->name);
-                if(!retval)
+                if(retval == FAILURE)
                 {
                     free(new_macro);
+                    printf("allocation faild\n");
                     break;
                 }
                 new_macro->content = malloc(1); // 1 for '\0'
                 retval = check_memory_allocation(new_macro->content);
-                if(!retval)
+                if(retval == FAILURE)
                 {
                     free(new_macro->content);
                     free(new_macro->name);
                     free(new_macro);
+                    printf("allocation faild\n");
                     break;
                 }
                 new_macro->content[0] = '\0';
@@ -119,13 +127,13 @@ int list_macros(char *file_as_path)
                     pointer_to_macro = strstr(line, "endm");
                     if(pointer_to_macro == NULL)
                     {
-                        if(!(add_to_content(new_macro, line)))
+                        if((add_to_content(new_macro, line)) == FAILURE)
                         {
                             free(new_macro->content);
                             free(new_macro->name);
                             free(new_macro);
-                            retval = FAIL;
-                            printf("failed to add content of the macro");
+                            retval = FAILURE;
+                            printf("failed to add content of the macro\n");
                             break;
                         }
                     }
@@ -144,7 +152,7 @@ int list_macros(char *file_as_path)
                     free(new_macro->content);
                     free(new_macro->name);
                     free(new_macro);
-                    retval = FAIL;
+                    retval = FAILURE;
                     break;
                 }
             }
@@ -167,8 +175,9 @@ int print_macro(FILE *file_am, char *line)
         if(found != NULL)
         {
             macro *macro_ptr = (macro *)(found->data);
-            macro_ptr->content[strlen(macro_ptr->content) - 1] = '\0';
+            macro_ptr->content[strlen(macro_ptr->content)] = '\0';
             fprintf(file_am, "%s", macro_ptr->content);
+
         }
         else
         {
@@ -189,18 +198,18 @@ int create_file_am(char *file_as, char *file_am)
     if(!original_code)
     {
         perror("Couldn't open file assembly\n");
-        retval = FAIL;
+        retval = FAILURE;
     }
-    if(retval)
+    if(retval == SUCCESS)
     {
         FILE  *printed_macros_file = fopen(file_am, "w");
         if(!printed_macros_file)
         {
             perror("Couldn't open file am\n");
-            retval = FAIL;
+            retval = FAILURE;
             fclose(original_code);
         }
-        if(retval)
+        if(retval == SUCCESS)
         {
             int is_macro_def = NOT_MACRO;
             char line[MAX_LINE];
@@ -231,6 +240,6 @@ int create_file_am(char *file_as, char *file_am)
         }
     }
     fclose(original_code);
-    
+    hdestroy();
     return retval;
 }

@@ -2,18 +2,19 @@
 #include "main.h"
 #include "memory_manager.h"
 
-status memory(instruction *instruction_line_table,int n, instruction_data * instruction_info_table)
+status memory(instruction *instruction_line_table,int n, instruction_data ** instruction_info_table)
 {
+    
     status retval = SUCCESS;
+    *instruction_info_table = (instruction_data*) calloc(1,n*sizeof(instruction_data));
     for (int i = 0; i < n && retval == SUCCESS; i++)
     {
-        if(memory_instruction_assign(instruction_line_table,instruction_info_table) == FAILURE)
+        if(memory_instruction_assign(instruction_line_table+i,*instruction_info_table+i) == FAILURE)
         {
             retval = FAILURE;
             fprintf(stderr,"Error at line %d\n",i);
         }
-        instruction_line_table++;
-        instruction_info_table++;
+
     }
 
     return retval;
@@ -49,26 +50,33 @@ int memory_instruction_get_command_index(instruction *ins)
     return get_command_index(ins->commnand);
 }
 
-void *memory_operand_get_info(instruction *ins ,operand_data * src_operand, operand_data * dest_operand)
+void memory_operand_get_info(instruction *ins ,operand_data * src_operand, operand_data * dest_operand)
 {
 
-    /*source file handle*/
+    /*source operand*/
+ 
     src_operand->addressing_mode = memory_operand_get_addressing_mode(ins->src_operand);
     memory_operand_get_data(src_operand,ins->src_operand,src_operand->addressing_mode);
 
+    
+    /*destination operand*/
+
     dest_operand->addressing_mode = memory_operand_get_addressing_mode(ins->dest_operand);
     memory_operand_get_data(dest_operand,ins->dest_operand,dest_operand->addressing_mode);
+    
 }
 
 
 int memory_operand_get_register_index(char *op)
 {
-    
 
     int i;
     int index = -1;
+ 
+    
     for (i = 0; i < OPERAND_AMONT && index == -1; i++)
     {
+
         if(strncmp(op,register_names[i],SYMBOL_MAX_SIZE) == 0)
         {
             index = i;
@@ -198,14 +206,13 @@ addressing_modes memory_operand_get_addressing_mode(char *op)
     }
     return mode;
     
-    
 
 }
 
 bool memory_is_addressing_mode_immediate(char * op)
 {
     bool is_immeditate = true;
-    if(*op == '#')
+    if(*op == SIGN_ADDRESSING_MODES_IMMEDIATE)
     {   
         op++;
         while(*op != '\0' && is_immeditate)
@@ -225,7 +232,7 @@ bool memory_is_addressing_mode_immediate(char * op)
 }
 int memory_addressing_mode_immediate_extract_data(char * op)
 {
-    op++;
+    op++; /* skip # charcter */
     return (int) strtol(op,NULL,10);
 }
 bool memory_is_addressing_mode_direct(char * op)
@@ -258,11 +265,12 @@ status memory_instruction_validation(instruction_data * ins_data)
     {
         retval = FAILURE;
     }
-    else if(src_addressing_mode == ADDRESSING_MODES_NONE || commands[command_index].src_operand_types[src_addressing_mode])
+    else if(src_addressing_mode == ADDRESSING_MODES_NONE || commands[command_index].src_operand_types[src_addressing_mode] == false)
     {
+
         retval = FAILURE;
     }
-    else if(dest_addressing_mode == ADDRESSING_MODES_NONE || commands[command_index].dest_operand_types[dest_addressing_mode])
+    else if(dest_addressing_mode == ADDRESSING_MODES_NONE || commands[command_index].dest_operand_types[dest_addressing_mode] == false)
     {
         retval = FAILURE;
     }
@@ -282,14 +290,18 @@ bool memory_is_addressing_mode_index(char * op)
 
     int i;
     char brackets_sub_str[SYMBOL_MAX_SIZE] = {0}; 
-    get_substring_between_brackets(op,brackets_sub_str,SYMBOL_MAX_SIZE);
+    if(get_substring_between_brackets(op,brackets_sub_str,SYMBOL_MAX_SIZE) == FAILURE)
+    {
+        is_direct = false;
+
+    }
     /* if the first charcter is a number or if there is no varible name*/
-    if(isdigit(*op) || *op == '[')
+    else if(isdigit(*op) || *op == '[')
     {
         is_direct = false;
     }   
 
-    for (i = 0; i < OPERAND_AMONT && is_register == false; i++)
+    for (i = 0; i < OPERAND_AMONT && is_register == false && is_direct == true; i++)
     {
         is_register = strncmp(register_names[i],brackets_sub_str,SYMBOL_MAX_SIZE) == 0;
     } 
@@ -302,8 +314,6 @@ bool memory_is_addressing_mode_register_direct(char * op)
 {
     return memory_operand_get_register_index(op) != -1;
 }
-
-
 
 
 

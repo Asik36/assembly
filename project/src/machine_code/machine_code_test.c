@@ -9,32 +9,7 @@
 static void print_machine_code(int amount);
 static void print_word(word_data w);
 
-int main(void)
-{
-    value_content k_storage[1] = { 31 };
 
-    symbol symbols[1] = {0};
-    symbols[0].access_attribute=0;
-    symbols[0].address = 105;
-    symbols[0].data = k_storage;
-    symbols[0].data_attribute = ATTRIBUTE_DATA;
-    strcpy(symbols[0].name, "k");
-    symbols[0].size = 1;
-
-    instruction_data ins[1];
-    memset(&ins[0], 0, sizeof(ins[0]));
-    ins[0].size = 4;                 /* one word (opcode only) */
-    ins[0].command_index = 7;
-    ins[0].address = 101;
-    ins[0].dest_operand_data.addressing_mode = ADDRESSING_MODES_DIRECT;
-    strcpy(ins[0].dest_operand_data.varible_name, "k");
-    memset(&ins[0].src_operand_data, 0, sizeof(ins[0].src_operand_data));
-
-    machine_code_main(symbols, 1, ins, 1);
-
-    print_machine_code(6);             /* expect exactly 1 word */
-    return 0;
-}
 
 static void print_machine_code(int amount)
 {
