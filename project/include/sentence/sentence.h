@@ -1,8 +1,13 @@
 #ifndef SENTENCE_H
 #define SENTENCE_H
 #include <stdio.h>
-#include "main.h"
-
+#include "common_structs.h"
+#include "errors.h"
+#include "preassembly.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #define EXTERN_WORD_LENGTH 7
 #define ENTRY_WORD_LEN 6
 #define STRING_WORD_LEN 7

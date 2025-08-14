@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <search.h>
+#include "common_structs.h"
 #define START_ADDRESS 100
 #define MSG_SUCCESS                         ""
 #define MSG_ERR_EXTERN_DEFINED_IN_FILE      "ERROR : Extern can't be defined in a file.\n"

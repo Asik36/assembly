@@ -2,7 +2,7 @@
 #define MEMORY_MANAGER_H
 #include <stdio.h>
 #include <stdlib.h>
-#include "main.h"
+#include "common_structs.h"
 #define ADDRESSING_MODES_NONE -1 
 #define SIGN_ADDRESSING_MODES_IMMEDIATE '#'
 #define MSG_MEM_ERR_INVALID_SRC_ADDR_MODE   "ERROR: Invalid addressing mode for source operand\n"

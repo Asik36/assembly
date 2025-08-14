@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include "main.h"
 #include "memory_manager.h"
 static const char * register_names[OPERAND_AMONT] = 
 {

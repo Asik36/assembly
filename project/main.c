@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <main.h>
+#include <common_structs.h>
 #include "machine_code.h"
 #include "preassembly.h"
 #include "sentence.h"

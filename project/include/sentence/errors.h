@@ -1,6 +1,10 @@
 #ifndef ERRORS_H
 #define ERRORS_H
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <regex.h>
 #define MAX_LABEL_SIZE 31
 
 #define LABEL_PATTERN "^[[:space:]]*(([[:alpha:]][[:alnum:]]{0,30}):[[:space:]]*)?"

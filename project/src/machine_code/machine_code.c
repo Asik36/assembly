@@ -1,5 +1,5 @@
 #include "machine_code.h"
-#include "../output_files/out_files.h"
+#include "out_files.h"
 
 const bool NO_DEST_OPERAND[ADDRESSING_TYPES_AMOUNT] = {0};
 
@@ -338,10 +338,6 @@ symbol* machine_code_find_symbol(symbol * symbol_list, int symbol_list_length, c
     return ret;
 }
 
-static bool operand_is_empty(const operand_data *op)
-{
-    return (op && op->addressing_mode == 0 && op->operand_data == 0 && op->varible_name[0] == '\0');
-}
 
 machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_list_length, operand_data operand, machine_code * instruction_code, int * curr_word_index_ptr, const char ** func_name)
 {

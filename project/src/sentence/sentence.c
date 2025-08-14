@@ -1,11 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+
 #include "sentence.h"
-#include "errors.h"
-#include "preassembly.h"
-#include "main.h"
+
 
 
 

@@ -1,7 +1,7 @@
 #ifndef MACHINE_CODE_H
 #define MACHINE_CODE_H
 #include <stdio.h>
-#include "../../include/main.h"
+#include "common_structs.h"
 #include <stdlib.h>
 #include <string.h>
 

@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include "main.h"
 #include "symbol.h"
 
 static int hasmap_index = 0;

@@ -1,7 +1,12 @@
 #ifndef PREASSEMBLY_H
 #define PREASSEMBLY_H
 #include <stdio.h>
-#include "main.h"
+#include "common_structs.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <search.h>
 #define MAX_NAME_LEN 100
 #define MACRO_WORD_LEN 5
 #define MAX_LINE 80
