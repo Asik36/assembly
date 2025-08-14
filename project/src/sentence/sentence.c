@@ -268,7 +268,6 @@ status fill_data_arr(char *data_start, directive **list, int* directive_counter,
 {
     status retval = SUCCESS;
     int data_len = get_data_len(data_start);
-    printf("data len is: %d\n", data_len);
 
     if (data_len <= 0)
     {
@@ -558,7 +557,6 @@ module_status_e check_processing_modules(char *file_as, char* file_am, directive
     if(returned_val == SUCCESS)
     {
         returned_val = create_file_am(file_as,file_am);
-        printf("returned value from create_file_am: %d\n",returned_val);
         if(returned_val == FAILURE)
         {   
             retval = MODULE_STATUS_ERR_ALLOCATION_FAILED;

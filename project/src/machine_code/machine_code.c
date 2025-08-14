@@ -48,7 +48,6 @@ static uint16_t machine_code_append_arg_to_word(uint16_t curr_val, uint16_t new_
 
 /**
  * @brief a helper function that is responsible that the fields of the word_content line are ordered correctly in the memmory
- *
  * @param operand_data_word the instruction operand before correct memory ordering
  * @return uint16_t the instruction operand after correct memory ordering
  */

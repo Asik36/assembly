@@ -252,6 +252,5 @@ status create_file_am(char *file_as, char *file_am)
         fclose(original_code);
     }
     hdestroy();
-    printf("returned value from create_file_am: %d\n",retval);
     return retval;
 }

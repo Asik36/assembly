@@ -19,17 +19,24 @@ int main(void)
     symbol * symbol_list = NULL;
     int symbol_counter = 0;
 
-    machine_code * machine_code_list = NULL;
-    int machine_code_counter = 0;
 
-    check_processing_modules("test.as", "test.am", &directive_list, &instruction_list, &instruction_counter, &directive_counter);
-    // else if(memory(instruction_list,instruction_counter,&instruction_data_list) == FAILURE)
-    // {
-    //     fprintf(stderr,"MEMORY ERROR\n");
-    // }
 
-    printf("instuction counter = %d\n", instruction_counter);
-    printf("direction counter = %d\n",directive_counter);
+    if(check_processing_modules("test.as","test.am",&directive_list,&instruction_list,&instruction_counter,&directive_counter) < 0)
+    {
+        fprintf(stderr,"MACRO ERROR\n");
+    }
+    else if(memory(instruction_list,instruction_counter,&instruction_data_list) < 0)
+    {
+        fprintf(stderr,"MEMORY ERROR\n");
+    }
+    else if(symbol_create(instruction_data_list,instruction_list,instruction_counter,directive_list,directive_counter,&symbol_list,&symbol_counter) < 0)
+    {
+        fprintf(stderr,"SYMBOL ERROR\n");
+    }
+    else if(machine_code_main("dude.txt",symbol_list,symbol_counter,instruction_data_list,instruction_counter)== false)
+    {
+        fprintf(stderr,"MACHINE CODE ERROR\n");
+    }
 
 
     
