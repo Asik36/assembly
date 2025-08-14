@@ -27,4 +27,4 @@ valgrind: $(TARGET)
 	valgrind --leak-check=full --show-leak-kinds=all  ./$(TARGET)
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) 

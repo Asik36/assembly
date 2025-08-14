@@ -112,7 +112,7 @@ bool machine_code_main(char * base_file_name,symbol * symbol_list, int symbol_li
     machine_code_handle_instructions(symbol_list, symbol_list_length, instruction_list, instruction_list_length);
     machine_code_handle_symbols(symbol_list, symbol_list_length);
 
-    if(g_machine_code_error_flag == false)
+    if(g_machine_code_error_flag == true)
     {
         out_files_main(g_instructions_word_count, g_symbols_word_count, base_file_name);
     }
@@ -351,75 +351,74 @@ machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_li
     machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
 
     int curr_word_index = *curr_word_index_ptr;
-    if(!operand_is_empty(&operand))
+    
+    are are_attribute = ABSOLUTE;
+    symbol * operand_symbol;
+    instruction_code->words[curr_word_index] = (word_data){0};
+
+    switch (operand.addressing_mode)
     {
-        are are_attribute = ABSOLUTE;
-        symbol * operand_symbol;
-        instruction_code->words[curr_word_index] = (word_data){0};
+    case ADDRESSING_MODES_IMMEDIATE:
+        instruction_code->words[curr_word_index].are_attribute = ABSOLUTE;
 
-        switch (operand.addressing_mode)
+        instruction_code->words[curr_word_index].content.value = operand.operand_data;
+        curr_word_index++;
+        break;
+
+    case ADDRESSING_MODES_DIRECT:
+    case ADDRESSING_MODES_INDEX:
+
+        if(*operand.varible_name == '\0')
         {
-        case ADDRESSING_MODES_IMMEDIATE:
-            instruction_code->words[curr_word_index].are_attribute = ABSOLUTE;
 
-            instruction_code->words[curr_word_index].content.value = operand.operand_data;
-            curr_word_index++;
-            break;
-
-        case ADDRESSING_MODES_DIRECT:
-        case ADDRESSING_MODES_INDEX:
-
-            if(*operand.varible_name == '\0')
-            {
-
-                ret = MACHINE_CODE_STATUS_ERROR_EMPTY_VARIABLE_NAME;
-                break;
-            }
-            operand_symbol = machine_code_find_symbol(symbol_list,symbol_list_length, operand.varible_name);
-            if(!operand_symbol)
-            {
-
-                ret = MACHINE_CODE_STATUS_ERROR_SYMBOL_NOT_FOUND;
-                break;
-            }
-            if(operand_symbol->access_attribute == ATTRIBUTE_EXTERN)
-            {
-                are_attribute = EXTERNAL;
-                symbol_call extern_item;
-                strncpy(extern_item.symbol_name,operand_symbol->name, FILE_NAME_LENGTH - 1);
-                extern_item.symbol_name[FILE_NAME_LENGTH - 1] = '\0';
-                extern_item.base_address = curr_word_index + g_memory_word_index;
-                child_func_status = add_item(extern_item, ATTRIBUTE_EXTERN, &child_func_name);
-                if (child_func_status != MACHINE_CODE_STATUS_SUCCESS)
-                {
-                    machine_code_func_handler(child_func_status, child_func_name);
-                }
-            }
-            else
-            {
-                are_attribute = RELOCATABLE;
-            }
-            instruction_code->words[curr_word_index].are_attribute = are_attribute;
-
-            instruction_code->words[curr_word_index].content.data_address = (operand_symbol->address / 16) * 16;
-
-            curr_word_index++;
-
-            instruction_code->words[curr_word_index] = (word_data){0};
-            instruction_code->words[curr_word_index].are_attribute = are_attribute;
-            instruction_code->words[curr_word_index].content.offset = operand_symbol->address % 16;
-            curr_word_index++;
-
-            break;
-
-        case ADDRESSING_MODES_REGISTER_DIRECT:
-            break;
-
-        default:
-            ret = MACHINE_CODE_STATUS_ERROR_UNKNOWN_ADDRESSING_MODE;
+            ret = MACHINE_CODE_STATUS_ERROR_EMPTY_VARIABLE_NAME;
             break;
         }
+        operand_symbol = machine_code_find_symbol(symbol_list,symbol_list_length, operand.varible_name);
+        if(!operand_symbol)
+        {
+
+            ret = MACHINE_CODE_STATUS_ERROR_SYMBOL_NOT_FOUND;
+            break;
+        }
+        if(operand_symbol->access_attribute == ATTRIBUTE_EXTERN)
+        {
+            are_attribute = EXTERNAL;
+            symbol_call extern_item;
+            strncpy(extern_item.symbol_name,operand_symbol->name, FILE_NAME_LENGTH - 1);
+            extern_item.symbol_name[FILE_NAME_LENGTH - 1] = '\0';
+            extern_item.base_address = curr_word_index + g_memory_word_index;
+            child_func_status = add_item(extern_item, ATTRIBUTE_EXTERN, &child_func_name);
+            if (child_func_status != MACHINE_CODE_STATUS_SUCCESS)
+            {
+                machine_code_func_handler(child_func_status, child_func_name);
+            }
+        }
+        else
+        {
+            are_attribute = RELOCATABLE;
+        }
+        instruction_code->words[curr_word_index].are_attribute = are_attribute;
+
+        instruction_code->words[curr_word_index].content.data_address = (operand_symbol->address / 16) * 16;
+
+        curr_word_index++;
+
+        instruction_code->words[curr_word_index] = (word_data){0};
+        instruction_code->words[curr_word_index].are_attribute = are_attribute;
+        instruction_code->words[curr_word_index].content.offset = operand_symbol->address % 16;
+        curr_word_index++;
+
+        break;
+
+    case ADDRESSING_MODES_REGISTER_DIRECT:
+        break;
+
+    default:
+        ret = MACHINE_CODE_STATUS_ERROR_UNKNOWN_ADDRESSING_MODE;
+        break;
     }
+
     *curr_word_index_ptr = curr_word_index;
     return ret;
 

@@ -33,7 +33,7 @@ int main(void)
     {
         fprintf(stderr,"SYMBOL ERROR\n");
     }
-    else if(machine_code_main("dude.txt",symbol_list,symbol_counter,instruction_data_list,instruction_counter)== false)
+    else if(machine_code_main("dude",symbol_list,symbol_counter,instruction_data_list,instruction_counter)== false)
     {
         fprintf(stderr,"MACHINE CODE ERROR\n");
     }
