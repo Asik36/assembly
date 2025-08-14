@@ -5,7 +5,11 @@ const bool NO_DEST_OPERAND[ADDRESSING_TYPES_AMOUNT] = {0};
 word_data g_memory [MEMORY_MAX_SIZE];
 int g_memory_word_index = STARTING_MEMORY_ADDRESS;
 
-#define NO_OPERAND {0,0,0,0}
+symbol_call * g_externals;
+symbol_call * g_entrys;
+
+int g_extern_call_length = 0;
+int g_entry_defenition_length = 0;
 
 const char * function_names [] =
 {
@@ -59,6 +63,38 @@ static uint16_t machine_code_reorder_operand_word_content(operand_content operan
     return ret;
 }
 
+static void add_item(symbol_call new_item, enum attribute_access_type_e type)
+{
+    symbol_call **array;
+    int *array_length;
+
+    if (type == ATTRIBUTE_EXTERN)
+    {
+        array = &g_externals;
+        array_length = &g_extern_call_length;
+    }
+    else if(type == ATTRIBUTE_ENTERY)
+    {
+        array = &g_entrys;
+        array_length = &g_entry_defenition_length;
+    }
+    else
+    {
+        fprintf(stderr, "%s: unknown attribute_access_type, symbol:%s, attr:%d\n", __func__, new_item.symbol_name, type);
+        exit(1);
+    }
+
+    symbol_call *temp = realloc(*array, (*array_length + 1) * sizeof (**array));
+    if (!temp)
+    {
+        fprintf(stderr, "%s: realloc failed\n", __func__);
+        exit(1);
+    }
+
+    *array = temp;
+    (*array)[*array_length] = new_item;
+    (*array_length)++;
+}
 
 
 void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length)
@@ -212,6 +248,13 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol)
         }
         else
         {
+            if(current_symbol.access_attribute == ATTRIBUTE_ENTERY)
+            {
+                symbol_call entry_item;
+                entry_item.symbol_name = current_symbol.name;
+                entry_item.base_address = current_symbol.address;
+                add_item(entry_item, ATTRIBUTE_ENTERY);
+            }
             for(int word_index = 0; word_index < (int)symbol_code.word_count; word_index++)
             {
                 symbol_code.words[word_index].are_attribute =  ABSOLUTE;
@@ -262,7 +305,7 @@ int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, opera
         case ADDRESSING_MODES_DIRECT:
         case ADDRESSING_MODES_INDEX:
 
-            if(*operand.varible_name == "\0")
+            if(*operand.varible_name == '\0')
             {
                 fprintf(stderr, "%s error: empty varieble name\n",__func__);
                 break;
@@ -276,6 +319,10 @@ int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, opera
             if(operand_symbol->access_attribute == ATTRIBUTE_EXTERN)
             {
                 are_attribute = EXTERNAL;
+                symbol_call extern_item;
+                extern_item.symbol_name = operand_symbol->name;
+                extern_item.base_address = curr_word_index + g_memory_word_index;
+                add_item(extern_item, ATTRIBUTE_EXTERN);
             }
             else
             {

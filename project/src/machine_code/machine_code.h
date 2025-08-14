@@ -12,6 +12,17 @@ extern word_data g_memory[MEMORY_MAX_SIZE];
 
 
 extern const char * function_names [];
+typedef struct machine_code_symbol_call_s
+{
+    char * symbol_name;
+    int base_address;
+}symbol_call;
+
+extern symbol_call * g_externals;
+extern symbol_call * g_entrys;
+
+extern int g_extern_call_length ;
+extern int g_entry_defenition_length ;
 
 typedef enum machine_code_success_e
 {
