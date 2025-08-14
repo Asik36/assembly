@@ -2,12 +2,23 @@
 
 #define STARTING_GROUP_NAME 'A'
 
+bool g_out_files_error_flag = false;
 
-void out_files_main( int machine_code_instructions_length, int machine_code_symbols_length, char* base_file_name)
+bool out_files_main( int machine_code_instructions_length, int machine_code_symbols_length, char* base_file_name)
 {
-    out_files_machine_code(  machine_code_instructions_length,  machine_code_symbols_length, base_file_name);
-    out_files_symbol_files(base_file_name, OUT_FILE_TYPE_EXTERNALS);
-    out_files_symbol_files(base_file_name, OUT_FILE_TYPE_ENTRIES);
+    out_file_status child_func_status = OUT_FILE_STATUS_SUCCESS;
+    const char * child_func_name;
+
+    child_func_status = out_files_machine_code(machine_code_instructions_length,  machine_code_symbols_length, base_file_name, &child_func_name);
+    out_files_func_handler(child_func_status, child_func_name);
+
+    child_func_status = out_files_symbol_files(base_file_name, OUT_FILE_TYPE_EXTERNALS, &child_func_name);
+    out_files_func_handler(child_func_status, child_func_name);
+
+    child_func_status = out_files_symbol_files(base_file_name, OUT_FILE_TYPE_ENTRIES, &child_func_name);
+    out_files_func_handler(child_func_status, child_func_name);
+
+    return g_out_files_error_flag == false;
 }
 
 static special_base out_files_convert_to_special_base(word_data word)
@@ -51,11 +62,12 @@ static void out_files_write_machine_code_line(FILE * machine_code_f, int word_in
     }
 }
 
-static bool out_files_create_file(out_file_type f_type, char * base_file_name,FILE ** out_file)
+static out_file_status out_files_create_file(out_file_type f_type, char * base_file_name,FILE ** out_file, const char ** func_name)
 {
     char ret_file_name [FILE_NAME_LENGTH];
     char * file_ending = NULL;
-    bool ret = true;
+    out_file_status ret = OUT_FILE_STATUS_SUCCESS;
+    *func_name = __func__;
 
     switch (f_type)
     {
@@ -70,8 +82,7 @@ static bool out_files_create_file(out_file_type f_type, char * base_file_name,FI
         break;
 
     default:
-        fprintf(stderr, "%s error: unknown output file type: %d\n",__func__, f_type);
-        ret = false;
+        ret = OUT_FILE_STATUS_ERROR_UNKNOWN_OUTPUT_FILE_TYPE;
         break;
     }
     if(file_ending)
@@ -79,20 +90,26 @@ static bool out_files_create_file(out_file_type f_type, char * base_file_name,FI
         snprintf(ret_file_name , FILE_NAME_LENGTH,"%s.%s", base_file_name,file_ending);
         *out_file = fopen(ret_file_name,"w");
     }
-    return(ret);
+    return ret;
 }
 
-void out_files_machine_code(  int machine_code_instructions_length, int machine_code_symbols_length, char* base_file_name)
+out_file_status out_files_machine_code(  int machine_code_instructions_length, int machine_code_symbols_length, char* base_file_name, const char ** func_name)
 {
+    out_file_status ret = OUT_FILE_STATUS_SUCCESS;
+    *func_name = __func__;
+
+    const char * child_func_name;
+    out_file_status child_func_status;
 
     FILE * machine_code_f = NULL;
-    if(out_files_create_file(OUT_FILE_TYPE_OBJECT, base_file_name, &machine_code_f))
+    child_func_status = out_files_create_file(OUT_FILE_TYPE_OBJECT, base_file_name, &machine_code_f, &child_func_name);
+    out_files_func_handler(child_func_status,child_func_name);
+
+    if(child_func_status == OUT_FILE_STATUS_SUCCESS)
     {
         if(! machine_code_f)
         {
-            fprintf(stderr,"error opening file: %s, in: %s\n",base_file_name, __func__);
-            exit(1);
-            /*add  error handle*/
+            ret = OUT_FILE_STATUS_ERROR_OPENING_FILE;
         }
 
         else
@@ -109,10 +126,14 @@ void out_files_machine_code(  int machine_code_instructions_length, int machine_
             fclose(machine_code_f);
         }
     }
+    return ret;
 }
 
-void out_files_write_line(FILE * out_file, out_file_type file_type, int symbol_index)
+out_file_status out_files_write_line(FILE * out_file, out_file_type file_type, int symbol_index, const char ** func_name)
 {
+    out_file_status ret = OUT_FILE_STATUS_SUCCESS;
+    *func_name = __func__;
+
     symbol_call symbol_to_write;
     switch (file_type)
     {
@@ -126,15 +147,21 @@ void out_files_write_line(FILE * out_file, out_file_type file_type, int symbol_i
         fprintf(out_file, "%s OFFSET %d\n\n", symbol_to_write.symbol_name, symbol_to_write.base_address + 1);
         break;
     default:
-        fprintf(stderr, "%s error: not a supported out file type: %d\n",__func__, file_type);
+        ret = OUT_FILE_STATUS_ERROR_UNKNOWN_OUTPUT_FILE_TYPE;
         break;
     }
 
-
+    return ret;
 }
 
-void out_files_symbol_files(char * base_file_name, out_file_type file_type)
+out_file_status out_files_symbol_files(char * base_file_name, out_file_type file_type, const char ** func_name)
 {
+    out_file_status ret = OUT_FILE_STATUS_SUCCESS;
+    *func_name = __func__;
+
+    out_file_status child_func_status;
+    const char * child_func_name;
+
     int length = 0;
 
     switch (file_type)
@@ -146,39 +173,64 @@ void out_files_symbol_files(char * base_file_name, out_file_type file_type)
         length = g_extern_call_length;
         break;
     default:
-        fprintf(stderr, "%s error: unknown output file type: %d\n",__func__, file_type);
+        ret = OUT_FILE_STATUS_ERROR_UNKNOWN_OUTPUT_FILE_TYPE;
         break;
     }
 
     if(length)
     {
         FILE * out_file;
-        if( out_files_create_file(file_type, base_file_name, &out_file))
+        child_func_status = out_files_create_file(file_type, base_file_name, &out_file,&child_func_name);
+        out_files_func_handler(child_func_status,child_func_name);
+
+        if(child_func_status == OUT_FILE_STATUS_SUCCESS)
         {
             if(!out_file)
             {
-                char * file_type_name;
-                if(file_type == OUT_FILE_TYPE_EXTERNALS)
-                {
-                    file_type_name = "externals";
-                }
-                else
-                {
-                    file_type_name = "entries";
-                }
-
-                fprintf(stderr,"%s error: opening %s file\n", __func__, file_type_name);
+                ret = OUT_FILE_STATUS_ERROR_OPENING_FILE;
             }
             else
             {
                 for(int call_index = 0; call_index < length; call_index++)
                 {
-                    out_files_write_line(out_file, file_type, call_index);
+                    out_files_write_line(out_file, file_type, call_index, &child_func_name);
+                    out_files_func_handler(child_func_status,child_func_name);
                 }
                 fclose(out_file);
             }
         }
     }
-
+    return ret;
 }
 
+void out_files_func_handler(out_file_status func_return_status, const char * func_name)
+{
+    if(func_return_status != OUT_FILE_STATUS_SUCCESS)
+    {
+        g_out_files_error_flag = true;
+    }
+
+    switch (func_return_status)
+    {
+    case OUT_FILE_STATUS_SUCCESS:
+
+        break;
+
+    case OUT_FILE_STATUS_ERROR_MALLOC:
+        fprintf(stderr, "malloc error in function: %s\n", func_name);
+        break;
+    case OUT_FILE_STATUS_ERROR_OPENING_FILE:
+        fprintf(stderr, "opening file error in function: %s\n", func_name);
+        break;
+
+    case OUT_FILE_STATUS_ERROR_UNKNOWN_OUTPUT_FILE_TYPE:
+        fprintf(stderr, "unknown output file type error in function: %s\n", func_name);
+        break;
+
+
+    default:
+        fprintf(stderr,"unhandled error: %d, in %s\n",func_return_status, func_name);
+        break;
+    }
+
+}

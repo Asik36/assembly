@@ -25,10 +25,20 @@ typedef enum out_filetype_e
     OUT_FILE_TYPE_ENTRIES
 }out_file_type;
 
-void out_files_main( int machine_code_instructions_length, int machine_code_symbols_length, char* base_file_name);
+typedef enum out_file_status_e
+{
+    OUT_FILE_STATUS_SUCCESS,
+    OUT_FILE_STATUS_ERROR_MALLOC,
+    OUT_FILE_STATUS_ERROR_OPENING_FILE,
+    OUT_FILE_STATUS_ERROR_UNKNOWN_OUTPUT_FILE_TYPE,
+}out_file_status;
 
-void out_files_machine_code(int machine_code_instructions_length, int machine_code_symbols_length, char* base_file_name);
+bool out_files_main( int machine_code_instructions_length, int machine_code_symbols_length, char* base_file_name);
 
-void out_files_symbol_files(char * base_file_name, out_file_type file_type);
 
+out_file_status out_files_machine_code(  int machine_code_instructions_length, int machine_code_symbols_length, char* base_file_name, const char ** func_name);
+
+out_file_status out_files_symbol_files(char * base_file_name, out_file_type file_type, const char ** func_name);
+
+void out_files_func_handler(out_file_status func_return_status, const char * func_name);
 #endif
