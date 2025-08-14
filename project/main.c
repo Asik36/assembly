@@ -22,21 +22,14 @@ int main(void)
     machine_code * machine_code_list = NULL;
     int machine_code_counter = 0;
 
-    list_macros("test.as");
-    if(create_file_am("test.as","test.am") == FAILURE)
-    {
-        fprintf(stderr,"MACRO ERROR\n");
-    }
-    else if(sentence_decider("test.as",&instruction_list,&directive_list,&directive_counter,&instruction_counter) == FAILURE)
-    {
-        fprintf(stderr,"SENTENCE ERROR\n");
-    }
-    else if(memory(instruction_list,instruction_counter,&instruction_data_list) == FAILURE)
-    {
-        fprintf(stderr,"MEMORY ERROR\n");
-    }
+    check_processing_modules("test.as", "test.am", &directive_list, &instruction_list, &instruction_counter, &directive_counter);
+    // else if(memory(instruction_list,instruction_counter,&instruction_data_list) == FAILURE)
+    // {
+    //     fprintf(stderr,"MEMORY ERROR\n");
+    // }
 
-
+    printf("instuction counter = %d\n", instruction_counter);
+    printf("direction counter = %d\n",directive_counter);
 
 
     
