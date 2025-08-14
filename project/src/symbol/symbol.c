@@ -107,7 +107,6 @@ status_e symbol_directive(directive *directive_table, int directive_num,
         {
             cur_directive = directive_table + i;
             retval = symbol_get_directive_labels(cur_directive, symbol_table,symbol_counter-1);
-            printf("MY I %d\n",i);
         }
       
     }
@@ -201,7 +200,6 @@ status_e symbol_get_directive_labels(directive *dir, symbol *symbol_table,int in
 
     if (p_old_symbol_index == NULL)
     {
-        printf("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB %s\n",new_symbol->name);
 
         symbol_enter(new_symbol->name,index);
         retval = STATUS_SYMBOL_ENTER;
@@ -212,7 +210,6 @@ status_e symbol_get_directive_labels(directive *dir, symbol *symbol_table,int in
         if(old_symbol != NULL)
         {
             retval = symbol_update(old_symbol, new_symbol);
-            printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA %s\n",new_symbol->name);
         }
 
 
