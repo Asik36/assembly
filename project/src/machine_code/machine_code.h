@@ -55,7 +55,7 @@ typedef enum machine_code_func_type_e
  * @param instruction_list an array of all the instructions
  * @param instruction_list_length the amount of instructions in the symbol array
  */
-void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length);
+bool machine_code_main(char * base_file_name,symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length);
 
 /**
  * @brief the function tryies to write machine code into the memory array

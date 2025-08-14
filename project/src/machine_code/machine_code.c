@@ -103,7 +103,7 @@ static void add_item(symbol_call new_item, enum attribute_access_type_e type)
 }
 
 
-void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length)
+bool machine_code_main(char * base_file_name,symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length)
 {
     memset(g_memory, 0, sizeof(g_memory));
     g_memory_word_index = STARTING_MEMORY_ADDRESS;
@@ -119,11 +119,13 @@ void machine_code_main(symbol * symbol_list, int symbol_list_length, instruction
 
     if(error_flag == false)
     {
-        out_files_main(g_instructions_word_count, g_symbols_word_count, "file_name");
+        out_files_main(g_instructions_word_count, g_symbols_word_count, base_file_name);
     }
 
     free(g_entrys);
     free(g_externals);
+
+    return (error_flag);
 }
 
 machine_code_status machine_code_write_machine_code(machine_code code)
@@ -196,11 +198,14 @@ machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int 
     machine_code instruction_code;
     command curr_command;
     int curr_word_index = 0;
-    word_data *curr_word;
+    word_data *curr_word = NULL ;
+
     operand_content *op;
 
     instruction_code.word_count = current_instruction.size;
-    instruction_code.words = (word_data *) malloc(sizeof(word_data) * instruction_code.word_count);
+    instruction_code.words = calloc(instruction_code.word_count, sizeof *instruction_code.words);
+
+
 
     g_instructions_word_count += instruction_code.word_count;
 
@@ -265,7 +270,8 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol)
 
         g_symbols_word_count += symbol_code.word_count;
 
-        symbol_code.words = malloc(sizeof(word_data) * symbol_code.word_count);
+        symbol_code.words = calloc(symbol_code.word_count, sizeof *symbol_code.words);
+
         if(!symbol_code.words)
         {
             ret = MACHINE_CODE_STATUS_ERROR_MALLOC;
@@ -319,6 +325,8 @@ int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, opera
     {
         are are_attribute = ABSOLUTE;
         symbol * operand_symbol;
+        instruction_code->words[curr_word_index] = (word_data){0};
+
         switch (operand.addressing_mode)
         {
         case ADDRESSING_MODES_IMMEDIATE:
@@ -360,6 +368,8 @@ int machine_code_add_operand(symbol * symbol_list, int symbol_list_length, opera
             instruction_code->words[curr_word_index].content.data_address = (operand_symbol->address / 16) * 16;
 
             curr_word_index++;
+
+            instruction_code->words[curr_word_index] = (word_data){0};
             instruction_code->words[curr_word_index].are_attribute = are_attribute;
             instruction_code->words[curr_word_index].content.offset = operand_symbol->address % 16;
             curr_word_index++;

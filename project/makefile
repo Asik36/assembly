@@ -1,12 +1,12 @@
 CC = gcc
 
 CFLAGS = -Wall -Wextra -g -ansi -pedantic -std=c99
-INCLUDES = -I./include -Isrc/format -Isrc/machine_code -Isrc/preassembly -Isrc/sentence -Isrc/symbol -Isrc/memory_manager
+INCLUDES = -I./include -Isrc/format -Isrc/machine_code -Isrc/preassembly -Isrc/sentence -Isrc/symbol -Isrc/memory_manager -Isrc/output_files
 CFLAGS+= $(INCLUDES)
 
 
 
-SRC_DIRS = src/format src/machine_code src/preassembly src/sentence src/symbol src/memory_manager src
+SRC_DIRS = src/format src/machine_code src/preassembly src/sentence src/symbol src/memory_manager src/output_files src
 SRCS=$(wildcard *.c)
 OBJS = main.c $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 
@@ -27,4 +27,4 @@ valgrind: $(TARGET)
 	valgrind --leak-check=full --show-leak-kinds=all  ./$(TARGET)
 
 clean:
-	rm -f $(TARGET) 
+	rm -f $(TARGET)

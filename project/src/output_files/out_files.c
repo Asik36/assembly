@@ -33,7 +33,7 @@ static void out_files_write_machine_code_line(FILE * machine_code_f, int word_in
     special_base line = out_files_convert_to_special_base(g_memory[word_index]);
     fprintf(machine_code_f,  "%04d ", word_index);
 
-    char ending_char;
+    char ending_char = '-';
 
     for(int group_index = 0; group_index < AMOUNT_OF_SPETIAL_BITS_GROUPS; group_index++)
     {
@@ -46,6 +46,10 @@ static void out_files_write_machine_code_line(FILE * machine_code_f, int word_in
         {
             ending_char = '\n';
         }
+        printf("%c", STARTING_GROUP_NAME + group_index);
+        printf("%x", line.groups[group_index].val);
+        printf("%c", ending_char);
+
         fprintf(machine_code_f, "%c%x%c", STARTING_GROUP_NAME + group_index,line.groups[group_index].val, ending_char);
     }
 }
@@ -84,7 +88,7 @@ static bool out_files_create_file(out_file_type f_type, char * base_file_name,FI
 void out_files_machine_code(  int machine_code_instructions_length, int machine_code_symbols_length, char* base_file_name)
 {
 
-    FILE * machine_code_f ;
+    FILE * machine_code_f = NULL;
     if(out_files_create_file(OUT_FILE_TYPE_OBJECT, base_file_name, &machine_code_f))
     {
         if(! machine_code_f)
