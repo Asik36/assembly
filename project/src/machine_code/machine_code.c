@@ -32,10 +32,7 @@ static inline uint16_t machine_code_append_arg_to_word(uint16_t curr_val, uint16
 {
     curr_val = curr_val << new_length;
     uint16_t mask = 0xFFFF >> (0xF - new_length);
-    // for(int i = 0; i < (15 - new_length); i++)
-    // {
-    //     mask = mask >> 1;
-    // }
+
     curr_val |= (new_arg & mask);
     return curr_val;
 }
