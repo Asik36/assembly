@@ -2,21 +2,24 @@
 #define MEMORY_MANAGER_H
 #include <stdio.h>
 #include <stdlib.h>
-#include "main.h"
+#include "common_structs.h"
 #define ADDRESSING_MODES_NONE -1 
 #define SIGN_ADDRESSING_MODES_IMMEDIATE '#'
+#define MSG_MEM_ERR_INVALID_SRC_ADDR_MODE   "ERROR: Invalid addressing mode for source operand\n"
+#define MSG_MEM_ERR_INVALID_DEST_ADDR_MODE  "ERROR: Invalid addressing mode for destination operand\n"
+#define MSG_MEM_ERR_INVALID_COMMAND         "ERROR: Invalid command\n"
+#define MSG_MEM_ERR_UNDEFINED               "ERROR: Undefined\n"
 
-
-
-static const char * register_names[OPERAND_AMONT] = 
+typedef enum memory_status_e
 {
-    "r1",   "r2",   "r3",
-    "r4",   "r5",   "r6",
-    "r7",   "r8",   "r9",
-    "r10",  "r11",  "r12",
-    "r13",  "r14",  "r15",
-    "r16"
-};
+    MEMORY_STATUS_ERR_INVALID_COMMAND = -3,
+    MEMORY_STATUS_ERR_INVALID_SOURCE_ADRESSING_MODE,
+    MEMORY_STATUS_ERR_INVALID_DESTINATION_ADDRESSING_MODE,
+    MEMORY_STATUS_SUCCESS = 0,
+
+} memory_status;
+
+
 
 /** 
  * @brief main function that goes over instruction table checks if command is valid and assign memory address
@@ -25,7 +28,7 @@ static const char * register_names[OPERAND_AMONT] =
  * @param instruction_info_table list of instruction data
  * @return SUCCESS if all lines are valid otherwise if one line is invalid returns FAILURE
  */
-status memory(instruction *instruction_line_table,int n, instruction_data ** instruction_info_table);
+memory_status memory(instruction *instruction_line_table,int n, instruction_data ** instruction_info_table);
 
 /**
  * @brief extract info from instruction line into instruction data
@@ -33,7 +36,7 @@ status memory(instruction *instruction_line_table,int n, instruction_data ** ins
  * @param instruction_info instruction data
  * @return SUCCESS if line is valid otherwise FAILURE
  */
-status memory_instruction_assign(instruction *instruction_line, instruction_data *instruction_info);
+memory_status memory_instruction_assign(instruction *instruction_line, instruction_data *instruction_info);
 
 /** @brief get address of the next instruction
  *  @param instruction_size size of current instruction
@@ -140,15 +143,24 @@ bool memory_is_addressing_mode_register_direct(char *op);
  * @param ins_data current instruction
  * @return SUCCSESS if instruction is valid otherwise FAILURE
  */
-status memory_instruction_validation(instruction_data *ins_data);
+memory_status memory_instruction_validation(instruction_data *ins_data);
 
 /** 
  * @brief gets the string between brackets []
  * @param src source string with brackets
  * @param dest string inside the brackets
  * @param dest_size max size of string inside the brackets
- * @return SUCCSESS if found string inside the brackets , if string not found return FAILURE 
+ * @return true if found string inside the brackets , if string not found return false 
  */
-status get_substring_between_brackets(const char *src, char *dest, size_t dest_size);
+bool get_substring_between_brackets(const char *src, char *dest, size_t dest_size);
 
+
+/**
+ * @brief prints error messeges 
+ * @param m_status error code
+ */
+void memory_error_handle(memory_status m_status);
+
+
+bool memory_have_operand(const bool addressing_modes[ADDRESSING_TYPES_AMOUNT]);
 #endif

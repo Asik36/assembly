@@ -1,6 +1,12 @@
 #ifndef PREASSEMBLY_H
 #define PREASSEMBLY_H
 #include <stdio.h>
+#include "common_structs.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <search.h>
 #define MAX_NAME_LEN 100
 #define MACRO_WORD_LEN 5
 #define MAX_LINE 80
@@ -42,26 +48,26 @@ char *remove_spaces_from_start(char *line);
  * @return int retval - SUCCESS if the line was added successfully, FAILURE otherwise
  */
 
-int add_to_content(macro *macro_ptr, char *line);
+status add_to_content(macro *macro_ptr, char *line);
 
 /**
  * @brief this function puts into a hash table all the macros in the file
  * 
  * @param file_as_path the originial code file we recieve
- * @return int retval - SUCCESS if the macros were listed successfully, FAILURE otherwise
+ * @return status SUCCESS/FAILURE
  */
 
-int list_macros(char *file_as_path);
+status list_macros(char *file_as_path);
 
 /**
  * @brief this function prints the content of a macro to a file.
  * 
  * @param file_am this is the file we write into 
  * @param line this is the line we read from the original code file
- * @return int retval - SUCCESS if the macro was printed successfully, FAILURE otherwise
+ * @return status SUCCESS/FAILURE
  */
 
-int print_macro(FILE *file_am, char *line);
+status print_macro(FILE *file_am, char *line);
 
 /**
  * @brief Create a file am file
@@ -71,6 +77,6 @@ int print_macro(FILE *file_am, char *line);
  * @return int retval - SUCCESS if the file was created successfully, FAILURE otherwise
  */
 
-int create_file_am(char *file_as, char *file_am);
+status create_file_am(char *file_as, char *file_am);
 
 #endif 

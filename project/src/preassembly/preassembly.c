@@ -1,16 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <search.h>
+
 #include "preassembly.h"
-
-typedef enum status_e
-{
-    FAILURE = -1,
-    SUCCESS = 0
-};
-
 
 int check_memory_allocation(char *arr)
 {
@@ -41,9 +30,9 @@ char *remove_spaces_from_start(char *line)
 }
 
 
-int add_to_content(macro *macro_ptr, char *line)
+status add_to_content(macro *macro_ptr, char *line)
 {
-    int retval = SUCCESS;
+    status retval = SUCCESS;
     int size_of_line_read = strlen(line);
     int current_content_len = macro_ptr->content ? strlen(macro_ptr->content) : 0;
     int new_size = current_content_len + size_of_line_read + 1;
@@ -67,9 +56,9 @@ int add_to_content(macro *macro_ptr, char *line)
     return retval;
 }
 
-int list_macros(char *file_as_path)
+status list_macros(char *file_as_path)
 {
-    int retval = SUCCESS;
+    status retval = SUCCESS;
     FILE* file_as = fopen(file_as_path,"r");
     if(!file_as)
     {
@@ -143,7 +132,6 @@ int list_macros(char *file_as_path)
                     }
                 }
                 ENTRY item;
-                ENTRY *found;
                 item.key = new_macro->name;
                 item.data = (void*)new_macro;
                 if(hsearch(item, ENTER) == NULL)
@@ -158,42 +146,52 @@ int list_macros(char *file_as_path)
             }
         }
     }
-    fclose(file_as);
-    return retval;
-}
-
-int print_macro(FILE *file_am, char *line)
-{
-    int retval = SUCCESS;
-    char *word = strtok(line, " \t\n\0");
-    while(word)
+    if(file_as != NULL)
     {
-        ENTRY item;
-        ENTRY *found;
-        item.key = word;
-        found = hsearch(item, FIND);
-        if(found != NULL)
-        {
-            macro *macro_ptr = (macro *)(found->data);
-            macro_ptr->content[strlen(macro_ptr->content)] = '\0';
-            fprintf(file_am, "%s", macro_ptr->content);
-
-        }
-        else
-        {
-            fprintf(file_am, "%s ", word);
-        }
-        word = strtok(NULL, " \t\n\0");
-    
+        fclose(file_as);
     }
-    fprintf(file_am, "\n");
+    return retval;
+}
+
+status print_macro(FILE *file_am, char *line)
+{
+    status retval = SUCCESS;
+    if(file_am != NULL)
+    {
+        char *word = strtok(line, " \t\n\0");
+        while(word)
+        {
+            ENTRY item;
+            ENTRY *found;
+            item.key = word;
+            found = hsearch(item, FIND);
+            if(found != NULL)
+            {
+                macro *macro_ptr = (macro *)(found->data);
+                macro_ptr->content[strlen(macro_ptr->content)] = '\0';
+                fprintf(file_am, "%s", macro_ptr->content);
+
+            }
+            else
+            {
+                fprintf(file_am, "%s ", word);
+            }
+            word = strtok(NULL, " \t\n\0");
+        
+        }
+        fprintf(file_am, "\n");
+    }
+    else
+    {
+        retval = FAILURE;
+    }
     return retval;
 }
 
 
-int create_file_am(char *file_as, char *file_am)
+status create_file_am(char *file_as, char *file_am)
 {
-    int retval = SUCCESS;
+    status retval = SUCCESS;
     FILE* original_code = fopen(file_as,"r");
     if(!original_code)
     {
@@ -208,8 +206,9 @@ int create_file_am(char *file_as, char *file_am)
             perror("Couldn't open file am\n");
             retval = FAILURE;
             fclose(original_code);
+            original_code = NULL;
         }
-        if(retval == SUCCESS)
+        else
         {
             int is_macro_def = NOT_MACRO;
             char line[MAX_LINE];
@@ -236,10 +235,17 @@ int create_file_am(char *file_as, char *file_am)
                     }
                 }
             }
-            fclose(printed_macros_file);
+            if(printed_macros_file != NULL)
+            {
+                fclose(printed_macros_file);
+                printed_macros_file = NULL;
+            }
         }
     }
-    fclose(original_code);
+    if(original_code != NULL)
+    {
+        fclose(original_code);
+    }
     hdestroy();
     return retval;
 }

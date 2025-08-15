@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <main.h>
+#include <common_structs.h>
 #include "machine_code.h"
 #include "preassembly.h"
 #include "sentence.h"
@@ -19,32 +19,27 @@ int main(void)
     symbol * symbol_list = NULL;
     int symbol_counter = 0;
 
-    machine_code * machine_code_list = NULL;
-    int machine_code_counter = 0;
 
-    list_macros("test.as");
-    if(create_file_am("test.as","test.am") == FAILURE)
+
+    if(check_processing_modules("test.as","test.am",&directive_list,&instruction_list,&instruction_counter,&directive_counter) < 0)
     {
         fprintf(stderr,"MACRO ERROR\n");
     }
-    else if(sentence_decider("test.as",&instruction_list,&directive_list,&directive_counter,&instruction_counter) == FAILURE)
-    {
-        fprintf(stderr,"SENTENCE ERROR\n");
-    }
-    else if(memory(instruction_list,instruction_counter,&instruction_data_list) == FAILURE)
+    else if(memory(instruction_list,instruction_counter,&instruction_data_list) < 0)
     {
         fprintf(stderr,"MEMORY ERROR\n");
     }
-
-    else if (machine_code_main("test", symbol_list, symbol_counter, instruction_data_list, instruction_counter))
+    else if(symbol_create(instruction_data_list,instruction_list,instruction_counter,directive_list,directive_counter,&symbol_list,&symbol_counter) < 0)
     {
-        fprintf(stderr, "MACHINE CODE ERROR\n");
+        fprintf(stderr,"SYMBOL ERROR\n");
+    }
+    else if(machine_code_main("dude",symbol_list,symbol_counter,instruction_data_list,instruction_counter)== false)
+    {
+        fprintf(stderr,"MACHINE CODE ERROR\n");
     }
 
 
-
-
-
+    
     for (int i = 0; i < directive_counter; i++)
     {
         if(directive_list != NULL && directive_list[i].data != NULL)
@@ -56,6 +51,7 @@ int main(void)
     free(instruction_list);
     free(directive_list);
     free(instruction_data_list);
+    free(symbol_list);
 
     return 0;
 }
@@ -69,3 +65,8 @@ int main(void)
 
 
 
+// 0x3 0x4 0x5 0x6
+//  1   2   3   4
+
+// 0x13 0x14 0x14 0x15 0x16
+//  1    2    3    4    5

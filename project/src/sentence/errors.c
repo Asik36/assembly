@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <regex.h>
+
 #include "errors.h"
 
 line_status_e instruction_error_check(char *line)

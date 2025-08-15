@@ -1,8 +1,8 @@
 #ifndef OUT_FILES_H
 #define OUT_FILES_H
 
-#include "../../include/main.h"
-#include "../machine_code/machine_code.h"
+#include "common_structs.h"
+#include "machine_code.h"
 
 #define SIZE_OF_SPETIAL_BITS_GROUP 4
 #define AMOUNT_OF_SPETIAL_BITS_GROUPS 5

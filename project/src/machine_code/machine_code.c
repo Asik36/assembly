@@ -1,5 +1,5 @@
 #include "machine_code.h"
-#include "../output_files/out_files.h"
+#include "out_files.h"
 
 const bool NO_DEST_OPERAND[ADDRESSING_TYPES_AMOUNT] = {0};
 
@@ -37,7 +37,6 @@ static inline uint16_t machine_code_append_arg_to_word(uint16_t curr_val, uint16
 
 /**
  * @brief a helper function that is responsible that the fields of the word_content line are ordered correctly in the memmory
- *
  * @param operand_data_word the instruction operand before correct memory ordering
  * @return uint16_t the instruction operand after correct memory ordering
  */
@@ -124,7 +123,7 @@ bool machine_code_main(char * base_file_name,symbol * symbol_list, int symbol_li
     machine_code_handle_instructions(symbol_list, symbol_list_length, instruction_list, instruction_list_length);
     machine_code_handle_symbols(symbol_list, symbol_list_length);
 
-    if(g_machine_code_error_flag == false)
+    if(g_machine_code_error_flag == true)
     {
         out_files_main(g_instructions_word_count, g_symbols_word_count, base_file_name);
     }
@@ -350,17 +349,6 @@ symbol* machine_code_find_symbol(symbol * symbol_list, int symbol_list_length, c
     return ret;
 }
 
-/**
- * @brief a helper function that checks if the operand is set to all zeros
- *
- * @param op
- * @return true
- * @return false
- */
-static bool operand_is_empty(const operand_data *op)
-{
-    return (op && op->addressing_mode == 0 && op->operand_data == 0 && op->varible_name[0] == '\0');
-}
 
 machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_list_length, operand_data operand, machine_code * instruction_code, int * curr_word_index_ptr, const char ** func_name)
 {
@@ -370,6 +358,7 @@ machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_li
     machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
 
     int curr_word_index = *curr_word_index_ptr;
+
 
     are are_attribute = ABSOLUTE;
     symbol * operand_symbol;

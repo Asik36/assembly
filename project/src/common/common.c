@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "main.h"
+#include "common_structs.h"
 
 int get_command_index(char * command_name)
 {
