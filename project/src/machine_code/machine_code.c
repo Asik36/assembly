@@ -247,7 +247,6 @@ machine_code_status machine_code_add_instruction_code(symbol *symbol_list, int s
             op.dest_operand_type = current_instruction.dest_operand_data.addressing_mode;
             curr_word->content.opcode = machine_code_reorder_operand_word_content(op);
 
-            curr_word_index++;
             machine_code_status adding_operand;
 
             if (!flag_array_is_empty(curr_command.src_operand_types, ADDRESSING_TYPES_AMOUNT))
@@ -274,10 +273,10 @@ machine_code_status machine_code_add_instruction_code(symbol *symbol_list, int s
         {
             machine_code_func_handler(ret, child_func_name);
         }
-    
+
         free(instruction_code.words);
 
-        
+
     }
     return ret;
 }
@@ -371,15 +370,16 @@ machine_code_status machine_code_add_operand(symbol *symbol_list, int symbol_lis
     switch (operand.addressing_mode)
     {
     case ADDRESSING_MODES_IMMEDIATE:
+        curr_word_index++;
         instruction_code->words[curr_word_index] = (word_data){0};
         instruction_code->words[curr_word_index].are_attribute = ABSOLUTE;
 
         instruction_code->words[curr_word_index].content.value = operand.operand_data;
-        curr_word_index++;
         break;
 
     case ADDRESSING_MODES_DIRECT:
     case ADDRESSING_MODES_INDEX:
+        curr_word_index++;
         instruction_code->words[curr_word_index] = (word_data){0};
 
         if (*operand.varible_name == '\0')
@@ -421,7 +421,7 @@ machine_code_status machine_code_add_operand(symbol *symbol_list, int symbol_lis
         instruction_code->words[curr_word_index] = (word_data){0};
         instruction_code->words[curr_word_index].are_attribute = are_attribute;
         instruction_code->words[curr_word_index].content.offset = operand_symbol->address & MASK_OFFSET_ADDRESS;
-        curr_word_index++;
+
 
         break;
 
