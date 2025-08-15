@@ -19,6 +19,7 @@ typedef struct machine_code_symbol_call_s
     int base_address;
 }symbol_call;
 
+
 extern symbol_call * g_externals;
 extern symbol_call * g_entrys;
 
@@ -57,7 +58,7 @@ bool machine_code_main(char * base_file_name,symbol * symbol_list, int symbol_li
  *
  * @param code the machine code to add to the memory
  * @param func_name a string that is used to return this functions name to the caller function
- * @return machine_code_status FAILURE if there isn't enough space for the machine code (and doesnt add enything to the memory),
+ * @return machine_code_status status that represents wether the function was executed successfully or with wich errors
  * otherwise adds machine code to memory and return SUCCESS
  */
 machine_code_status machine_code_write_machine_code(machine_code code, const char ** func_name);
@@ -87,7 +88,7 @@ void machine_code_handle_symbols(symbol * symbol_list, int symbol_list_length);
  * @param symbol_list_lengththe amount of symbols in the symbol array
  * @param current_instruction the instruction to be added to the memory
  * @param func_name a string that is used to return this functions name to the caller function
- * @return machine_code_status SUCCESS if the instruction was added to the memory, otherwise FAILURE
+ * @return machine_code_status status that represents wether the function was executed successfully or with wich errors
  */
 machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int symbol_list_length, instruction_data current_instruction, const char ** func_name);
 
@@ -96,7 +97,7 @@ machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int 
  *
  * @param current_symbol the symbol to be added to the memory
  * @param func_name a string that is used to return this functions name to the caller function
- * @return machine_code_status SUCCESS if the instruction was added to the memory, otherwise FAILURE
+ * @return machine_code_status status that represents wether the function was executed successfully or with wich errors
  */
 machine_code_status machine_code_add_symbol_code(symbol current_symbol, const char ** func_name);
 
@@ -134,9 +135,9 @@ uint16_t machine_code_get_operands_register(operand_data operand);
 /**
  * @brief the function prints an error message, that includes the type of error and the function it happend in
  *
- * @param ret the status value of the function
+ * @param func_return_status the status value of the function
  * @param func_name  a string with the name of the function that was called
  */
-void machine_code_func_handler(machine_code_status ret, const char * func_name);
+void machine_code_func_handler(machine_code_status func_return_status, const char * func_name);
 
 #endif

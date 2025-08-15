@@ -6,7 +6,10 @@ const bool NO_DEST_OPERAND[ADDRESSING_TYPES_AMOUNT] = {0};
 word_data g_memory [MEMORY_MAX_SIZE];
 int g_memory_word_index = STARTING_MEMORY_ADDRESS;
 
+/* a table of symbol calls (symbol name and address) with all the calls for external varieables that is passed to the out_files module*/
 symbol_call * g_externals = NULL;
+
+/* a table of symbol calls (symbol name and address) with all the defenitions for entry varieables that is passed to the out_files module*/
 symbol_call * g_entrys = NULL;
 
 int g_extern_call_length = 0;
@@ -54,6 +57,14 @@ static uint16_t machine_code_reorder_operand_word_content(operand_content operan
     return ret;
 }
 
+/**
+ * @brief a helper function that adds a symbol_call item to the apropriate global table (g_externals table or g_entrys table)
+ *
+ * @param new_item the symbol_call to add to one of the tables
+ * @param type the type of the new item that determins to wich table to add the item to
+ * @param func_name a string that is used to return this functions name to the caller function
+ * @return machine_code_status status that represents wether the function was executed successfully or with wich errors
+ */
 static machine_code_status add_item(symbol_call new_item, enum attribute_access_type_e type, const char ** func_name)
 {
     *func_name = __func__;
@@ -120,7 +131,7 @@ bool machine_code_main(char * base_file_name,symbol * symbol_list, int symbol_li
     free(g_entrys);
     free(g_externals);
 
-    return (g_machine_code_error_flag);
+    return g_machine_code_error_flag == false;
 }
 
 machine_code_status machine_code_write_machine_code(machine_code code, const char ** func_name)
@@ -347,14 +358,15 @@ machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_li
     machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
 
     int curr_word_index = *curr_word_index_ptr;
-    
+
+
     are are_attribute = ABSOLUTE;
     symbol * operand_symbol;
-    instruction_code->words[curr_word_index] = (word_data){0};
 
     switch (operand.addressing_mode)
     {
     case ADDRESSING_MODES_IMMEDIATE:
+        instruction_code->words[curr_word_index] = (word_data){0};
         instruction_code->words[curr_word_index].are_attribute = ABSOLUTE;
 
         instruction_code->words[curr_word_index].content.value = operand.operand_data;
@@ -363,6 +375,8 @@ machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_li
 
     case ADDRESSING_MODES_DIRECT:
     case ADDRESSING_MODES_INDEX:
+        instruction_code->words[curr_word_index] = (word_data){0};
+
 
         if(*operand.varible_name == '\0')
         {
@@ -411,13 +425,18 @@ machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_li
         break;
 
     default:
-        ret = MACHINE_CODE_STATUS_ERROR_UNKNOWN_ADDRESSING_MODE;
+
+
+        /* check if the operand want just empty, if not error*/
+        if((operand.addressing_mode != 0) && (operand.addressing_mode != ADDRESSING_MODES_NONE ) && (operand.operand_data != 0) && (operand.varible_name[0] != '\0'))
+        {
+            ret = MACHINE_CODE_STATUS_ERROR_UNKNOWN_ADDRESSING_MODE;
+        }
         break;
     }
 
     *curr_word_index_ptr = curr_word_index;
     return ret;
-
 }
 
 

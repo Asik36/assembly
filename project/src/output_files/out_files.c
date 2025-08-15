@@ -21,6 +21,12 @@ bool out_files_main( int machine_code_instructions_length, int machine_code_symb
     return g_out_files_error_flag == false;
 }
 
+/**
+ * @brief a helper function that converts a word from the machine code table to special base (splits the 20 bits into 5 groups of 4)
+ *
+ * @param word the word_data from memory to be converted to the special base
+ * @return special_base the word data after being changed to the special base
+ */
 static special_base out_files_convert_to_special_base(word_data word)
 {
     special_base ret = (special_base){0};
@@ -39,6 +45,12 @@ static special_base out_files_convert_to_special_base(word_data word)
     return ret;
 }
 
+/**
+ * @brief a helper function that writes one word from the memory into the machine code output file in the correct format
+ *
+ * @param machine_code_f a pointer to the machine code output file
+ * @param word_index the index in the g_memory of the word we want to write into the output file
+ */
 static void out_files_write_machine_code_line(FILE * machine_code_f, int word_index)
 {
     special_base line = out_files_convert_to_special_base(g_memory[word_index]);
@@ -62,6 +74,15 @@ static void out_files_write_machine_code_line(FILE * machine_code_f, int word_in
     }
 }
 
+/**
+ * @brief a helperr function that creates an output file with appropriate name (without checking if the file was opened successfully)
+ *
+ * @param f_type the type of output file to be created
+ * @param base_file_name the name of the base file (the name of the assembly file without the ending)
+ * @param out_file a pointer to a pointer to a file that is used to pass up to the called function the opend file
+ * @param func_name a string that is used to return this functions name to the caller function
+ * @return out_file_status status that represents wether the function was executed successfully or with wich errors
+ */
 static out_file_status out_files_create_file(out_file_type f_type, char * base_file_name,FILE ** out_file, const char ** func_name)
 {
     char ret_file_name [FILE_NAME_LENGTH];

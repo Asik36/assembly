@@ -51,6 +51,7 @@ typedef enum are_e
 
 typedef enum addressing_modes_e
 {
+    ADDRESSING_MODES_NONE = -1,
     ADDRESSING_MODES_IMMEDIATE,
     ADDRESSING_MODES_DIRECT,
     ADDRESSING_MODES_INDEX,
