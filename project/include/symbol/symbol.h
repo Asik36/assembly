@@ -145,13 +145,43 @@ status_e symbol_handle_entry_attribute(symbol *old_symbol) ;
  * @return error if symbol alredy defined as extern or the symbol is used as label elsewhere
  */
 status_e symbol_handle_data_or_string(symbol *old_symbol, symbol *new_symbol) ;
+/**
+ * @brief prints error messeges
+ * @param status error code
+ */
 void symbol_error_handle(status_e status) ;
-
+/**
+ * @brief assign a symbol memory if it is not assigned alredy
+ * @param s symbol without an adresss
+ * @param address assigning address
+ * @return returns the size of command
+ */
 uint16_t symbol_assign_memory(symbol * s, int address);
+/**
+ * @brief checks if symbol is of type entery and if it was not initilized in a file
+ * @param s symbol
+ * @return status if it was initilized or not
+ */
 status_e symbol_is_uninitilized_entery(symbol * s);
-
+/**
+ * @brief gets the next avlible address form instructions list
+ * @param instruction_data_table list of instructions
+ * @param instruction_num amont of instructions
+ * @return retutn the next avlible address or 100 if there is not instructions
+ */
 int symbol_get_varibles_start_address(instruction_data *instruction_data_table, int instruction_num);
+/**
+ * @brief incrise the size of symbol table by one
+ * @param p_symbol_table pointer to symbol table
+ * @param p_symbol_counter pointer to symbol counter
+ * @return status if allocation was succssful
+ */
 status_e symbol_table_grow(symbol **p_symbol_table, int *p_symbol_counter);
+/**
+ * @brief duplicates a string
+ * @param src string to copy
+ * @return copy of a stringS
+ */
 char *my_strdup(const char *src);
 #endif 
 
