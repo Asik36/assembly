@@ -433,6 +433,7 @@ status fill_directive_struct(char *line, directive ** list, int * directive_coun
             else
             {
                 (*list)[*directive_counter].data = string_data; 
+                (*list)[*directive_counter].data_length = length_of_string;
                 char *ptr_to_String = (char *)(*list)[*directive_counter].data;
                 (*list)[*directive_counter].data = string_data;
                 char *start_of_string = strchr(line,'"');

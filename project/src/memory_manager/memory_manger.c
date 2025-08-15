@@ -128,49 +128,55 @@ int memory_operand_addressing_mode_index_data(char *op)
 uint16_t memory_instruction_get_size(instruction_data *ins_data)
 {
     uint16_t size = 1; /*defualt size , each command is at least one word long*/
-    operand_data *op_data;
+    operand_data *op_data_dest;
+    operand_data *op_data_src;
 
-    op_data = &ins_data->dest_operand_data;
-    if (op_data != NULL)
+    op_data_src = &ins_data->src_operand_data;
+    op_data_dest = &ins_data->dest_operand_data;
+    
+    if (op_data_dest != NULL)
     {
-        switch (op_data->addressing_mode)
+        switch (op_data_dest->addressing_mode)
         {
-        case ADDRESSING_MODES_IMMEDIATE:
-            size += 2;
-            break;
-        case ADDRESSING_MODES_DIRECT:
-            size += 2;
-            break;
-        case ADDRESSING_MODES_INDEX:
-            size += 2;
-            break;
-        case ADDRESSING_MODES_REGISTER_DIRECT:
-            size += 1;
-            break;
-        default:
-            break;
+            case ADDRESSING_MODES_IMMEDIATE:
+                size += 1;
+                break;
+            case ADDRESSING_MODES_DIRECT:
+                size += 2;
+                break;
+            case ADDRESSING_MODES_INDEX:
+                size += 2;
+                break;
+            case ADDRESSING_MODES_REGISTER_DIRECT:
+                size += 0;
+                break;
+            default:
+                break;
         }
     }
 
-    op_data = &ins_data->src_operand_data;
-    if (op_data != NULL)
+    if (op_data_src != NULL)
     {
-        switch (op_data->addressing_mode)
+        switch (op_data_src->addressing_mode)
         {
-        case ADDRESSING_MODES_IMMEDIATE:
-            size += 2;
-            break;
-        case ADDRESSING_MODES_DIRECT:
-            size += 2;
-            break;
-        case ADDRESSING_MODES_INDEX:
-            size += 2;
-            break;
-        case ADDRESSING_MODES_REGISTER_DIRECT:
+            case ADDRESSING_MODES_IMMEDIATE:
+                size += 1;
+                break;
+            case ADDRESSING_MODES_DIRECT:
+                size += 2;
+                break;
+            case ADDRESSING_MODES_INDEX:
+                size += 2;
+                break;
+            case ADDRESSING_MODES_REGISTER_DIRECT:
+                size += 0;
+                break;
+            default:
+                break;
+        }
+        if(op_data_dest != NULL || op_data_src != NULL)
+        {
             size += 1;
-            break;
-        default:
-            break;
         }
     }
 
@@ -265,8 +271,6 @@ memory_status memory_instruction_validation(instruction_data *ins_data)
     }
     else if (dest_addressing_mode != ADDRESSING_MODES_NONE  && commands[command_index].dest_operand_types[dest_addressing_mode] == false)
     {
-        printf("DEST OPERAND : %s %d %d\n",commands[command_index].command_name ,src_addressing_mode,dest_addressing_mode);
-
         retval = MEMORY_STATUS_ERR_INVALID_DESTINATION_ADDRESSING_MODE;
     }
 
