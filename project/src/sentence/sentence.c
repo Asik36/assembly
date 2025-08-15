@@ -439,7 +439,6 @@ status fill_directive_struct(char *line, directive ** list, int * directive_coun
                 line = start_of_string + 1;
                 while(*line != '"' && *line != '\0')
                 {
-                    printf("A");
                     ptr_to_String[idx] = *line;
                     idx++;
                     line++;
