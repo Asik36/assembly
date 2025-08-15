@@ -13,7 +13,7 @@
 #define ARE_MAX_BIT_SIZE 4
 #define FUNCT_MAX_BIT_SIZE 4
 #define REGISTER_MAX_BIT_SIZE 4
-#define OPERAND_TYPE_MAX_BIT_SIZE 2
+#define OPERAND_TYPE_MAX_BIT_SIZE 3
 #define ADDRESSING_TYPES_AMOUNT 4
 #define COMMAND_AMONT 16
 #define OPERAND_AMONT 16
@@ -125,11 +125,11 @@ typedef uint16_t base_address_content;  /*Data location in memory*/
 /*Info about the operands of the command*/
 typedef struct operand_content_s
 {
-    uint16_t funct                  : FUNCT_MAX_BIT_SIZE;
-    uint16_t src_register               : REGISTER_MAX_BIT_SIZE;         /*first operand*/
-    addressing_modes src_operand_type  : OPERAND_TYPE_MAX_BIT_SIZE;    /*first operand's type*/
+    uint16_t funct                       : FUNCT_MAX_BIT_SIZE;
+    uint16_t src_register                : REGISTER_MAX_BIT_SIZE;         /*first operand*/
+    addressing_modes src_operand_type    : OPERAND_TYPE_MAX_BIT_SIZE;    /*first operand's type*/
     uint16_t dest_register               : REGISTER_MAX_BIT_SIZE;         /*second operand*/
-    addressing_modes dest_operand_type  : OPERAND_TYPE_MAX_BIT_SIZE;    /*second operand's type*/
+    addressing_modes dest_operand_type   : OPERAND_TYPE_MAX_BIT_SIZE;    /*second operand's type*/
 
 }operand_content;
 

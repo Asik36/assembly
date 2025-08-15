@@ -122,8 +122,7 @@ bool machine_code_main(char * base_file_name,symbol * symbol_list, int symbol_li
 
     machine_code_handle_instructions(symbol_list, symbol_list_length, instruction_list, instruction_list_length);
     machine_code_handle_symbols(symbol_list, symbol_list_length);
-
-    if(g_machine_code_error_flag == true)
+    if(g_machine_code_error_flag == false)
     {
         out_files_main(g_instructions_word_count, g_symbols_word_count, base_file_name);
     }
