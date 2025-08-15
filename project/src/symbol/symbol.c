@@ -49,6 +49,7 @@ int symbol_get_varibles_start_address(instruction_data *instruction_data_table, 
     {
         start_address = instruction_data_table[instruction_num - 1].address + instruction_data_table[instruction_num - 1].size;
     }
+    printf("START ADDRESS :%s\n",commands[instruction_data_table[6].command_index].command_name);
     return start_address;
 }
 
@@ -146,8 +147,11 @@ status_e symbol_complete_table(symbol *symbol_table, int symbol_counter, int sta
 }
 uint16_t symbol_assign_memory(symbol *s, int address)
 {
-
-    if (s->data_attribute != ATTRIBUTE_CODE)
+    if(s->access_attribute == ATTRIBUTE_EXTERN)
+    {
+        s->address = 0;
+    }
+    else if (s->data_attribute != ATTRIBUTE_CODE && s->size != 0)
     {
         s->address = address;
     }
@@ -223,6 +227,7 @@ void symbol_extract_directive(symbol *new_symbol, directive *dir)
     new_symbol->data_attribute = dir->data_attribute;
     new_symbol->size = dir->data_length;
     new_symbol->data = dir->data;
+    printf("name: %s , size: %d\n",dir->variable_name,dir->data_length);
 }
 
 int * symbol_find(char *symbol_name)
