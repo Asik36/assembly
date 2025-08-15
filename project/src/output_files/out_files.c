@@ -160,7 +160,7 @@ out_file_status out_files_write_line(FILE * out_file, out_file_type file_type, i
     {
     case OUT_FILE_TYPE_ENTRIES:
         symbol_to_write = g_entrys[symbol_index];
-        fprintf(out_file, "%s,%d,%d\n",symbol_to_write.symbol_name, (symbol_to_write.base_address / 16) * 16, symbol_to_write.base_address % 16);
+        fprintf(out_file, "%s,%d,%d\n",symbol_to_write.symbol_name, (symbol_to_write.base_address & MASK_BASE_ADDRESS), (symbol_to_write.base_address & MASK_OFFSET_ADDRESS));
         break;
     case OUT_FILE_TYPE_EXTERNALS:
         symbol_to_write = g_externals[symbol_index];

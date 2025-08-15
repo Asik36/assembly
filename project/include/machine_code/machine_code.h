@@ -9,6 +9,10 @@
 #define STARTING_MEMORY_ADDRESS 100
 #define FILE_NAME_LENGTH 255
 
+/*masks used to create base and offset addreses from the regular (value) address*/
+#define MASK_OFFSET_ADDRESS 0x000F
+#define MASK_BASE_ADDRESS 0xFFF0
+
 extern word_data g_memory[MEMORY_MAX_SIZE];
 
 

@@ -416,13 +416,13 @@ machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_li
         }
         instruction_code->words[curr_word_index].are_attribute = are_attribute;
 
-        instruction_code->words[curr_word_index].content.data_address = (operand_symbol->address / 16) * 16;
+        instruction_code->words[curr_word_index].content.data_address = (operand_symbol->address & MASK_BASE_ADDRESS);
 
         curr_word_index++;
 
         instruction_code->words[curr_word_index] = (word_data){0};
         instruction_code->words[curr_word_index].are_attribute = are_attribute;
-        instruction_code->words[curr_word_index].content.offset = operand_symbol->address % 16;
+        instruction_code->words[curr_word_index].content.offset = operand_symbol->address & MASK_OFFSET_ADDRESS;
         curr_word_index++;
 
         break;
