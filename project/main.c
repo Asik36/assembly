@@ -37,10 +37,13 @@ int main(void)
     {
         fprintf(stderr,"MACHINE CODE ERROR\n");
     }
-    for (int i = 0; i < symbol_counter; i++)
-    {
-        printf("SYMBOL : %s , %d , %d\n",symbol_list[i].name,symbol_list[i].address, symbol_list[i].size);
-    }
+
+
+    
+    // for (int i = 0; i < symbol_counter; i++)
+    // {
+    //     printf("SYMBOL : %s , %d , %d\n",symbol_list[i].name,symbol_list[i].address, symbol_list[i].size);
+    // }
     
 
 

@@ -59,7 +59,6 @@ static uint16_t machine_code_reorder_operand_word_content(operand_content operan
     ret = machine_code_append_arg_to_word(ret, operand_data_word.dest_register, REGISTER_MAX_BIT_SIZE);
     ret = machine_code_append_arg_to_word(ret, operand_data_word.dest_operand_type, OPERAND_TYPE_MAX_BIT_SIZE);
 
-    printf("SRC : %d %d DST: %d %d\n", operand_data_word.src_register, operand_data_word.src_operand_type, operand_data_word.dest_register, operand_data_word.dest_operand_type);
 
     return ret;
 }
@@ -219,7 +218,7 @@ machine_code_status machine_code_add_instruction_code(symbol *symbol_list, int s
     operand_content op;
 
     instruction_code.word_count = current_instruction.size;
-    instruction_code.words = calloc(instruction_code.word_count, sizeof *instruction_code.words);
+    instruction_code.words = calloc(instruction_code.word_count+1, sizeof(word_data));
 
     g_instructions_word_count += instruction_code.word_count;
 
@@ -278,7 +277,10 @@ machine_code_status machine_code_add_instruction_code(symbol *symbol_list, int s
         {
             machine_code_func_handler(ret, child_func_name);
         }
+    
         free(instruction_code.words);
+
+        
     }
     return ret;
 }
@@ -300,7 +302,7 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol, const ch
 
         g_symbols_word_count += symbol_code.word_count;
 
-        symbol_code.words = calloc(symbol_code.word_count, sizeof *symbol_code.words);
+        symbol_code.words = calloc(symbol_code.word_count, sizeof(word_data));
 
         if (!symbol_code.words)
         {
@@ -324,7 +326,14 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol, const ch
             for (int word_index = 0; word_index < (int)symbol_code.word_count; word_index++)
             {
                 symbol_code.words[word_index].are_attribute = ABSOLUTE;
-                symbol_code.words[word_index].content.value = ((value_content *)current_symbol.data)[word_index];
+                if(current_symbol.data_attribute == ATTRIBUTE_STRING)
+                {
+                    symbol_code.words[word_index].content.value = ((char *)current_symbol.data)[word_index];
+                }
+                else
+                {
+                    symbol_code.words[word_index].content.value = ((int *)current_symbol.data)[word_index];
+                }
             }
             child_func_status = machine_code_write_machine_code(symbol_code, &child_func_name);
             if (child_func_status != MACHINE_CODE_STATUS_SUCCESS)
@@ -429,6 +438,7 @@ machine_code_status machine_code_add_operand(symbol *symbol_list, int symbol_lis
         {
             ret = MACHINE_CODE_STATUS_ERROR_UNKNOWN_ADDRESSING_MODE;
         }
+
         break;
     }
 

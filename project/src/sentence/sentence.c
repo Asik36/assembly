@@ -424,7 +424,7 @@ status fill_directive_struct(char *line, directive ** list, int * directive_coun
                 line++;
             }
             int length_of_string = get_len_string(line);
-            char *string_data = (char*) malloc(length_of_string + 1);
+            char *string_data = (char*) malloc((length_of_string+1)*sizeof(char));
             if(string_data == NULL)
             {
                 perror("Couldn't malloc\n");
@@ -432,20 +432,23 @@ status fill_directive_struct(char *line, directive ** list, int * directive_coun
             }
             else
             {
-                (*list)[*directive_counter].data = string_data; 
-                (*list)[*directive_counter].data_length = length_of_string;
-                char *ptr_to_String = (char *)(*list)[*directive_counter].data;
-                (*list)[*directive_counter].data = string_data;
+
+                char *ptr_to_String = string_data;
                 char *start_of_string = strchr(line,'"');
                 int idx = 0;
                 line = start_of_string + 1;
-                while(*line != '"')
+                while(*line != '"' && *line != '\0')
                 {
+                    printf("A");
                     ptr_to_String[idx] = *line;
                     idx++;
                     line++;
                 }
                 ptr_to_String[idx] = '\0';
+
+                (*list)[*directive_counter].data = string_data; 
+                (*list)[*directive_counter].data_length = length_of_string;
+
                 (*list)[*directive_counter].data_attribute = ATTRIBUTE_STRING;
             }
         }

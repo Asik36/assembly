@@ -22,12 +22,10 @@ memory_status memory(instruction *instruction_line_table, int n, instruction_dat
         if(cur_instruction_data->dest_operand_data.addressing_mode == ADDRESSING_MODES_NONE)
         {
             cur_instruction_data->dest_operand_data.addressing_mode = 0;
-            cur_instruction_data->dest_operand_data.operand_data = 0;
         }
         if(cur_instruction_data->src_operand_data.addressing_mode == ADDRESSING_MODES_NONE)
         {
             cur_instruction_data->src_operand_data.addressing_mode = 0;
-            cur_instruction_data->src_operand_data.operand_data = 0;
         }
 
 
