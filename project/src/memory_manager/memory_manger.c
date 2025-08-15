@@ -79,7 +79,7 @@ int memory_operand_get_register_index(char *op)
 
         if (strncmp(op, register_names[i], SYMBOL_MAX_SIZE) == 0)
         {
-            index = i;
+            index = i+1;
         }
     }
     return index;
