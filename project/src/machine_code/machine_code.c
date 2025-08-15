@@ -131,7 +131,7 @@ bool machine_code_main(char * base_file_name,symbol * symbol_list, int symbol_li
     free(g_entrys);
     free(g_externals);
 
-    return (g_machine_code_error_flag);
+    return g_machine_code_error_flag == false;
 }
 
 machine_code_status machine_code_write_machine_code(machine_code code, const char ** func_name)
@@ -362,11 +362,11 @@ machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_li
 
     are are_attribute = ABSOLUTE;
     symbol * operand_symbol;
-    instruction_code->words[curr_word_index] = (word_data){0};
 
     switch (operand.addressing_mode)
     {
     case ADDRESSING_MODES_IMMEDIATE:
+        instruction_code->words[curr_word_index] = (word_data){0};
         instruction_code->words[curr_word_index].are_attribute = ABSOLUTE;
 
         instruction_code->words[curr_word_index].content.value = operand.operand_data;
@@ -375,6 +375,8 @@ machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_li
 
     case ADDRESSING_MODES_DIRECT:
     case ADDRESSING_MODES_INDEX:
+        instruction_code->words[curr_word_index] = (word_data){0};
+
 
         if(*operand.varible_name == '\0')
         {
@@ -423,7 +425,13 @@ machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_li
         break;
 
     default:
-        ret = MACHINE_CODE_STATUS_ERROR_UNKNOWN_ADDRESSING_MODE;
+
+
+        /* check if the operand want just empty, if not error*/
+        if((operand.addressing_mode != 0) && (operand.addressing_mode != ADDRESSING_MODES_NONE ) && (operand.operand_data != 0) && (operand.varible_name[0] != '\0'))
+        {
+            ret = MACHINE_CODE_STATUS_ERROR_UNKNOWN_ADDRESSING_MODE;
+        }
         break;
     }
 
