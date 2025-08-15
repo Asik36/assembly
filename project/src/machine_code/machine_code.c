@@ -31,11 +31,11 @@ bool g_machine_code_error_flag = false;
 static inline uint16_t machine_code_append_arg_to_word(uint16_t curr_val, uint16_t new_arg, int new_length)
 {
     curr_val = curr_val << new_length;
-    uint16_t mask = 0xFF;
-    for(int i = 0; i < (15 - new_length); i++)
-    {
-        mask = mask >> 1;
-    }
+    uint16_t mask = 0xFFFF >> (0xF - new_length);
+    // for(int i = 0; i < (15 - new_length); i++)
+    // {
+    //     mask = mask >> 1;
+    // }
     curr_val |= (new_arg & mask);
     return curr_val;
 }
@@ -245,11 +245,13 @@ machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int 
 
             // op = &curr_word->content.operand;
             op.funct = curr_command.funct;
-            op.dest_operand_type = current_instruction.dest_operand_data.addressing_mode;
-            op.dest_register = machine_code_get_operands_register(current_instruction.dest_operand_data);
-            op.src_operand_type = current_instruction.src_operand_data.addressing_mode;
+
             op.src_register = machine_code_get_operands_register(current_instruction.src_operand_data);
-            curr_word->content.value = machine_code_reorder_operand_word_content(op);
+            op.src_operand_type = current_instruction.src_operand_data.addressing_mode;
+
+            op.dest_register = machine_code_get_operands_register(current_instruction.dest_operand_data);
+            op.dest_operand_type = current_instruction.dest_operand_data.addressing_mode;
+            curr_word->content.opcode = machine_code_reorder_operand_word_content(op);
 
             curr_word_index++;
             machine_code_status adding_operand;
