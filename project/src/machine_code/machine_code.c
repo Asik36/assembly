@@ -3,14 +3,14 @@
 
 const bool NO_DEST_OPERAND[ADDRESSING_TYPES_AMOUNT] = {0};
 
-word_data g_memory [MEMORY_MAX_SIZE];
+word_data g_memory[MEMORY_MAX_SIZE];
 int g_memory_word_index = STARTING_MEMORY_ADDRESS;
 
 /* a table of symbol calls (symbol name and address) with all the calls for external varieables that is passed to the out_files module*/
-symbol_call * g_externals = NULL;
+symbol_call *g_externals = NULL;
 
 /* a table of symbol calls (symbol name and address) with all the defenitions for entry varieables that is passed to the out_files module*/
-symbol_call * g_entrys = NULL;
+symbol_call *g_entrys = NULL;
 
 int g_extern_call_length = 0;
 int g_entry_defenition_length = 0;
@@ -59,6 +59,8 @@ static uint16_t machine_code_reorder_operand_word_content(operand_content operan
     ret = machine_code_append_arg_to_word(ret, operand_data_word.dest_register, REGISTER_MAX_BIT_SIZE);
     ret = machine_code_append_arg_to_word(ret, operand_data_word.dest_operand_type, OPERAND_TYPE_MAX_BIT_SIZE);
 
+    printf("SRC : %d %d DST: %d %d\n", operand_data_word.src_register, operand_data_word.src_operand_type, operand_data_word.dest_register, operand_data_word.dest_operand_type);
+
     return ret;
 }
 
@@ -70,7 +72,7 @@ static uint16_t machine_code_reorder_operand_word_content(operand_content operan
  * @param func_name a string that is used to return this functions name to the caller function
  * @return machine_code_status status that represents wether the function was executed successfully or with wich errors
  */
-static machine_code_status add_item(symbol_call new_item, enum attribute_access_type_e type, const char ** func_name)
+static machine_code_status add_item(symbol_call new_item, enum attribute_access_type_e type, const char **func_name)
 {
     *func_name = __func__;
 
@@ -83,7 +85,7 @@ static machine_code_status add_item(symbol_call new_item, enum attribute_access_
         array = &g_externals;
         array_length = &g_extern_call_length;
     }
-    else if(type == ATTRIBUTE_ENTERY)
+    else if (type == ATTRIBUTE_ENTERY)
     {
         array = &g_entrys;
         array_length = &g_entry_defenition_length;
@@ -94,10 +96,10 @@ static machine_code_status add_item(symbol_call new_item, enum attribute_access_
         ret = MACHINE_CODE_STATUS_ERROR_UNKNOWN_ATTRIBUTE_ACCESS_TYPE;
     }
 
-    if(ret == MACHINE_CODE_STATUS_SUCCESS)
+    if (ret == MACHINE_CODE_STATUS_SUCCESS)
     {
 
-        symbol_call *temp = realloc(*array, (*array_length + 1) * sizeof (**array));
+        symbol_call *temp = realloc(*array, (*array_length + 1) * sizeof(**array));
         if (!temp)
         {
 
@@ -113,8 +115,7 @@ static machine_code_status add_item(symbol_call new_item, enum attribute_access_
     return ret;
 }
 
-
-bool machine_code_main(char * base_file_name,symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length)
+bool machine_code_main(char *base_file_name, symbol *symbol_list, int symbol_list_length, instruction_data *instruction_list, int instruction_list_length)
 {
     memset(g_memory, 0, sizeof(g_memory));
     g_memory_word_index = STARTING_MEMORY_ADDRESS;
@@ -124,10 +125,9 @@ bool machine_code_main(char * base_file_name,symbol * symbol_list, int symbol_li
     g_entrys = NULL;
     g_entry_defenition_length = 0;
 
-
     machine_code_handle_instructions(symbol_list, symbol_list_length, instruction_list, instruction_list_length);
     machine_code_handle_symbols(symbol_list, symbol_list_length);
-    if(g_machine_code_error_flag == false)
+    if (g_machine_code_error_flag == false)
     {
         out_files_main(g_instructions_word_count, g_symbols_word_count, base_file_name);
     }
@@ -138,35 +138,35 @@ bool machine_code_main(char * base_file_name,symbol * symbol_list, int symbol_li
     return g_machine_code_error_flag == false;
 }
 
-machine_code_status machine_code_write_machine_code(machine_code code, const char ** func_name)
+machine_code_status machine_code_write_machine_code(machine_code code, const char **func_name)
 {
     *func_name = __func__;
 
     machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
-    if(g_memory_word_index + code.word_count > MEMORY_MAX_SIZE)
+    if (g_memory_word_index + code.word_count > MEMORY_MAX_SIZE)
     {
 
         ret = MACHINE_CODE_STATUS_ERROR_MEMORY_OVERFLOW;
     }
     else
     {
-        for(int word_index = 0; (word_index < (int)code.word_count); word_index++)
+        for (int word_index = 0; (word_index < (int)code.word_count); word_index++)
         {
-            g_memory[g_memory_word_index ++] = code.words[word_index];
+            g_memory[g_memory_word_index++] = code.words[word_index];
         }
     }
     return ret;
 }
 
-void machine_code_handle_instructions(symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length)
+void machine_code_handle_instructions(symbol *symbol_list, int symbol_list_length, instruction_data *instruction_list, int instruction_list_length)
 {
-    const char * child_func_name;
+    const char *child_func_name;
     machine_code_status adding_instruction_status;
 
-    for(int instruction_index = 0; instruction_index < instruction_list_length; instruction_index++)
+    for (int instruction_index = 0; instruction_index < instruction_list_length; instruction_index++)
     {
         adding_instruction_status = machine_code_add_instruction_code(symbol_list, symbol_list_length, instruction_list[instruction_index], &child_func_name);
-        if(adding_instruction_status != MACHINE_CODE_STATUS_SUCCESS)
+        if (adding_instruction_status != MACHINE_CODE_STATUS_SUCCESS)
         {
             machine_code_func_handler(adding_instruction_status, child_func_name);
             break;
@@ -174,11 +174,11 @@ void machine_code_handle_instructions(symbol * symbol_list, int symbol_list_leng
     }
 }
 
-void machine_code_handle_symbols(symbol * symbol_list, int symbol_list_length)
+void machine_code_handle_symbols(symbol *symbol_list, int symbol_list_length)
 {
-    const char * child_func_name;
+    const char *child_func_name;
     machine_code_status child_status;
-    for(int symbol_index = 0; symbol_index < symbol_list_length; symbol_index++)
+    for (int symbol_index = 0; symbol_index < symbol_list_length; symbol_index++)
     {
         child_status = machine_code_add_symbol_code(symbol_list[symbol_index], &child_func_name);
         machine_code_func_handler(child_status, child_func_name);
@@ -197,16 +197,16 @@ void machine_code_handle_symbols(symbol * symbol_list, int symbol_list_length)
 static bool flag_array_is_empty(bool flag_array[], int arr_length)
 {
     bool ret = true;
-    for(int i = 0; (i < arr_length) && (ret == true); i++)
+    for (int i = 0; (i < arr_length) && (ret == true); i++)
     {
         ret = !flag_array[i];
     }
     return ret;
 }
 
-machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int symbol_list_length, instruction_data current_instruction, const char ** func_name)
+machine_code_status machine_code_add_instruction_code(symbol *symbol_list, int symbol_list_length, instruction_data current_instruction, const char **func_name)
 {
-    const char * child_func_name;
+    const char *child_func_name;
     *func_name = __func__;
 
     machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
@@ -214,14 +214,12 @@ machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int 
     machine_code instruction_code;
     command curr_command;
     int curr_word_index = 0;
-    word_data *curr_word = NULL ;
+    word_data *curr_word = NULL;
 
-    operand_content op ;
+    operand_content op;
 
     instruction_code.word_count = current_instruction.size;
     instruction_code.words = calloc(instruction_code.word_count, sizeof *instruction_code.words);
-
-
 
     g_instructions_word_count += instruction_code.word_count;
 
@@ -256,20 +254,20 @@ machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int 
             curr_word_index++;
             machine_code_status adding_operand;
 
-            if(!flag_array_is_empty(curr_command.src_operand_types, ADDRESSING_TYPES_AMOUNT))
+            if (!flag_array_is_empty(curr_command.src_operand_types, ADDRESSING_TYPES_AMOUNT))
             {
                 adding_operand = machine_code_add_operand(symbol_list, symbol_list_length, current_instruction.src_operand_data, &instruction_code, &curr_word_index, &child_func_name);
-                if(adding_operand != MACHINE_CODE_STATUS_SUCCESS)
+                if (adding_operand != MACHINE_CODE_STATUS_SUCCESS)
                 {
-                    machine_code_func_handler(adding_operand,child_func_name);
+                    machine_code_func_handler(adding_operand, child_func_name);
                 }
             }
-            if(!flag_array_is_empty(curr_command.dest_operand_types, ADDRESSING_TYPES_AMOUNT))
+            if (!flag_array_is_empty(curr_command.dest_operand_types, ADDRESSING_TYPES_AMOUNT))
             {
                 adding_operand = machine_code_add_operand(symbol_list, symbol_list_length, current_instruction.dest_operand_data, &instruction_code, &curr_word_index, &child_func_name);
-                if(adding_operand != MACHINE_CODE_STATUS_SUCCESS)
+                if (adding_operand != MACHINE_CODE_STATUS_SUCCESS)
                 {
-                    machine_code_func_handler(adding_operand,child_func_name);
+                    machine_code_func_handler(adding_operand, child_func_name);
                 }
             }
         }
@@ -285,17 +283,17 @@ machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int 
     return ret;
 }
 
-machine_code_status machine_code_add_symbol_code(symbol current_symbol, const char ** func_name)
+machine_code_status machine_code_add_symbol_code(symbol current_symbol, const char **func_name)
 {
     *func_name = __func__;
-    const char * child_func_name;
+    const char *child_func_name;
 
     machine_code_status child_func_status;
 
     machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
 
     /* check if symbol isnt external or label*/
-    if(current_symbol.access_attribute != ATTRIBUTE_EXTERN && (current_symbol.size != 0) )
+    if (current_symbol.access_attribute != ATTRIBUTE_EXTERN && (current_symbol.size != 0))
     {
         machine_code symbol_code;
         symbol_code.word_count = current_symbol.size;
@@ -304,14 +302,13 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol, const ch
 
         symbol_code.words = calloc(symbol_code.word_count, sizeof *symbol_code.words);
 
-        if(!symbol_code.words)
+        if (!symbol_code.words)
         {
             ret = MACHINE_CODE_STATUS_ERROR_MALLOC;
-
         }
         else
         {
-            if(current_symbol.access_attribute == ATTRIBUTE_ENTERY)
+            if (current_symbol.access_attribute == ATTRIBUTE_ENTERY)
             {
                 symbol_call entry_item;
                 strncpy(entry_item.symbol_name, current_symbol.name, FILE_NAME_LENGTH - 1);
@@ -323,14 +320,13 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol, const ch
                 {
                     machine_code_func_handler(child_func_status, child_func_name);
                 }
-
             }
-            for(int word_index = 0; word_index < (int)symbol_code.word_count; word_index++)
+            for (int word_index = 0; word_index < (int)symbol_code.word_count; word_index++)
             {
-                symbol_code.words[word_index].are_attribute =  ABSOLUTE;
+                symbol_code.words[word_index].are_attribute = ABSOLUTE;
                 symbol_code.words[word_index].content.value = ((value_content *)current_symbol.data)[word_index];
             }
-            child_func_status = machine_code_write_machine_code(symbol_code,&child_func_name);
+            child_func_status = machine_code_write_machine_code(symbol_code, &child_func_name);
             if (child_func_status != MACHINE_CODE_STATUS_SUCCESS)
             {
                 machine_code_func_handler(child_func_status, child_func_name);
@@ -341,33 +337,30 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol, const ch
     return ret;
 }
 
-symbol* machine_code_find_symbol(symbol * symbol_list, int symbol_list_length, const char * symbol_name)
+symbol *machine_code_find_symbol(symbol *symbol_list, int symbol_list_length, const char *symbol_name)
 {
-    symbol * ret = NULL;
-    for(int symbol_index = 0; (!ret) && (symbol_index < symbol_list_length); symbol_index++)
+    symbol *ret = NULL;
+    for (int symbol_index = 0; (!ret) && (symbol_index < symbol_list_length); symbol_index++)
     {
-        if(strncmp(symbol_list[symbol_index].name, symbol_name, SYMBOL_MAX_SIZE) == 0)
+        if (strncmp(symbol_list[symbol_index].name, symbol_name, SYMBOL_MAX_SIZE) == 0)
         {
             ret = &symbol_list[symbol_index];
         }
-
     }
     return ret;
 }
 
-
-machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_list_length, operand_data operand, machine_code * instruction_code, int * curr_word_index_ptr, const char ** func_name)
+machine_code_status machine_code_add_operand(symbol *symbol_list, int symbol_list_length, operand_data operand, machine_code *instruction_code, int *curr_word_index_ptr, const char **func_name)
 {
     *func_name = __func__;
-    const char * child_func_name;
+    const char *child_func_name;
     machine_code_status child_func_status;
     machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
 
     int curr_word_index = *curr_word_index_ptr;
 
-
     are are_attribute = ABSOLUTE;
-    symbol * operand_symbol;
+    symbol *operand_symbol;
 
     switch (operand.addressing_mode)
     {
@@ -383,25 +376,24 @@ machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_li
     case ADDRESSING_MODES_INDEX:
         instruction_code->words[curr_word_index] = (word_data){0};
 
-
-        if(*operand.varible_name == '\0')
+        if (*operand.varible_name == '\0')
         {
 
             ret = MACHINE_CODE_STATUS_ERROR_EMPTY_VARIABLE_NAME;
             break;
         }
-        operand_symbol = machine_code_find_symbol(symbol_list,symbol_list_length, operand.varible_name);
-        if(!operand_symbol)
+        operand_symbol = machine_code_find_symbol(symbol_list, symbol_list_length, operand.varible_name);
+        if (!operand_symbol)
         {
 
             ret = MACHINE_CODE_STATUS_ERROR_SYMBOL_NOT_FOUND;
             break;
         }
-        if(operand_symbol->access_attribute == ATTRIBUTE_EXTERN)
+        if (operand_symbol->access_attribute == ATTRIBUTE_EXTERN)
         {
             are_attribute = EXTERNAL;
             symbol_call extern_item;
-            strncpy(extern_item.symbol_name,operand_symbol->name, FILE_NAME_LENGTH - 1);
+            strncpy(extern_item.symbol_name, operand_symbol->name, FILE_NAME_LENGTH - 1);
             extern_item.symbol_name[FILE_NAME_LENGTH - 1] = '\0';
             extern_item.base_address = curr_word_index + g_memory_word_index;
             child_func_status = add_item(extern_item, ATTRIBUTE_EXTERN, &child_func_name);
@@ -432,9 +424,8 @@ machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_li
 
     default:
 
-
         /* check if the operand want just empty, if not error*/
-        if((operand.addressing_mode != 0) && (operand.addressing_mode != ADDRESSING_MODES_NONE ) && (operand.operand_data != 0) && (operand.varible_name[0] != '\0'))
+        if ((operand.addressing_mode != 0) && (operand.addressing_mode != ADDRESSING_MODES_NONE) && (operand.operand_data != 0) && (operand.varible_name[0] != '\0'))
         {
             ret = MACHINE_CODE_STATUS_ERROR_UNKNOWN_ADDRESSING_MODE;
         }
@@ -445,21 +436,19 @@ machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_li
     return ret;
 }
 
-
 uint16_t machine_code_get_operands_register(operand_data operand)
 {
     uint16_t ret = 0;
-    if((operand.addressing_mode == ADDRESSING_MODES_REGISTER_DIRECT) || (operand.addressing_mode == ADDRESSING_MODES_INDEX))
+    if ((operand.addressing_mode == ADDRESSING_MODES_REGISTER_DIRECT) || (operand.addressing_mode == ADDRESSING_MODES_INDEX))
     {
         ret = operand.operand_data;
     }
     return ret;
 }
 
-
-void machine_code_func_handler(machine_code_status func_return_status, const char * func_name)
+void machine_code_func_handler(machine_code_status func_return_status, const char *func_name)
 {
-    if(func_return_status != MACHINE_CODE_STATUS_SUCCESS)
+    if (func_return_status != MACHINE_CODE_STATUS_SUCCESS)
     {
         g_machine_code_error_flag = true;
     }
@@ -495,10 +484,8 @@ void machine_code_func_handler(machine_code_status func_return_status, const cha
         fprintf(stderr, "uncknown addressing mode error in function: %s\n", func_name);
         break;
 
-
     default:
-        fprintf(stderr,"unhandled error: %d, in %s\n",func_return_status, func_name);
+        fprintf(stderr, "unhandled error: %d, in %s\n", func_return_status, func_name);
         break;
     }
-
 }

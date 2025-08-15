@@ -14,10 +14,23 @@ memory_status memory(instruction *instruction_line_table, int n, instruction_dat
     memory_status retval = MEMORY_STATUS_SUCCESS;
     *instruction_info_table = (instruction_data *)calloc(1, n * sizeof(instruction_data));
     instruction_data *cur_instruction_data;
+
     for (int i = 0; i < n && retval == MEMORY_STATUS_SUCCESS; i++)
     {
         cur_instruction_data = *instruction_info_table + i;
         retval = memory_instruction_assign(instruction_line_table + i, cur_instruction_data);
+        if(cur_instruction_data->dest_operand_data.addressing_mode == ADDRESSING_MODES_NONE)
+        {
+            cur_instruction_data->dest_operand_data.addressing_mode = 0;
+            cur_instruction_data->dest_operand_data.operand_data = 0;
+        }
+        if(cur_instruction_data->src_operand_data.addressing_mode == ADDRESSING_MODES_NONE)
+        {
+            cur_instruction_data->src_operand_data.addressing_mode = 0;
+            cur_instruction_data->src_operand_data.operand_data = 0;
+        }
+
+
         if (is_error(retval))
         {
             fprintf(stderr, " Error at instruction [%d]\n", i);
