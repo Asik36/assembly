@@ -42,9 +42,8 @@ bool out_files_main( int machine_code_instructions_length, int machine_code_symb
  * @param machine_code_symbols_length the  length in words of the symbols in the memory array
  * @param base_file_name the name of the base file (the name of the assembly file without the ending)
  * @param func_name a string that is used to return this functions name to the caller function
- * @return out_file_status status that represents wether the function was executed successfully or with wich errors
  */
-out_file_status out_files_machine_code(  int machine_code_instructions_length, int machine_code_symbols_length, char* base_file_name, const char ** func_name);
+void out_files_machine_code(  int machine_code_instructions_length, int machine_code_symbols_length, char* base_file_name, const char ** func_name);
 
 /**
  * @brief the function writes a single symbol call into either the entry or the external output files
