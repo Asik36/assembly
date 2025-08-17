@@ -11,6 +11,7 @@
 #define MACRO_WORD_LEN 5
 #define MAX_LINE 80
 #define MACRO_TABLE_SIZE 1000 
+#define MACRO_FILE_NAME_EXTENSION ".am"
 
 enum macro_def_e {NOT_MACRO,MACRO};
 

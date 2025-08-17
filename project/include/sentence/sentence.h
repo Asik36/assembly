@@ -13,6 +13,7 @@
 #define STRING_WORD_LEN 7
 #define DATA_WORD_LEN 5 
 
+
 typedef enum setnence_type
 {
     SENTENCE_TYPE_UNKNOWN = -1,
@@ -203,7 +204,7 @@ status sentence_decider(char *file_am, instruction **list_instructions, directiv
  * @brief this function does the whole first two modules and handling errors
  * 
  * @param file_as the original assembly file
- * @param file_am the file am we create
+ * @param base_file_name base file name for the file .am that is going to be created
  * @param directive_list a pointer to pointer of directive list
  * @param instruction_list a pointer to pointer of instruction list
  * @param instruction_counter 
@@ -211,6 +212,6 @@ status sentence_decider(char *file_am, instruction **list_instructions, directiv
  * @return module_status_e repsents code error or success of the compilation
  */
 
-module_status_e check_processing_modules(char *file_as, char* file_am, directive **directive_list, 
+module_status_e check_processing_modules(char *file_as, char* base_file_name, directive **directive_list, 
                 instruction **instruction_list, int* instruction_counter, int * directive_counter);
 #endif 

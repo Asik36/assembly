@@ -546,11 +546,14 @@ status sentence_decider(char *file_am, instruction **list_instructions, directiv
     return had_error;
 }
 
-module_status_e check_processing_modules(char *file_as, char* file_am, directive **directive_list, 
+module_status_e check_processing_modules(char *file_as, char* base_file_name, directive **directive_list, 
                 instruction **instruction_list, int* instruction_counter, int * directive_counter)
 {
     module_status_e retval = MODULE_STATUS_SUCCESS;
     status returned_val;
+    char file_am[FILE_NAME_MAX_LEN] = {0}; 
+    strncpy(file_am,base_file_name,FILE_NAME_MAX_LEN);
+    strncat(file_am,MACRO_FILE_NAME_EXTENSION,strlen(MACRO_FILE_NAME_EXTENSION)+1);
     returned_val = list_macros(file_as);
     if(returned_val == SUCCESS)
     {

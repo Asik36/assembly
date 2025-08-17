@@ -32,8 +32,7 @@ extern int g_entry_defenition_length ;
 
 typedef enum machine_code_success_e
 {
-    MACHINE_CODE_STATUS_SUCCESS ,
-    MACHINE_CODE_STATUS_ERROR_MALLOC,
+    MACHINE_CODE_STATUS_ERROR_MALLOC = -8 ,
     MACHINE_CODE_STATUS_ERROR_REALLOC,
     MACHINE_CODE_STATUS_ERROR_SYMBOL_NOT_FOUND,
     MACHINE_CODE_STATUS_ERROR_OPENING_FILE,
@@ -41,6 +40,8 @@ typedef enum machine_code_success_e
     MACHINE_CODE_STATUS_ERROR_UNKNOWN_ADDRESSING_MODE,
     MACHINE_CODE_STATUS_ERROR_EMPTY_VARIABLE_NAME,
     MACHINE_CODE_STATUS_ERROR_MEMORY_OVERFLOW,
+    MACHINE_CODE_STATUS_SUCCESS = 0,
+
 
 
 }machine_code_status;
@@ -119,7 +120,7 @@ symbol* machine_code_find_symbol(symbol * symbol_list, int symbol_list_length, c
  * @brief the function adds to the machine additional words if needed for an operand
  *
  * @param symbol_list an array of all the symbols
- * @param symbol_list_lengththe amount of symbols in the symbol array
+ * @param symbol_list_length the amount of symbols in the symbol array
  * @param operand the operand that may need extra words added
  * @param instruction_code the machine code pointer wich the extra words are added to
  * @param curr_word_index the current word to write to in the words array (field in instruction_code)
@@ -143,5 +144,16 @@ uint16_t machine_code_get_operands_register(operand_data operand);
  * @param func_name  a string with the name of the function that was called
  */
 void machine_code_func_handler(machine_code_status func_return_status, const char * func_name);
+
+/**
+ * @brief Add second instruction word to machine code
+ * 
+ * @param instruction_code the machine code pointer wich the extra words are added to
+ * @param current_instruction the instruction to be added to the memory
+ * @param symbol_list an array of all the symbols
+ * @param symbol_list_length the amount of symbols in the symbol array
+ * @param func_name a string with the name of the function that was called
+ */
+void machine_code_instructions_with_operand_word(machine_code * instruction_code, instruction_data current_instruction,symbol *symbol_list, int symbol_list_length,const char **func_name);
 
 #endif

@@ -62,10 +62,7 @@ memory_status memory_instruction_assign(instruction *instruction_line, instructi
         instruction_info->src_operand_data = src_operand;
         instruction_info->dest_operand_data = dest_operand;
     }
-    /**
-     *  mov a,b
-     *  inc cx
-     */
+
     instruction_info->size = memory_instruction_get_size(instruction_info);
     instruction_info->address = memory_instruction_get_address(instruction_info->size);
 
@@ -107,7 +104,6 @@ void memory_operand_get_info(instruction *ins, operand_data *src_operand, operan
 
 int memory_operand_get_register_index(char *op)
 {
-
     int i;
     int index = -1;
 

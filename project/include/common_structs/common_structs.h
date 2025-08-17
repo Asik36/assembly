@@ -15,6 +15,7 @@
 #define REGISTER_MAX_BIT_SIZE 4
 #define OPERAND_TYPE_MAX_BIT_SIZE 2
 #define ADDRESSING_TYPES_AMOUNT 4
+#define FILE_NAME_MAX_LEN 256
 #define COMMAND_AMONT 16
 #define OPERAND_AMONT 16
 #define ATTRIBUTE_NONE 0
@@ -26,6 +27,19 @@ typedef enum status_e
     FAILURE = -1,
     SUCCESS = 0
 }status;
+
+typedef enum main_status_e
+{
+    MAIN_STATUS_ERR_MACHINE_CODE = -7,
+    MAIN_STATUS_ERR_SYMBOL,
+    MAIN_STATUS_ERR_MEMORY ,
+    MAIN_STATUS_ERR_SENTENCE ,
+    MAIN_STATUS_ERR_MACRO ,
+    MAIN_STATUS_ERR_OUT_FILES,
+    MAIN_STATUS_ERR_IN_FILES,
+    MAIN_STATUS_SUCCESS = 0
+}main_status;
+
 enum attribute_data_type_e
 {
 
@@ -205,8 +219,13 @@ static const command commands[COMMAND_AMONT] =
     {.opcode = OPCODE_STOP,.funct = 0,.command_name = "stop",.src_operand_types = {0} ,.dest_operand_types = {0}}
 
 };
+main_status assembly(char * file_name);
 
+void free_lists(int directive_counter, directive *directive_list, instruction *instruction_list, instruction_data *instruction_data_list, symbol *symbol_list);
+status get_base_file_name(char * input_file , char * base_file_name);
+void main_error_check(main_status m_status);
 
 int get_command_index(char * command_name);
+
 
 #endif
