@@ -199,12 +199,19 @@ status_e symbol_get_directive_labels(directive *dir, symbol *symbol_table,int in
     symbol * old_symbol = NULL;
     symbol_extract_directive(new_symbol, dir); /* copy data from dir to symbol */
 
-    if (p_old_symbol_index == NULL)
+    /* if no label save in list but not in hashmap */
+    if(*dir->variable_name == '\0')
+    {
+        retval = STATUS_SYMBOL_ENTER;
+    }
+    /* enter new label into a list */
+    else if (p_old_symbol_index == NULL)
     {
 
         symbol_enter(new_symbol->name,index);
         retval = STATUS_SYMBOL_ENTER;
     }
+    /* update found label in the list */
     else
     {
         old_symbol = symbol_table+*p_old_symbol_index;
@@ -212,7 +219,6 @@ status_e symbol_get_directive_labels(directive *dir, symbol *symbol_table,int in
         {
             retval = symbol_update(old_symbol, new_symbol);
         }
-
 
     }
 
