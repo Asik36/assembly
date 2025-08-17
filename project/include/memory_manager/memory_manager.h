@@ -161,6 +161,12 @@ bool get_substring_between_brackets(const char *src, char *dest, size_t dest_siz
  */
 void memory_error_handle(memory_status m_status);
 
-
+/**
+ * @brief check if there should be an operand
+ * 
+ * @param addressing_modes addressing mode available for opeand
+ * @return true if at least one addressing_modes mode is true
+ * @return false if all addressing_modes are false
+ */
 bool memory_have_operand(const bool addressing_modes[ADDRESSING_TYPES_AMOUNT]);
 #endif

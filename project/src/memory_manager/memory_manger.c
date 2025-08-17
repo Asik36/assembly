@@ -46,8 +46,6 @@ memory_status memory_instruction_assign(instruction *instruction_line, instructi
 
     memory_operand_get_info(instruction_line, &src_operand, &dest_operand);
 
-// inc r1
-
 
     bool is_src_operand = memory_have_operand(current_command.src_operand_types);
     bool is_dest_operand = memory_have_operand(current_command.dest_operand_types);

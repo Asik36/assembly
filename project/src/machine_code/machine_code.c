@@ -56,7 +56,6 @@ static uint16_t machine_code_reorder_operand_word_content(operand_content operan
     ret = machine_code_append_arg_to_word(ret, operand_data_word.dest_register, REGISTER_MAX_BIT_SIZE);
     ret = machine_code_append_arg_to_word(ret, operand_data_word.dest_operand_type, OPERAND_TYPE_MAX_BIT_SIZE);
 
-
     return ret;
 }
 
@@ -75,6 +74,7 @@ static machine_code_status add_item(symbol_call new_item, enum attribute_access_
     symbol_call **array;
     int *array_length;
     machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
+    symbol_call *temp;
 
     if (type == ATTRIBUTE_EXTERN)
     {
@@ -95,7 +95,7 @@ static machine_code_status add_item(symbol_call new_item, enum attribute_access_
     if (ret == MACHINE_CODE_STATUS_SUCCESS)
     {
 
-        symbol_call *temp = realloc(*array, (*array_length + 1) * sizeof(**array));
+        temp = realloc(*array, (*array_length + 1) * sizeof(**array));
         if (!temp)
         {
 
@@ -154,7 +154,6 @@ machine_code_status machine_code_write_machine_code(machine_code code, const cha
     }
     return ret;
 }
-
 
 void machine_code_handle_instructions(symbol *symbol_list, int symbol_list_length, instruction_data *instruction_list, int instruction_list_length)
 {
@@ -223,7 +222,7 @@ machine_code_status machine_code_add_instruction_code(symbol *symbol_list, int s
     {
         ret = MACHINE_CODE_STATUS_ERROR_MALLOC;
     }
-    else if(instruction_code.word_count != 0)
+    else if (instruction_code.word_count != 0)
     {
         curr_command = commands[current_instruction.command_index];
 
@@ -233,7 +232,7 @@ machine_code_status machine_code_add_instruction_code(symbol *symbol_list, int s
 
         if (instruction_code.word_count > 1)
         {
-            machine_code_instructions_with_operand_word(&instruction_code,current_instruction,symbol_list,symbol_list_length,&child_func_name);
+            machine_code_instructions_with_operand_word(&instruction_code, current_instruction, symbol_list, symbol_list_length, &child_func_name);
         }
 
         ret = machine_code_write_machine_code(instruction_code, &child_func_name);
@@ -243,16 +242,12 @@ machine_code_status machine_code_add_instruction_code(symbol *symbol_list, int s
             machine_code_func_handler(ret, child_func_name);
         }
 
-        
-
         free(instruction_code.words);
-
-
     }
     return ret;
 }
 
-void machine_code_instructions_with_operand_word(machine_code * instruction_code, instruction_data current_instruction,symbol *symbol_list, int symbol_list_length,const char **func_name)
+void machine_code_instructions_with_operand_word(machine_code *instruction_code, instruction_data current_instruction, symbol *symbol_list, int symbol_list_length, const char **func_name)
 {
     const char *child_func_name;
     *func_name = __func__;
@@ -302,10 +297,13 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol, const ch
 
     machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
 
+    symbol_call entry_item;
+    machine_code symbol_code;
+
+
     /* check if symbol isnt external or label*/
-    if (current_symbol.access_attribute != ATTRIBUTE_EXTERN && (current_symbol.size != 0))
+    if (current_symbol.access_attribute != ATTRIBUTE_EXTERN && current_symbol.data_attribute != ATTRIBUTE_CODE)
     {
-        machine_code symbol_code;
         symbol_code.word_count = current_symbol.size;
 
         g_symbols_word_count += symbol_code.word_count;
@@ -320,7 +318,8 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol, const ch
         {
             if (current_symbol.access_attribute == ATTRIBUTE_ENTERY)
             {
-                symbol_call entry_item;
+
+                /* add item to entery list*/
                 strncpy(entry_item.symbol_name, current_symbol.name, FILE_NAME_LENGTH - 1);
                 entry_item.symbol_name[FILE_NAME_LENGTH - 1] = '\0';
                 entry_item.base_address = current_symbol.address;
@@ -334,11 +333,11 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol, const ch
             for (int word_index = 0; word_index < (int)symbol_code.word_count; word_index++)
             {
                 symbol_code.words[word_index].are_attribute = ABSOLUTE;
-                if(current_symbol.data_attribute == ATTRIBUTE_STRING)
+                if (current_symbol.data_attribute == ATTRIBUTE_STRING)
                 {
                     symbol_code.words[word_index].content.value = ((char *)current_symbol.data)[word_index];
                 }
-                else
+                else if(current_symbol.data_attribute == ATTRIBUTE_DATA)
                 {
                     symbol_code.words[word_index].content.value = ((int *)current_symbol.data)[word_index];
                 }
@@ -375,7 +374,7 @@ machine_code_status machine_code_add_operand(symbol *symbol_list, int symbol_lis
     machine_code_status ret = MACHINE_CODE_STATUS_SUCCESS;
 
     int curr_word_index = *curr_word_index_ptr;
-
+    word_data * words = instruction_code->words;
     are are_attribute = ABSOLUTE;
     symbol *operand_symbol;
 
@@ -383,16 +382,16 @@ machine_code_status machine_code_add_operand(symbol *symbol_list, int symbol_lis
     {
     case ADDRESSING_MODES_IMMEDIATE:
         curr_word_index++;
-        instruction_code->words[curr_word_index] = (word_data){0};
-        instruction_code->words[curr_word_index].are_attribute = ABSOLUTE;
+        words[curr_word_index] = (word_data){0};
+        words[curr_word_index].are_attribute = ABSOLUTE;
 
-        instruction_code->words[curr_word_index].content.value = operand.operand_data;
+        words[curr_word_index].content.value = operand.operand_data;
         break;
 
     case ADDRESSING_MODES_DIRECT:
     case ADDRESSING_MODES_INDEX:
         curr_word_index++;
-        instruction_code->words[curr_word_index] = (word_data){0};
+        words[curr_word_index] = (word_data){0};
 
         if (*operand.varible_name == '\0')
         {
@@ -410,6 +409,8 @@ machine_code_status machine_code_add_operand(symbol *symbol_list, int symbol_lis
         if (operand_symbol->access_attribute == ATTRIBUTE_EXTERN)
         {
             are_attribute = EXTERNAL;
+
+            /* add item to extern file */
             symbol_call extern_item;
             strncpy(extern_item.symbol_name, operand_symbol->name, FILE_NAME_LENGTH - 1);
             extern_item.symbol_name[FILE_NAME_LENGTH - 1] = '\0';
@@ -424,30 +425,27 @@ machine_code_status machine_code_add_operand(symbol *symbol_list, int symbol_lis
         {
             are_attribute = RELOCATABLE;
         }
-        instruction_code->words[curr_word_index].are_attribute = are_attribute;
+        words[curr_word_index].are_attribute = are_attribute;
 
-        instruction_code->words[curr_word_index].content.data_address = (operand_symbol->address & MASK_BASE_ADDRESS);
+        words[curr_word_index].content.data_address = (operand_symbol->address & MASK_BASE_ADDRESS);
 
         curr_word_index++;
 
-        instruction_code->words[curr_word_index] = (word_data){0};
-        instruction_code->words[curr_word_index].are_attribute = are_attribute;
-        instruction_code->words[curr_word_index].content.offset = operand_symbol->address & MASK_OFFSET_ADDRESS;
-
+        words[curr_word_index] = (word_data){0};
+        words[curr_word_index].are_attribute = are_attribute;
+        words[curr_word_index].content.offset = operand_symbol->address & MASK_OFFSET_ADDRESS;
 
         break;
 
     case ADDRESSING_MODES_REGISTER_DIRECT:
         break;
 
+    case ADDRESSING_MODES_NONE:
+        ret = MACHINE_CODE_STATUS_ERROR_MISSING_OPERAND;
+        break;
+
     default:
-
-        /* check if the operand want just empty, if not error*/
-        if ((operand.addressing_mode != 0) && (operand.addressing_mode != ADDRESSING_MODES_NONE) && (operand.operand_data != 0) && (operand.varible_name[0] != '\0'))
-        {
-            ret = MACHINE_CODE_STATUS_ERROR_UNKNOWN_ADDRESSING_MODE;
-        }
-
+        ret = MACHINE_CODE_STATUS_ERROR_UNKNOWN_ADDRESSING_MODE;
         break;
     }
 
@@ -497,12 +495,14 @@ void machine_code_func_handler(machine_code_status func_return_status, const cha
         fprintf(stderr, "empty variable name error in function: %s\n", func_name);
         break;
     case MACHINE_CODE_STATUS_ERROR_UNKNOWN_ATTRIBUTE_ACCESS_TYPE:
-        fprintf(stderr, "uncknown atribute access type error in function: %s\n", func_name);
+        fprintf(stderr, "unknown atribute access type error in function: %s\n", func_name);
         break;
     case MACHINE_CODE_STATUS_ERROR_UNKNOWN_ADDRESSING_MODE:
-        fprintf(stderr, "uncknown addressing mode error in function: %s\n", func_name);
+        fprintf(stderr, "unknown addressing mode error in function: %s\n", func_name);
         break;
-
+    case MACHINE_CODE_STATUS_ERROR_MISSING_OPERAND:
+        fprintf(stderr, "missing opearnd error in function %s\n", func_name);
+        break;
     default:
         fprintf(stderr, "unhandled error: %d, in %s\n", func_return_status, func_name);
         break;
