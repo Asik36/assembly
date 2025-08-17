@@ -19,15 +19,6 @@ memory_status memory(instruction *instruction_line_table, int n, instruction_dat
     {
         cur_instruction_data = *instruction_info_table + i;
         retval = memory_instruction_assign(instruction_line_table + i, cur_instruction_data);
-        if(cur_instruction_data->dest_operand_data.addressing_mode == ADDRESSING_MODES_NONE)
-        {
-            cur_instruction_data->dest_operand_data.addressing_mode = 0;
-        }
-        if(cur_instruction_data->src_operand_data.addressing_mode == ADDRESSING_MODES_NONE)
-        {
-            cur_instruction_data->src_operand_data.addressing_mode = 0;
-        }
-
 
         if (is_error(retval))
         {
@@ -45,6 +36,7 @@ memory_status memory_instruction_assign(instruction *instruction_line, instructi
     command current_command = commands[instruction_info->command_index];
 
     memory_operand_get_info(instruction_line, &src_operand, &dest_operand);
+
 
 
     bool is_src_operand = memory_have_operand(current_command.src_operand_types);

@@ -263,9 +263,18 @@ void machine_code_instructions_with_operand_word(machine_code *instruction_code,
 
     op.src_register = machine_code_get_operands_register(current_instruction.src_operand_data);
     op.src_operand_type = current_instruction.src_operand_data.addressing_mode;
+    if(current_instruction.src_operand_data.addressing_mode == ADDRESSING_MODES_NONE)
+    {
+        op.src_operand_type = ADDRESSING_MODES_IMMEDIATE;
+    }
 
     op.dest_register = machine_code_get_operands_register(current_instruction.dest_operand_data);
     op.dest_operand_type = current_instruction.dest_operand_data.addressing_mode;
+    if(current_instruction.dest_operand_data.addressing_mode == ADDRESSING_MODES_NONE)
+    {
+        op.dest_operand_type = ADDRESSING_MODES_IMMEDIATE;
+    }
+
     curr_word->content.opcode = machine_code_reorder_operand_word_content(op);
 
     machine_code_status adding_operand;
