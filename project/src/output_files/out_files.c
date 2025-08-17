@@ -9,8 +9,7 @@ bool out_files_main( int machine_code_instructions_length, int machine_code_symb
     out_file_status child_func_status = OUT_FILE_STATUS_SUCCESS;
     const char * child_func_name;
 
-    child_func_status = out_files_machine_code(machine_code_instructions_length,  machine_code_symbols_length, base_file_name, &child_func_name);
-    out_files_func_handler(child_func_status, child_func_name);
+    out_files_machine_code(machine_code_instructions_length,  machine_code_symbols_length, base_file_name, &child_func_name);
 
     child_func_status = out_files_symbol_files(base_file_name, OUT_FILE_TYPE_EXTERNALS, &child_func_name);
     out_files_func_handler(child_func_status, child_func_name);
@@ -75,7 +74,7 @@ static void out_files_write_machine_code_line(FILE * machine_code_f, int word_in
 }
 
 /**
- * @brief a helperr function that creates an output file with appropriate name (without checking if the file was opened successfully)
+ * @brief a helperr function that creates an output file with appropriate name 
  *
  * @param f_type the type of output file to be created
  * @param base_file_name the name of the base file (the name of the assembly file without the ending)
@@ -110,13 +109,16 @@ static out_file_status out_files_create_file(out_file_type f_type, char * base_f
     {
         snprintf(ret_file_name , FILE_NAME_LENGTH,"%s.%s", base_file_name,file_ending);
         *out_file = fopen(ret_file_name,"w");
+        if (!out_file)
+        {
+            ret = OUT_FILE_STATUS_ERROR_OPENING_FILE;
+        }
     }
     return ret;
 }
 
-out_file_status out_files_machine_code(  int machine_code_instructions_length, int machine_code_symbols_length, char* base_file_name, const char ** func_name)
+void out_files_machine_code(  int machine_code_instructions_length, int machine_code_symbols_length, char* base_file_name, const char ** func_name)
 {
-    out_file_status ret = OUT_FILE_STATUS_SUCCESS;
     *func_name = __func__;
 
     const char * child_func_name;
@@ -128,26 +130,17 @@ out_file_status out_files_machine_code(  int machine_code_instructions_length, i
 
     if(child_func_status == OUT_FILE_STATUS_SUCCESS)
     {
-        if(! machine_code_f)
+        /*file header: the length of instructions in words then the length of symbols in words (in the memory)*/
+        fprintf(machine_code_f, "%d\t%d\n", machine_code_instructions_length, machine_code_symbols_length);
+
+        /*file content: each line has 4 digits with the number of word in the memorry, then the name of the special group of 4 bits, and the 4 bits in hexadecimal representation, seperated by '-'*/
+        for(int word_index = STARTING_MEMORY_ADDRESS; word_index < STARTING_MEMORY_ADDRESS + machine_code_instructions_length + machine_code_symbols_length; word_index++)
         {
-            ret = OUT_FILE_STATUS_ERROR_OPENING_FILE;
+            out_files_write_machine_code_line(machine_code_f, word_index);
         }
 
-        else
-        {
-            /*file header: the length of instructions in words then the length of symbols in words (in the memory)*/
-            fprintf(machine_code_f, "%d\t%d\n", machine_code_instructions_length, machine_code_symbols_length);
-
-            /*file content: each line has 4 digits with the number of word in the memorry, then the name of the special group of 4 bits, and the 4 bits in hexadecimal representation, seperated by '-'*/
-            for(int word_index = STARTING_MEMORY_ADDRESS; word_index < STARTING_MEMORY_ADDRESS + machine_code_instructions_length + machine_code_symbols_length; word_index++)
-            {
-                out_files_write_machine_code_line(machine_code_f, word_index);
-            }
-
-            fclose(machine_code_f);
-        }
+        fclose(machine_code_f);
     }
-    return ret;
 }
 
 out_file_status out_files_write_line(FILE * out_file, out_file_type file_type, int symbol_index, const char ** func_name)
@@ -183,6 +176,8 @@ out_file_status out_files_symbol_files(char * base_file_name, out_file_type file
     out_file_status child_func_status;
     const char * child_func_name;
 
+    FILE * out_file;
+
     int length = 0;
 
     switch (file_type)
@@ -200,25 +195,17 @@ out_file_status out_files_symbol_files(char * base_file_name, out_file_type file
 
     if(length)
     {
-        FILE * out_file;
         child_func_status = out_files_create_file(file_type, base_file_name, &out_file,&child_func_name);
         out_files_func_handler(child_func_status,child_func_name);
 
         if(child_func_status == OUT_FILE_STATUS_SUCCESS)
         {
-            if(!out_file)
+            for(int call_index = 0; call_index < length; call_index++)
             {
-                ret = OUT_FILE_STATUS_ERROR_OPENING_FILE;
+                out_files_write_line(out_file, file_type, call_index, &child_func_name);
+                out_files_func_handler(child_func_status,child_func_name);
             }
-            else
-            {
-                for(int call_index = 0; call_index < length; call_index++)
-                {
-                    out_files_write_line(out_file, file_type, call_index, &child_func_name);
-                    out_files_func_handler(child_func_status,child_func_name);
-                }
-                fclose(out_file);
-            }
+            fclose(out_file);
         }
     }
     return ret;
