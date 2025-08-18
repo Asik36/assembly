@@ -7,12 +7,16 @@
 #include <string.h>
 #include <ctype.h>
 #include <search.h>
+#include <regex.h>
 #define MAX_NAME_LEN 100
 #define MACRO_WORD_LEN 5
 #define MAX_LINE 80
 #define MACRO_TABLE_SIZE 1000 
 #define MACRO_FILE_NAME_EXTENSION ".am"
-
+#define MACRO_PATTERN "^[[:space:]]*macro[[:space:]]+[[:alpha:]][[:alnum:]]*[[:space:]]*$"
+#define MACRO_PATTERN_LEN sizeof (MACRO_PATTERN)
+#define ENDM_PATTERN "^[[:space:]]*endm[[:space:]]*"
+#define ENDM_PATTERN_LEN sizeof(ENDM_PATTERN)
 enum macro_def_e {NOT_MACRO,MACRO};
 
 typedef struct macro_s
