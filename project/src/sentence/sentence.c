@@ -1,9 +1,6 @@
 
 #include "sentence.h"
 
-
-
-
 int parse_int_from_ptr(char *number_ptr)
 {
     int sign_factor = PLUS;

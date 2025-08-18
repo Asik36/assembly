@@ -20,10 +20,21 @@
 #define COMMAND_AMONT 16
 #define OPERAND_AMONT 16
 #define ATTRIBUTE_NONE 0
+
+#define MACHINE_CODE_MSG_ERR_MALLOC                        "malloc error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_REALLOC                       "realloc error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_OPENING_FILE                  "opening file error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_MEMORY_OVERFLOW               "virtual memory overflow error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_SYMBOL_NOT_FOUND              "symbol not found error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_EMPTY_VARIABLE_NAME           "empty variable name error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_UNKNOWN_ATTRIBUTE_ACCESS_TYPE "unknown atribute access type error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_UNKNOWN_ADDRESSING_MODE       "unknown addressing mode error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_MISSING_OPERAND               "missing operand error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_UNHANDLED                     "unhandled error: %d, in %s\n"
 #define is_error(s) ((s) < 0)
 
 
-typedef enum status_e
+typedef enum symbol_status
 {
     FAILURE = -1,
     SUCCESS = 0

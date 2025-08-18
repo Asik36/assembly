@@ -260,8 +260,7 @@ memory_status memory_instruction_validation(instruction_data *ins_data)
     int command_index = ins_data->command_index;
     int dest_addressing_mode = ins_data->dest_operand_data.addressing_mode;
     int src_addressing_mode = ins_data->src_operand_data.addressing_mode;
-
-    if (command_index > COMMAND_AMONT || command_index < 0)
+    if (command_index > COMMAND_AMONT || command_index < 0) 
     {
         retval = MEMORY_STATUS_ERR_INVALID_COMMAND;
     }
