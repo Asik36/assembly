@@ -29,7 +29,6 @@ typedef struct macro_s
  * @param arr the pointer to the allocated memory
  * @return int retval - SUCCESS if allocation was successful, FAILURE otherwise
  */
-
  int check_memory_allocation(char *arr);
 
 /**
@@ -38,7 +37,6 @@ typedef struct macro_s
  * @param line the line we want to fix
  * @return char* a pointer to the new line
  */
-
 char *remove_spaces_from_start(char *line);
 
 /**
@@ -48,7 +46,6 @@ char *remove_spaces_from_start(char *line);
  * @param line this is the line we want to add
  * @return int retval - SUCCESS if the line was added successfully, FAILURE otherwise
  */
-
 status add_to_content(macro *macro_ptr, char *line);
 
 /**
@@ -57,7 +54,6 @@ status add_to_content(macro *macro_ptr, char *line);
  * @param file_as_path the originial code file we recieve
  * @return status SUCCESS/FAILURE
  */
-
 status list_macros(char *file_as_path);
 
 /**
@@ -67,7 +63,6 @@ status list_macros(char *file_as_path);
  * @param line this is the line we read from the original code file
  * @return status SUCCESS/FAILURE
  */
-
 status print_macro(FILE *file_am, char *line);
 
 /**
@@ -77,7 +72,6 @@ status print_macro(FILE *file_am, char *line);
  * @param file_am the new file we create 
  * @return int retval - SUCCESS if the file was created successfully, FAILURE otherwise
  */
-
 status create_file_am(char *file_as, char *file_am);
 
 #endif 

@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
+#define START_ADDRESS 100
 #define MEMORY_MAX_SIZE 8192
 #define MEMORY_ADRESS_MAX_BITS 12
 #define SYMBOL_MAX_SIZE 16

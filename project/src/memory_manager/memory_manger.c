@@ -14,8 +14,8 @@ memory_status memory(instruction *instruction_line_table, int n, instruction_dat
     memory_status retval = MEMORY_STATUS_SUCCESS;
     *instruction_info_table = (instruction_data *)calloc(1, n * sizeof(instruction_data));
     instruction_data *cur_instruction_data;
-
-    for (int i = 0; i < n && retval == MEMORY_STATUS_SUCCESS; i++)
+    int i;
+    for (i = 0; i < n && retval == MEMORY_STATUS_SUCCESS; i++)
     {
         cur_instruction_data = *instruction_info_table + i;
         retval = memory_instruction_assign(instruction_line_table + i, cur_instruction_data);
@@ -38,14 +38,12 @@ memory_status memory_instruction_assign(instruction *instruction_line, instructi
     memory_operand_get_info(instruction_line, &src_operand, &dest_operand);
 
 
-
     bool is_src_operand = memory_have_operand(current_command.src_operand_types);
     bool is_dest_operand = memory_have_operand(current_command.dest_operand_types);
     if(is_src_operand == false && is_dest_operand == true)
     {
         instruction_info->dest_operand_data = src_operand;
         instruction_info->src_operand_data.addressing_mode = ADDRESSING_MODES_NONE;
-
     }
     else
     {
@@ -60,7 +58,7 @@ memory_status memory_instruction_assign(instruction *instruction_line, instructi
 }
 uint16_t memory_instruction_get_address(int instruction_size)
 {
-    static uint16_t address_count = 100;
+    static uint16_t address_count = START_ADDRESS;
     uint16_t new_address = address_count;
     address_count += instruction_size;
     return new_address;
@@ -197,6 +195,7 @@ uint16_t memory_instruction_get_size(instruction_data *ins_data)
             default:
                 break;
         }
+        /* check if at least operand exists , if it does add a word*/
         if(op_data_dest != NULL || op_data_src != NULL)
         {
             size += 1;
@@ -237,7 +236,7 @@ bool memory_is_addressing_mode_immediate(char *op)
     bool is_immeditate = true;
     if (*op == SIGN_ADDRESSING_MODES_IMMEDIATE)
     {
-        op++;
+        op++; /* skip # */
         while (*op != '\0' && is_immeditate)
         {
             if (!isdigit(*op) && !(*op == '-' && isdigit(*(op+1) )))
@@ -304,7 +303,6 @@ bool memory_is_addressing_mode_index(char *op)
 {
     bool is_direct = true;
     bool is_register = false;
-
     int i;
     char brackets_sub_str[SYMBOL_MAX_SIZE] = {0};
     if (get_substring_between_brackets(op, brackets_sub_str, SYMBOL_MAX_SIZE) == false)
