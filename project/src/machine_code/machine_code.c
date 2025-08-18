@@ -1,6 +1,17 @@
 #include "machine_code.h"
 #include "out_files.h"
 
+#define MACHINE_CODE_MSG_ERR_MALLOC                        "malloc error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_REALLOC                       "realloc error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_OPENING_FILE                  "opening file error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_MEMORY_OVERFLOW               "virtual memory overflow error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_SYMBOL_NOT_FOUND              "symbol not found error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_EMPTY_VARIABLE_NAME           "empty variable name error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_UNKNOWN_ATTRIBUTE_ACCESS_TYPE "unknown atribute access type error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_UNKNOWN_ADDRESSING_MODE       "unknown addressing mode error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_MISSING_OPERAND               "missing operand error in function: %s\n"
+#define MACHINE_CODE_MSG_ERR_UNHANDLED                     "unhandled error: %d, in %s\n"
+
 const bool NO_DEST_OPERAND[ADDRESSING_TYPES_AMOUNT] = {0};
 
 word_data g_memory[MEMORY_MAX_SIZE];
@@ -479,41 +490,40 @@ void machine_code_func_handler(machine_code_status func_return_status, const cha
         g_machine_code_error_flag = true;
     }
 
-    switch (func_return_status)
+     switch (func_return_status)
     {
     case MACHINE_CODE_STATUS_SUCCESS:
-
         break;
 
     case MACHINE_CODE_STATUS_ERROR_MALLOC:
-        fprintf(stderr, "malloc error in function: %s\n", func_name);
+        fprintf(stderr, MACHINE_CODE_MSG_ERR_MALLOC, func_name);
         break;
     case MACHINE_CODE_STATUS_ERROR_REALLOC:
-        fprintf(stderr, "realloc error in function: %s\n", func_name);
+        fprintf(stderr, MACHINE_CODE_MSG_ERR_REALLOC, func_name);
         break;
     case MACHINE_CODE_STATUS_ERROR_OPENING_FILE:
-        fprintf(stderr, "opening file error in function: %s\n", func_name);
+        fprintf(stderr, MACHINE_CODE_MSG_ERR_OPENING_FILE, func_name);
         break;
     case MACHINE_CODE_STATUS_ERROR_MEMORY_OVERFLOW:
-        fprintf(stderr, "virtual memory overflow error in function: %s\n", func_name);
+        fprintf(stderr, MACHINE_CODE_MSG_ERR_MEMORY_OVERFLOW, func_name);
         break;
     case MACHINE_CODE_STATUS_ERROR_SYMBOL_NOT_FOUND:
-        fprintf(stderr, "symbol not found error in function: %s\n", func_name);
+        fprintf(stderr, MACHINE_CODE_MSG_ERR_SYMBOL_NOT_FOUND, func_name);
         break;
     case MACHINE_CODE_STATUS_ERROR_EMPTY_VARIABLE_NAME:
-        fprintf(stderr, "empty variable name error in function: %s\n", func_name);
+        fprintf(stderr, MACHINE_CODE_MSG_ERR_EMPTY_VARIABLE_NAME, func_name);
         break;
     case MACHINE_CODE_STATUS_ERROR_UNKNOWN_ATTRIBUTE_ACCESS_TYPE:
-        fprintf(stderr, "unknown atribute access type error in function: %s\n", func_name);
+        fprintf(stderr, MACHINE_CODE_MSG_ERR_UNKNOWN_ATTRIBUTE_ACCESS_TYPE, func_name);
         break;
     case MACHINE_CODE_STATUS_ERROR_UNKNOWN_ADDRESSING_MODE:
-        fprintf(stderr, "unknown addressing mode error in function: %s\n", func_name);
+        fprintf(stderr, MACHINE_CODE_MSG_ERR_UNKNOWN_ADDRESSING_MODE, func_name);
         break;
     case MACHINE_CODE_STATUS_ERROR_MISSING_OPERAND:
-        fprintf(stderr, "missing opearnd error in function %s\n", func_name);
+        fprintf(stderr, MACHINE_CODE_MSG_ERR_MISSING_OPERAND, func_name);
         break;
     default:
-        fprintf(stderr, "unhandled error: %d, in %s\n", func_return_status, func_name);
+        fprintf(stderr, MACHINE_CODE_MSG_ERR_UNHANDLED, func_return_status, func_name);
         break;
     }
 }

@@ -53,11 +53,10 @@ int memory_instruction_get_command_index(instruction *ins);
 
 /** 
  * @brief gets info about both operands , if they dont exists they are kept empty
- * @param ins current instruction
- * @param src_operand source operand
- * @param dest_operand destination operand
+ * @param input_operand current operand as written by user
+ * @param operand_info writes operand's data 
  */
-void memory_operand_get_info(instruction *ins, operand_data *src_operand, operand_data *dest_operand);
+void memory_operand_get_info(char * input_operand, operand_data *operand_info);
 
 /** 
  * @brief get addressing mode of operand
@@ -154,12 +153,21 @@ memory_status memory_instruction_validation(instruction_data *ins_data);
  */
 bool get_substring_between_brackets(const char *src, char *dest, size_t dest_size);
 
+/**
+ * @brief gets the extra size of instruction based on addressing mode 
+ * 
+ * @param operand instruction's operand
+ * @return size form operand's addressing mode
+ */
+int memory_addressing_mode_instruction_size(operand_data * operand);
+
 
 /**
  * @brief prints error messeges 
  * @param m_status error code
  */
 void memory_error_handle(memory_status m_status);
+
 
 /**
  * @brief check if there should be an operand

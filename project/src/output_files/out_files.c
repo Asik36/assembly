@@ -1,6 +1,10 @@
 #include "out_files.h"
 
 #define STARTING_GROUP_NAME 'A'
+#define OUT_FILE_MSG_ERR_MALLOC                  "malloc error in function: %s\n"
+#define OUT_FILE_MSG_ERR_OPENING_FILE            "opening file error in function: %s\n"
+#define OUT_FILE_MSG_ERR_UNKNOWN_OUTPUT_FILE_TYPE "unknown output file type error in function: %s\n"
+#define OUT_FILE_MSG_ERR_UNHANDLED               "unhandled error: %d, in %s\n"
 
 bool g_out_files_error_flag = false;
 
@@ -221,23 +225,22 @@ void out_files_func_handler(out_file_status func_return_status, const char * fun
     switch (func_return_status)
     {
     case OUT_FILE_STATUS_SUCCESS:
-
         break;
 
     case OUT_FILE_STATUS_ERROR_MALLOC:
-        fprintf(stderr, "malloc error in function: %s\n", func_name);
+        fprintf(stderr, OUT_FILE_MSG_ERR_MALLOC, func_name);
         break;
+
     case OUT_FILE_STATUS_ERROR_OPENING_FILE:
-        fprintf(stderr, "opening file error in function: %s\n", func_name);
+        fprintf(stderr, OUT_FILE_MSG_ERR_OPENING_FILE, func_name);
         break;
 
     case OUT_FILE_STATUS_ERROR_UNKNOWN_OUTPUT_FILE_TYPE:
-        fprintf(stderr, "unknown output file type error in function: %s\n", func_name);
+        fprintf(stderr, OUT_FILE_MSG_ERR_UNKNOWN_OUTPUT_FILE_TYPE, func_name);
         break;
 
-
     default:
-        fprintf(stderr,"unhandled error: %d, in %s\n",func_return_status, func_name);
+        fprintf(stderr, OUT_FILE_MSG_ERR_UNHANDLED, func_return_status, func_name);
         break;
     }
 

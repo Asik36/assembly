@@ -1,30 +1,32 @@
 #include "memory_manager.h"
-static const char * register_names[OPERAND_AMONT] = 
-{
-    "r1",   "r2",   "r3",
-    "r4",   "r5",   "r6",
-    "r7",   "r8",   "r9",
-    "r10",  "r11",  "r12",
-    "r13",  "r14",  "r15",
-    "r16"
-};
+static const char *register_names[OPERAND_AMONT] =
+    {
+        "r1" , "r2" , "r3",
+        "r4" , "r5" , "r6",
+        "r7" , "r8" , "r9",
+        "r10", "r11", "r12",
+        "r13", "r14", "r15",
+        "r16"
+    };
 memory_status memory(instruction *instruction_line_table, int n, instruction_data **instruction_info_table)
 {
 
     memory_status retval = MEMORY_STATUS_SUCCESS;
     *instruction_info_table = (instruction_data *)calloc(1, n * sizeof(instruction_data));
-    instruction_data *cur_instruction_data;
+    instruction_data *current_instruction_data;
+    instruction *current_instruction_line;
+
     int i;
     for (i = 0; i < n && retval == MEMORY_STATUS_SUCCESS; i++)
     {
-        cur_instruction_data = *instruction_info_table + i;
-        retval = memory_instruction_assign(instruction_line_table + i, cur_instruction_data);
-
-        if (is_error(retval))
-        {
-            fprintf(stderr, " Error at instruction [%d]\n", i);
-            memory_error_handle(retval);
-        }
+        current_instruction_line = instruction_line_table + i;
+        current_instruction_data = *instruction_info_table + i;
+        retval = memory_instruction_assign(current_instruction_line, current_instruction_data);
+    }
+    if (is_error(retval))
+    {
+        fprintf(stderr, " Error at instruction [%d]\n", i);
+        memory_error_handle(retval);
     }
 
     return retval;
@@ -35,12 +37,14 @@ memory_status memory_instruction_assign(instruction *instruction_line, instructi
     instruction_info->command_index = memory_instruction_get_command_index(instruction_line);
     command current_command = commands[instruction_info->command_index];
 
-    memory_operand_get_info(instruction_line, &src_operand, &dest_operand);
-
+    memory_operand_get_info(instruction_line->src_operand, &src_operand);
+    memory_operand_get_info(instruction_line->dest_operand, &dest_operand);
 
     bool is_src_operand = memory_have_operand(current_command.src_operand_types);
     bool is_dest_operand = memory_have_operand(current_command.dest_operand_types);
-    if(is_src_operand == false && is_dest_operand == true)
+
+    /*if command has only one operand , put it operand as dest oprand*/
+    if (is_src_operand == false && is_dest_operand == true)
     {
         instruction_info->dest_operand_data = src_operand;
         instruction_info->src_operand_data.addressing_mode = ADDRESSING_MODES_NONE;
@@ -69,25 +73,13 @@ int memory_instruction_get_command_index(instruction *ins)
     return get_command_index(ins->commnand);
 }
 
-void memory_operand_get_info(instruction *ins, operand_data *src_operand, operand_data *dest_operand)
+void memory_operand_get_info(char *input_operand, operand_data *operand_info)
 {
-
-    /*source operand*/
-    src_operand->addressing_mode = memory_operand_get_addressing_mode(ins->src_operand);
-    if(src_operand->addressing_mode != ADDRESSING_MODES_NONE)
+    operand_info->addressing_mode = memory_operand_get_addressing_mode(input_operand);
+    if (operand_info->addressing_mode != ADDRESSING_MODES_NONE)
     {
-        memory_operand_get_data(src_operand, ins->src_operand, src_operand->addressing_mode);
+        memory_operand_get_data(operand_info, input_operand, operand_info->addressing_mode);
     }
-
-
-    /*destination operand*/
-
-    dest_operand->addressing_mode = memory_operand_get_addressing_mode(ins->dest_operand);
-    if(dest_operand->addressing_mode != ADDRESSING_MODES_NONE)
-    {
-        memory_operand_get_data(dest_operand, ins->dest_operand, dest_operand->addressing_mode);
-    }
-    
 }
 
 int memory_operand_get_register_index(char *op)
@@ -100,7 +92,7 @@ int memory_operand_get_register_index(char *op)
 
         if (strncmp(op, register_names[i], SYMBOL_MAX_SIZE) == 0)
         {
-            index = i+1;
+            index = i + 1;
         }
     }
     return index;
@@ -154,54 +146,40 @@ uint16_t memory_instruction_get_size(instruction_data *ins_data)
 
     op_data_src = &ins_data->src_operand_data;
     op_data_dest = &ins_data->dest_operand_data;
-    
-    if (op_data_dest != NULL)
+
+    /* check if at least operand exists , if it does add a words based on addressing modes*/
+    if (op_data_dest != NULL || op_data_src != NULL)
     {
-        switch (op_data_dest->addressing_mode)
+        size += 1; /*extra word for funct and operands data*/
+        size += memory_addressing_mode_instruction_size(op_data_src);
+        size += memory_addressing_mode_instruction_size(op_data_dest);
+    }
+    return size;
+}
+
+int memory_addressing_mode_instruction_size(operand_data *operand)
+{
+    int size = 0;
+    if (operand != NULL)
+    {
+        switch (operand->addressing_mode)
         {
-            case ADDRESSING_MODES_IMMEDIATE:
-                size += 1;
-                break;
-            case ADDRESSING_MODES_DIRECT:
-                size += 2;
-                break;
-            case ADDRESSING_MODES_INDEX:
-                size += 2;
-                break;
-            case ADDRESSING_MODES_REGISTER_DIRECT:
-                size += 0;
-                break;
-            default:
-                break;
+        case ADDRESSING_MODES_IMMEDIATE:
+            size += 1; /*extra word for storing value of nmuber*/
+            break;
+        case ADDRESSING_MODES_DIRECT:
+            size += 2; /*extra two word for storing address and offset of a varible*/
+            break;
+        case ADDRESSING_MODES_INDEX:
+            size += 2; /*extra two word for storing address and offset of a varible*/
+            break;
+        case ADDRESSING_MODES_REGISTER_DIRECT:
+            size += 0; /*no extra words, registers are stored in the second word*/
+            break;
+        default:
+            break;
         }
     }
-
-    if (op_data_src != NULL)
-    {
-        switch (op_data_src->addressing_mode)
-        {
-            case ADDRESSING_MODES_IMMEDIATE:
-                size += 1;
-                break;
-            case ADDRESSING_MODES_DIRECT:
-                size += 2;
-                break;
-            case ADDRESSING_MODES_INDEX:
-                size += 2;
-                break;
-            case ADDRESSING_MODES_REGISTER_DIRECT:
-                size += 0;
-                break;
-            default:
-                break;
-        }
-        /* check if at least operand exists , if it does add a word*/
-        if(op_data_dest != NULL || op_data_src != NULL)
-        {
-            size += 1;
-        }
-    }
-
     return size;
 }
 
@@ -239,7 +217,7 @@ bool memory_is_addressing_mode_immediate(char *op)
         op++; /* skip # */
         while (*op != '\0' && is_immeditate)
         {
-            if (!isdigit(*op) && !(*op == '-' && isdigit(*(op+1) )))
+            if (!isdigit(*op) && !(*op == '-' && isdigit(*(op + 1))))
             {
                 is_immeditate = false;
             }
@@ -287,11 +265,11 @@ memory_status memory_instruction_validation(instruction_data *ins_data)
     {
         retval = MEMORY_STATUS_ERR_INVALID_COMMAND;
     }
-    else if (src_addressing_mode != ADDRESSING_MODES_NONE  && commands[command_index].src_operand_types[src_addressing_mode] == false)
+    else if (src_addressing_mode != ADDRESSING_MODES_NONE && commands[command_index].src_operand_types[src_addressing_mode] == false)
     {
         retval = MEMORY_STATUS_ERR_INVALID_SOURCE_ADRESSING_MODE;
     }
-    else if (dest_addressing_mode != ADDRESSING_MODES_NONE  && commands[command_index].dest_operand_types[dest_addressing_mode] == false)
+    else if (dest_addressing_mode != ADDRESSING_MODES_NONE && commands[command_index].dest_operand_types[dest_addressing_mode] == false)
     {
         retval = MEMORY_STATUS_ERR_INVALID_DESTINATION_ADDRESSING_MODE;
     }
@@ -353,9 +331,19 @@ bool get_substring_between_brackets(const char *src, char *dest, size_t dest_siz
     return retval;
 }
 
+bool memory_have_operand(const bool addressing_modes[ADDRESSING_TYPES_AMOUNT])
+{
+    bool operand_exits = false;
+    for (int i = 0; i < ADDRESSING_TYPES_AMOUNT && operand_exits == false; i++)
+    {
+        operand_exits |= addressing_modes[i];
+    }
+    return operand_exits;
+}
+
 void memory_error_handle(memory_status m_status)
 {
-   switch (m_status)
+    switch (m_status)
     {
     case MEMORY_STATUS_ERR_INVALID_SOURCE_ADRESSING_MODE:
         fprintf(stderr, MSG_MEM_ERR_INVALID_SRC_ADDR_MODE);
@@ -370,14 +358,4 @@ void memory_error_handle(memory_status m_status)
         fprintf(stderr, MSG_MEM_ERR_UNDEFINED);
         break;
     }
-}
-
-bool memory_have_operand(const bool addressing_modes[ADDRESSING_TYPES_AMOUNT])
-{
-    bool operand_exits = false;
-    for (int i = 0; i < ADDRESSING_TYPES_AMOUNT && operand_exits == false; i++)
-    {
-        operand_exits |= addressing_modes[i];
-    }
-    return operand_exits;
 }
