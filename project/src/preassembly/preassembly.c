@@ -165,7 +165,13 @@ status endm_handling(char *line, status *retval, macro *new_macro, FILE *file_as
 
 status list_macros(char *file_as_path)
 {
+    char *pointer_to_macro;
+    macro *new_macro;
+    char *name_ptr;
+    ENTRY item;
+    ENTRY *found;
     status retval = SUCCESS;
+    status is_macro;
     FILE* file_as = fopen(file_as_path,"r");
     if(!file_as)
     {
@@ -178,10 +184,10 @@ status list_macros(char *file_as_path)
         char line[MAX_LINE] = {0};
         while(fgets(line,MAX_LINE,file_as)!= NULL && retval == SUCCESS)
         {
-            status is_macro = check_is_macro(line);
+            is_macro = check_is_macro(line);
             if(is_macro == SUCCESS)
             {
-                char *pointer_to_macro = strstr(line, "macro");
+                pointer_to_macro = strstr(line, "macro");
                 if(pointer_to_macro != NULL)
                 {
 
@@ -189,7 +195,7 @@ status list_macros(char *file_as_path)
                     {
                         continue;
                     }
-                    macro *new_macro = malloc(sizeof(macro));
+                    new_macro = malloc(sizeof(macro));
                     if (!new_macro)
                     {
                         printf("allocation faild\n");
@@ -217,7 +223,7 @@ status list_macros(char *file_as_path)
                     new_macro->content[0] = '\0';
                     new_macro->content_size = 1;
                     pointer_to_macro += MACRO_WORD_LEN + 1;
-                    char *name_ptr = strtok(pointer_to_macro," \t\n");
+                    name_ptr = strtok(pointer_to_macro," \t\n");
                     strncpy(new_macro->name, name_ptr, MAX_NAME_LEN - 1);
                     new_macro->name[MAX_NAME_LEN - 1] = '\0';
 
@@ -231,9 +237,6 @@ status list_macros(char *file_as_path)
                         preassembly_free_hashmap();
                         break;
                     }
-
-                    ENTRY item;
-                    ENTRY *found;
                     item.key = new_macro->name;
                     item.data = (void*)new_macro;
                     found = hsearch(item, ENTER);

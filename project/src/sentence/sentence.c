@@ -315,6 +315,136 @@ status fill_data_arr(char *data_start, directive **list, int* directive_counter,
     return retval;
 }
 
+status fill_extern(char *line, directive **list, int *directive_counter)
+{
+    status retval = SUCCESS;
+    char *extern_start = strstr(line,".extern");
+    if(extern_start != NULL)
+    {
+        extern_start += EXTERN_WORD_LENGTH;
+        line = extern_start + 1;
+        int idx= 0;
+        while(isspace(*line))
+        {
+            line++;
+        }
+        while(!(isspace(*line)) && *line != '\n' && *line != '\0')
+        {
+            (*list)[*directive_counter].variable_name[idx] = *line;
+            line++;
+            idx++;
+        }
+        (*list)[*directive_counter].variable_name[idx] = '\0';
+        (*list)[*directive_counter].access_attribute = ATTRIBUTE_EXTERN;
+    }
+    else
+    {
+        retval = FAILURE;
+    }
+    return retval;
+}
+
+status fill_string(char *line,directive **list,int *directive_counter)
+{
+    status retval = SUCCESS;
+    char *is_label = strchr(line, ':'); 
+    if(is_label)
+    {
+        int idx = 0;
+        while(line != is_label)
+        {
+            while(isspace(*line)) 
+            { 
+                line++; 
+            }
+            (*list)[*directive_counter].variable_name[idx++] = *line;
+            line++;
+        }
+        (*list)[*directive_counter].variable_name[idx] = '\0';
+        line++;
+    }
+    int length_of_string = get_len_string(line);
+    char *string_data = (char*) malloc((length_of_string+1)*sizeof(char));
+    if(string_data == NULL)
+    {
+        perror("Couldn't malloc\n");
+        retval = FAILURE;
+    }
+    else
+    {
+
+        char *ptr_to_String = string_data;
+        char *start_of_string = strchr(line,'"');
+        int idx = 0;
+        line = start_of_string + 1;
+        while(*line != '"' && *line != '\0')
+        {
+            ptr_to_String[idx] = *line;
+            idx++;
+            line++;
+        }
+        ptr_to_String[idx] = '\0';
+
+        (*list)[*directive_counter].data = string_data; 
+        (*list)[*directive_counter].data_length = length_of_string;
+
+        (*list)[*directive_counter].data_attribute = ATTRIBUTE_STRING;
+    }
+    return retval;
+}
+
+status fill_entry(char *line, directive **list, int *directive_counter)
+{
+    status retval = SUCCESS;
+    (*list)[*directive_counter].access_attribute = ATTRIBUTE_ENTERY;
+    char *entry_declaration = strstr(line,".entry");
+    entry_declaration += ENTRY_WORD_LEN;
+    line = entry_declaration + 1;
+    while(isspace(*line))
+    {
+        line++;
+    }
+    int idx = 0;
+    while(!(isspace(*line)) && *line != '\n' && *line != '\0')
+    {
+        (*list)[*directive_counter].variable_name[idx] = *line;
+        line++;
+        idx++;
+    }
+    (*list)[*directive_counter].variable_name[idx] = '\0';
+    return retval;
+}
+
+status fill_data(char *line, directive **list, int *directive_counter)
+{
+    status retval = SUCCESS;
+    int counter = 0;
+    char *is_label = strchr(line, ':'); 
+    if(is_label)
+    {
+        int idx = 0;
+        while(line != is_label)
+        {
+            while(isspace(*line)) 
+            { 
+                line++; 
+            }
+            (*list)[*directive_counter].variable_name[idx++] = *line;
+            line++;
+        }
+        (*list)[*directive_counter].variable_name[idx] = '\0';
+        line++;
+    }
+
+    char *data_start = strstr(line, ".data"); 
+    data_start += DATA_WORD_LEN + 1;
+    status is_data_filled = fill_data_arr(data_start,list,directive_counter,&counter);
+    if(is_data_filled == FAILURE)
+    {
+        retval = FAILURE;
+    }
+    return retval;
+}
 
 status fill_directive_struct(char *line, directive ** list, int * directive_counter)
 {
@@ -331,122 +461,22 @@ status fill_directive_struct(char *line, directive ** list, int * directive_coun
         /* case of data directive */
         if(is_directive_data(line) == SENTENCE_TYPE_DIRECTIVE)
         {
-            int counter = 0;
-
-            char *is_label = strchr(line, ':'); 
-            if(is_label)
-            {
-                int idx = 0;
-                while(line != is_label)
-                {
-                    while(isspace(*line)) 
-                    { 
-                        line++; 
-                    }
-                    (*list)[*directive_counter].variable_name[idx++] = *line;
-                    line++;
-                }
-                (*list)[*directive_counter].variable_name[idx] = '\0';
-                line++;
-            }
-
-            char *data_start = strstr(line, ".data"); 
-            data_start += DATA_WORD_LEN + 1;
-            status is_data_filled = fill_data_arr(data_start,list,directive_counter,&counter);
-            if(is_data_filled == FAILURE)
-            {
-                retval = FAILURE;
-            }
+            fill_data(line,list,directive_counter);
         }
         /* case of directive entry */
         else if(is_directive_entry(line) == SENTENCE_TYPE_DIRECTIVE && retval == SUCCESS)
         {
-            (*list)[*directive_counter].access_attribute = ATTRIBUTE_ENTERY;
-            char *entry_declaration = strstr(line,".entry");
-            entry_declaration += ENTRY_WORD_LEN;
-            line = entry_declaration + 1;
-            while(isspace(*line))
-            {
-                line++;
-            }
-            int idx = 0;
-            while(!(isspace(*line)) && *line != '\n' && *line != '\0')
-            {
-                (*list)[*directive_counter].variable_name[idx] = *line;
-                line++;
-                idx++;
-            }
-            (*list)[*directive_counter].variable_name[idx] = '\0';
+            fill_entry(line,list,directive_counter);
         }
         /* case of directive extern */
         else if(is_directive_extern(line) == SENTENCE_TYPE_DIRECTIVE && retval == SUCCESS) 
         {
-            char *extern_start = strstr(line,".extern");
-            if(extern_start != NULL)
-            {
-                extern_start += EXTERN_WORD_LENGTH;
-                line = extern_start + 1;
-                int idx= 0;
-                while(isspace(*line))
-                {
-                    line++;
-                }
-                while(!(isspace(*line)) && *line != '\n' && *line != '\0')
-                {
-                    (*list)[*directive_counter].variable_name[idx] = *line;
-                    line++;
-                    idx++;
-                }
-                (*list)[*directive_counter].variable_name[idx] = '\0';
-                (*list)[*directive_counter].access_attribute = ATTRIBUTE_EXTERN;
-            }
+            fill_extern(line,list,directive_counter);
         }
         /* case of directive string */
         else if(is_directive_string(line) == SENTENCE_TYPE_DIRECTIVE && retval == SUCCESS)
         {
-            char *is_label = strchr(line, ':'); 
-            if(is_label)
-            {
-                int idx = 0;
-                while(line != is_label)
-                {
-                    while(isspace(*line)) 
-                    { 
-                        line++; 
-                    }
-                    (*list)[*directive_counter].variable_name[idx++] = *line;
-                    line++;
-                }
-                (*list)[*directive_counter].variable_name[idx] = '\0';
-                line++;
-            }
-            int length_of_string = get_len_string(line);
-            char *string_data = (char*) malloc((length_of_string+1)*sizeof(char));
-            if(string_data == NULL)
-            {
-                perror("Couldn't malloc\n");
-                retval = FAILURE;
-            }
-            else
-            {
-
-                char *ptr_to_String = string_data;
-                char *start_of_string = strchr(line,'"');
-                int idx = 0;
-                line = start_of_string + 1;
-                while(*line != '"' && *line != '\0')
-                {
-                    ptr_to_String[idx] = *line;
-                    idx++;
-                    line++;
-                }
-                ptr_to_String[idx] = '\0';
-
-                (*list)[*directive_counter].data = string_data; 
-                (*list)[*directive_counter].data_length = length_of_string;
-
-                (*list)[*directive_counter].data_attribute = ATTRIBUTE_STRING;
-            }
+            fill_string(line,list,directive_counter);
         }
         (*directive_counter)++;
     }
