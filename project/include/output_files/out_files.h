@@ -4,18 +4,18 @@
 #include "common_structs.h"
 #include "machine_code.h"
 
-#define SIZE_OF_SPETIAL_BITS_GROUP 4
-#define AMOUNT_OF_SPETIAL_BITS_GROUPS 5
+#define SIZE_OF_SPECIAL_BITS_GROUP 4
+#define AMOUNT_OF_SPECIAL_BITS_GROUPS 5
 
 
 typedef struct special_bits_group_s
 {
-    uint16_t val : SIZE_OF_SPETIAL_BITS_GROUP;
+    uint16_t val : SIZE_OF_SPECIAL_BITS_GROUP;
 } special_bits_group;
 
 typedef struct special_base_s
 {
-    special_bits_group groups[AMOUNT_OF_SPETIAL_BITS_GROUPS];
+    special_bits_group groups[AMOUNT_OF_SPECIAL_BITS_GROUPS];
 } special_base;
 
 typedef enum out_filetype_e

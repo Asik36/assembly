@@ -131,8 +131,14 @@ bool machine_code_main(char *base_file_name, symbol *symbol_list, int symbol_lis
         out_files_main(g_instructions_word_count, g_symbols_word_count, base_file_name);
     }
 
-    free(g_entrys);
-    free(g_externals);
+    if(g_entrys)
+    {
+        free(g_entrys);
+    }
+    if(g_externals)
+    {
+        free(g_externals);
+    }
 
     return g_machine_code_error_flag == false;
 }

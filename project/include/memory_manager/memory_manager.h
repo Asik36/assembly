@@ -20,7 +20,6 @@ typedef enum memory_status_e
 } memory_status;
 
 
-
 /** 
  * @brief main function that goes over instruction table checks if command is valid and assign memory address
  * @param instruction_line_table list of instruction in string form

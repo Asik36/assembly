@@ -40,9 +40,9 @@ static special_base out_files_convert_to_special_base(word_data word)
 
 
 
-    for (int group_index = 0; group_index < AMOUNT_OF_SPETIAL_BITS_GROUPS; group_index++)
+    for (int group_index = 0; group_index < AMOUNT_OF_SPECIAL_BITS_GROUPS; group_index++)
     {
-        int shift = (AMOUNT_OF_SPETIAL_BITS_GROUPS - 1 - group_index) * SIZE_OF_SPETIAL_BITS_GROUP;
+        int shift = (AMOUNT_OF_SPECIAL_BITS_GROUPS - 1 - group_index) * SIZE_OF_SPECIAL_BITS_GROUP;
         ret.groups[group_index].val = (uint16_t)((packed >> shift) & 0xF);
     }
     return ret;
@@ -61,10 +61,10 @@ static void out_files_write_machine_code_line(FILE * machine_code_f, int word_in
 
     char ending_char = '-';
 
-    for(int group_index = 0; group_index < AMOUNT_OF_SPETIAL_BITS_GROUPS; group_index++)
+    for(int group_index = 0; group_index < AMOUNT_OF_SPECIAL_BITS_GROUPS; group_index++)
     {
         /*check if this is not the last group, and set the char after the groups value acordingly*/
-        if(group_index + 1 < AMOUNT_OF_SPETIAL_BITS_GROUPS)
+        if(group_index + 1 < AMOUNT_OF_SPECIAL_BITS_GROUPS)
         {
             ending_char = '-';
         }
