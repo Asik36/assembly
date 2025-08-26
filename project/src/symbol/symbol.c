@@ -1,11 +1,11 @@
-#include "symbol.h"
+#include "symbol_t.h"
 
 static int hasmap_index = 0;
 static ENTRY *hashmap_data[MEMORY_MAX_SIZE] = {0};
 
-symbol_status symbol_create(instruction_data *instruction_data_table, instruction *instruction_table, int instruction_num,
-                       directive *directive_table, int directive_num,
-                       symbol **symbol_table, int *symbol_num)
+symbol_status symbol_create(instruction_data_t *instruction_data_table, instruction_t *instruction_table, int instruction_num,
+                       directive_t *directive_table, int directive_num,
+                       symbol_t **symbol_table, int *symbol_num)
 {
     symbol_status retval = SYMBOL_STATUS_SUCCESS;
     int starter_address;
@@ -30,7 +30,7 @@ symbol_status symbol_create(instruction_data *instruction_data_table, instructio
     return retval;
 }
 
-int symbol_get_varibles_start_address(instruction_data *instruction_data_table, int instruction_num)
+int symbol_get_varibles_start_address(instruction_data_t *instruction_data_table, int instruction_num)
 {
     int start_address = START_ADDRESS;
     if (instruction_num != 0)
@@ -40,13 +40,13 @@ int symbol_get_varibles_start_address(instruction_data *instruction_data_table, 
     return start_address;
 }
 
-symbol_status symbol_instructions(instruction_data *instruction_data_table, instruction *instruction_table, int instruction_num,
-                             symbol **p_symbol_table, int *p_symbol_counter)
+symbol_status symbol_instructions(instruction_data_t *instruction_data_table, instruction_t *instruction_table, int instruction_num,
+                             symbol_t **p_symbol_table, int *p_symbol_counter)
 {
     symbol_status retval = SYMBOL_STATUS_SUCCESS;
     int i;
-    instruction_data * current_instruction_data;
-    instruction      * current_instruction;
+    instruction_data_t * current_instruction_data;
+    instruction_t      * current_instruction;
 
     for (i = 0; i < instruction_num && !is_error(retval); i++)
     {
@@ -72,12 +72,12 @@ symbol_status symbol_instructions(instruction_data *instruction_data_table, inst
 }
 
 
-symbol_status symbol_directive(directive *directive_table, int directive_num,
-                          symbol **p_symbol_table, int *p_symbol_counter)
+symbol_status symbol_directive(directive_t *directive_table, int directive_num,
+                          symbol_t **p_symbol_table, int *p_symbol_counter)
 {
     symbol_status retval = SYMBOL_STATUS_SUCCESS;
 
-    directive *cur_directive;
+    directive_t *cur_directive;
     int i;
     for (i = 0; i < directive_num && !is_error(retval); i++)
     {
@@ -102,10 +102,10 @@ symbol_status symbol_directive(directive *directive_table, int directive_num,
 }
 
 
-symbol_status symbol_get_instruction_labels(instruction *ins, instruction_data *ins_data, symbol *symbol_table, int index)
+symbol_status symbol_get_instruction_labels(instruction_t *ins, instruction_data_t *ins_data, symbol_t *symbol_table, int index)
 {
     symbol_status retval = SYMBOL_STATUS_SUCCESS;
-    symbol *new_symbol = symbol_table + index;
+    symbol_t *new_symbol = symbol_table + index;
     if (ins->label[0] == '\0')
     {
         retval = SYMBOL_STATUS_NO_LABEL;
@@ -124,12 +124,12 @@ symbol_status symbol_get_instruction_labels(instruction *ins, instruction_data *
     }
     return retval;
 }
-symbol_status symbol_get_directive_labels(directive *dir, symbol *symbol_table, int index)
+symbol_status symbol_get_directive_labels(directive_t *dir, symbol_t *symbol_table, int index)
 {
     symbol_status retval;
     int *p_old_symbol_index = symbol_find(dir->variable_name);
-    symbol *new_symbol = symbol_table + index;
-    symbol *old_symbol = NULL;
+    symbol_t *new_symbol = symbol_table + index;
+    symbol_t *old_symbol = NULL;
     symbol_extract_directive(new_symbol, dir); /* copy data from dir to symbol */
 
     /* if no label save in list but not in hashmap */
@@ -156,7 +156,7 @@ symbol_status symbol_get_directive_labels(directive *dir, symbol *symbol_table, 
     return retval;
 }
 
-void symbol_extract_directive(symbol *new_symbol, directive *dir)
+void symbol_extract_directive(symbol_t *new_symbol, directive_t *dir)
 {
     strncpy(new_symbol->name, dir->variable_name, SYMBOL_MAX_SIZE);
     new_symbol->access_attribute = dir->access_attribute;
@@ -164,14 +164,14 @@ void symbol_extract_directive(symbol *new_symbol, directive *dir)
     new_symbol->size = dir->data_length;
     new_symbol->data = dir->data;
 }
-void symbol_extract_instruction(symbol *new_symbol, instruction *ins,instruction_data * ins_data)
+void symbol_extract_instruction(symbol_t *new_symbol, instruction_t *ins,instruction_data_t * ins_data)
 {
     strncpy(new_symbol->name, ins->label, SYMBOL_MAX_SIZE);
     new_symbol->address = ins_data->address;
     new_symbol->data_attribute = ATTRIBUTE_CODE;
 }
 
-symbol_status symbol_complete_table(symbol *symbol_table, int symbol_counter, int start_address)
+symbol_status symbol_complete_table(symbol_t *symbol_table, int symbol_counter, int start_address)
 {
 
     symbol_status retval = SYMBOL_STATUS_SUCCESS;
@@ -192,7 +192,7 @@ symbol_status symbol_complete_table(symbol *symbol_table, int symbol_counter, in
     }
     return retval;
 }
-uint16_t symbol_assign_memory(symbol *s, int address)
+uint16_t symbol_assign_memory(symbol_t *s, int address)
 {
     if (s->access_attribute == ATTRIBUTE_EXTERN)
     {
@@ -204,7 +204,7 @@ uint16_t symbol_assign_memory(symbol *s, int address)
     }
     return s->size;
 }
-symbol_status symbol_is_uninitilized_entery(symbol *s)
+symbol_status symbol_is_uninitilized_entery(symbol_t *s)
 {
     symbol_status retval = SYMBOL_STATUS_SUCCESS;
     if (s->access_attribute == ATTRIBUTE_ENTERY && s->data_attribute == ATTRIBUTE_DATA_NONE)
@@ -254,7 +254,7 @@ int symbol_enter(char *symbol_name, int index)
     return index;
 }
 
-symbol_status symbol_update(symbol *old_symbol, symbol *new_symbol)
+symbol_status symbol_update(symbol_t *old_symbol, symbol_t *new_symbol)
 {
     symbol_status retval = SYMBOL_STATUS_SYMBOL_UPDATE;
 
@@ -273,7 +273,7 @@ symbol_status symbol_update(symbol *old_symbol, symbol *new_symbol)
     return retval;
 }
 
-symbol_status symbol_handle_extern_attribute(symbol *old_symbol)
+symbol_status symbol_handle_extern_attribute(symbol_t *old_symbol)
 {
     symbol_status retval = SYMBOL_STATUS_SYMBOL_UPDATE;
 
@@ -285,7 +285,7 @@ symbol_status symbol_handle_extern_attribute(symbol *old_symbol)
     return retval;
 }
 
-symbol_status symbol_handle_entry_attribute(symbol *old_symbol)
+symbol_status symbol_handle_entry_attribute(symbol_t *old_symbol)
 {
     symbol_status retval = SYMBOL_STATUS_SYMBOL_UPDATE;
 
@@ -301,7 +301,7 @@ symbol_status symbol_handle_entry_attribute(symbol *old_symbol)
     return retval;
 }
 
-symbol_status symbol_handle_data_or_string(symbol *old_symbol, symbol *new_symbol)
+symbol_status symbol_handle_data_or_string(symbol_t *old_symbol, symbol_t *new_symbol)
 {
     symbol_status retval = SYMBOL_STATUS_SYMBOL_UPDATE;
 
@@ -323,14 +323,14 @@ symbol_status symbol_handle_data_or_string(symbol *old_symbol, symbol *new_symbo
 }
 
 
-symbol_status symbol_table_grow(symbol **p_symbol_table, int *p_symbol_counter)
+symbol_status symbol_table_grow(symbol_t **p_symbol_table, int *p_symbol_counter)
 {
-    symbol *tmp = NULL;
+    symbol_t *tmp = NULL;
     int symbol_counter = *p_symbol_counter;
-    symbol *symbol_table = *p_symbol_table;
+    symbol_t *symbol_table = *p_symbol_table;
     symbol_status retval = SYMBOL_STATUS_SUCCESS;
 
-    tmp = (symbol *)realloc(symbol_table, (symbol_counter + 1) * sizeof(symbol));
+    tmp = (symbol_t *)realloc(symbol_table, (symbol_counter + 1) * sizeof(symbol_t));
     if (tmp == NULL)
     {
         retval = SYMBOL_STATUS_ERR_MEMORY_ALLOCATION;
@@ -338,7 +338,7 @@ symbol_status symbol_table_grow(symbol **p_symbol_table, int *p_symbol_counter)
     else
     {
         symbol_table = tmp;
-        memset(symbol_table + symbol_counter, 0, sizeof(symbol));
+        memset(symbol_table + symbol_counter, 0, sizeof(symbol_t));
 
         symbol_counter++;
 
@@ -349,16 +349,16 @@ symbol_status symbol_table_grow(symbol **p_symbol_table, int *p_symbol_counter)
     return retval;
 }
 
-symbol_status symbol_table_shrink(symbol **p_symbol_table,int *p_symbol_counter)
+symbol_status symbol_table_shrink(symbol_t **p_symbol_table,int *p_symbol_counter)
 {
     symbol_status retval = SYMBOL_STATUS_SUCCESS;
     int symbol_counter = *p_symbol_counter;
-    symbol *symbol_table = *p_symbol_table;
+    symbol_t *symbol_table = *p_symbol_table;
 
     symbol_counter--;
     if (symbol_counter != 0)
     {
-        symbol_table = realloc(symbol_table, symbol_counter * sizeof(symbol));
+        symbol_table = realloc(symbol_table, symbol_counter * sizeof(symbol_t));
             if (symbol_table == NULL)
             {
                 retval = SYMBOL_STATUS_ERR_MEMORY_ALLOCATION;

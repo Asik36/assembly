@@ -52,7 +52,7 @@ void out_files_machine_code(  int machine_code_instructions_length, int machine_
  * @param file_type the type of file to write to (extern or entry) that determins the format of the line
  * @param symbol_index the index of the symbol call to be writen (in its apropriate global array )
  * @param func_name a string that is used to return this functions name to the caller function
- * @return out_file_status status that represents wether the function was executed successfully or with wich errors
+ * @return out_file_status status_e that represents wether the function was executed successfully or with wich errors
  */
 out_file_status out_files_write_line(FILE * out_file, out_file_type file_type, int symbol_index, const char ** func_name);
 
@@ -62,14 +62,14 @@ out_file_status out_files_write_line(FILE * out_file, out_file_type file_type, i
  * @param base_file_name the name of the base file (the name of the assembly file without the ending)
  * @param file_type the type of file to write to (extern or entry) that determins the global array that the symbol calls are red from
  * @param func_name a string that is used to return this functions name to the caller function
- * @return out_file_status status that represents wether the function was executed successfully or with wich errors
+ * @return out_file_status status_e that represents wether the function was executed successfully or with wich errors
  */
 out_file_status out_files_symbol_files(char * base_file_name, out_file_type file_type, const char ** func_name);
 
 /**
  * @brief the function prints an error message, that includes the type of error and the function it happend in
  *
- * @param func_return_status the status value of the function
+ * @param func_return_status the status_e value of the function
  * @param func_name a string with the name of the function that was called
  */
 void out_files_func_handler(out_file_status func_return_status, const char * func_name);

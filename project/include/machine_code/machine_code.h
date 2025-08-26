@@ -58,14 +58,14 @@ typedef enum machine_code_success_e
  * @param instruction_list an array of all the instructions
  * @param instruction_list_length the amount of instructions in the symbol array
  */
-bool machine_code_main(char * base_file_name,symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length);
+bool machine_code_main(char * base_file_name,symbol_t * symbol_list, int symbol_list_length, instruction_data_t * instruction_list, int instruction_list_length);
 
 /**
  * @brief the function tries to write machine code into the memory array
  *
  * @param code the machine code to add to the memory
  * @param func_name a string that is used to return this functions name to the caller function
- * @return machine_code_status status that represents wether the function was executed successfully or with wich errors
+ * @return machine_code_status status_e that represents wether the function was executed successfully or with wich errors
  * otherwise adds machine code to memory and return SUCCESS
  */
 machine_code_status machine_code_write_machine_code(machine_code code, const char ** func_name);
@@ -78,7 +78,7 @@ machine_code_status machine_code_write_machine_code(machine_code code, const cha
  * @param instruction_list an array of all the instructions
  * @param instruction_list_length the amount of instructions in the symbol array
  */
-void machine_code_handle_instructions(symbol * symbol_list, int symbol_list_length, instruction_data * instruction_list, int instruction_list_length);
+void machine_code_handle_instructions(symbol_t * symbol_list, int symbol_list_length, instruction_data_t * instruction_list, int instruction_list_length);
 
 /**
  * @brief the function adds instructions to memory one by one, until there are no more instructions left or the addition of one of the symbols is failed
@@ -86,7 +86,7 @@ void machine_code_handle_instructions(symbol * symbol_list, int symbol_list_leng
  * @param symbol_list  an array of all the symbols
  * @param symbol_list_lengththe amount of symbols in the symbol array
  */
-void machine_code_handle_symbols(symbol * symbol_list, int symbol_list_length);
+void machine_code_handle_symbols(symbol_t * symbol_list, int symbol_list_length);
 
 /**
  * @brief the function adds one instruction to the memory array
@@ -95,28 +95,28 @@ void machine_code_handle_symbols(symbol * symbol_list, int symbol_list_length);
  * @param symbol_list_lengththe amount of symbols in the symbol array
  * @param current_instruction the instruction to be added to the memory
  * @param func_name a string that is used to return this functions name to the caller function
- * @return machine_code_status status that represents wether the function was executed successfully or with wich errors
+ * @return machine_code_status status_e that represents wether the function was executed successfully or with wich errors
  */
-machine_code_status machine_code_add_instruction_code(symbol * symbol_list, int symbol_list_length, instruction_data current_instruction, const char ** func_name);
+machine_code_status machine_code_add_instruction_code(symbol_t * symbol_list, int symbol_list_length, instruction_data_t current_instruction, const char ** func_name);
 
 /**
  * @brief the function adds one symbol to the memory array
  *
- * @param current_symbol the symbol to be added to the memory
+ * @param current_symbol the symbol_t to be added to the memory
  * @param func_name a string that is used to return this functions name to the caller function
- * @return machine_code_status status that represents wether the function was executed successfully or with wich errors
+ * @return machine_code_status status_e that represents wether the function was executed successfully or with wich errors
  */
-machine_code_status machine_code_add_symbol_code(symbol current_symbol, const char ** func_name);
+machine_code_status machine_code_add_symbol_code(symbol_t current_symbol, const char ** func_name);
 
 /**
  * @brief the function saerches for a symbol by name in the symbol table
  *
  * @param symbol_list an array of all the symbols
- * @param symbol_list_lengththe amount of symbols in the symbol array
- * @param symbol_name the name that is searched for in the symbol array
- * @return symbol* a pointer to the symbol with the name field identical to symbol_name, or  NULL if such a symbol wasn't found
+ * @param symbol_list_lengththe amount of symbols in the symbol_t array
+ * @param symbol_name the name that is searched for in the symbol_t array
+ * @return symbol_t* a pointer to the symbol with the name field identical to symbol_name, or  NULL if such a symbol wasn't found
  */
-symbol* machine_code_find_symbol(symbol * symbol_list, int symbol_list_length, const char * symbol_name);
+symbol_t* machine_code_find_symbol(symbol_t * symbol_list, int symbol_list_length, const char * symbol_name);
 
 /**
  * @brief the function adds to the machine additional words if needed for an operand
@@ -129,7 +129,7 @@ symbol* machine_code_find_symbol(symbol * symbol_list, int symbol_list_length, c
  * @param func_name a string that is used to return this functions name to the caller function
  * @return int the current word to write to in the words array at the end of adding all needed additional words
  */
-machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_list_length, operand_data operand, machine_code * instruction_code, int * curr_word_index_ptr, const char ** func_name);
+machine_code_status machine_code_add_operand(symbol_t * symbol_list, int symbol_list_length, operand_data_t operand, machine_code * instruction_code, int * curr_word_index_ptr, const char ** func_name);
 
 /**
  * @brief the function gets an operand and returns what needs to be stored in it's corresponding register
@@ -137,12 +137,12 @@ machine_code_status machine_code_add_operand(symbol * symbol_list, int symbol_li
  * @param operand the operand that we want to check its mode and register
  * @return uint16_t if the operands mode uses a register return the register(the operand data), otherwise retrun 0
  */
-uint16_t machine_code_get_operands_register(operand_data operand);
+uint16_t machine_code_get_operands_register(operand_data_t operand);
 
 /**
  * @brief the function prints an error message, that includes the type of error and the function it happend in
  *
- * @param func_return_status the status value of the function
+ * @param func_return_status the status_e value of the function
  * @param func_name  a string with the name of the function that was called
  */
 void machine_code_func_handler(machine_code_status func_return_status, const char * func_name);
@@ -156,6 +156,6 @@ void machine_code_func_handler(machine_code_status func_return_status, const cha
  * @param symbol_list_length the amount of symbols in the symbol array
  * @param func_name a string with the name of the function that was called
  */
-void machine_code_instructions_with_operand_word(machine_code * instruction_code, instruction_data current_instruction,symbol *symbol_list, int symbol_list_length,const char **func_name);
+void machine_code_instructions_with_operand_word(machine_code * instruction_code, instruction_data_t current_instruction,symbol_t *symbol_list, int symbol_list_length,const char **func_name);
 
 #endif

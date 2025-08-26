@@ -23,20 +23,20 @@ typedef enum memory_status_e
 
 /** 
  * @brief main function that goes over instruction table checks if command is valid and assign memory address
- * @param instruction_line_table list of instruction in string form
+ * @param instruction_line_table list of instruction_t in string form
  * @param n number of instructions
- * @param instruction_info_table list of instruction data
+ * @param instruction_info_table list of instruction_t data
  * @return SUCCESS if all lines are valid otherwise if one line is invalid returns FAILURE
  */
-memory_status memory(instruction *instruction_line_table,int n, instruction_data ** instruction_info_table);
+memory_status memory(instruction_t *instruction_line_table,int n, instruction_data_t ** instruction_info_table);
 
 /**
  * @brief extract info from instruction line into instruction data
- * @param instruction_line instruction strings
- * @param instruction_info instruction data
+ * @param instruction_line instruction_t strings
+ * @param instruction_info instruction_t data
  * @return SUCCESS if line is valid otherwise FAILURE
  */
-memory_status memory_instruction_assign(instruction *instruction_line, instruction_data *instruction_info);
+memory_status memory_instruction_assign(instruction_t *instruction_line, instruction_data_t *instruction_info);
 
 /** @brief get address of the next instruction
  *  @param instruction_size size of current instruction
@@ -46,24 +46,24 @@ uint16_t memory_instruction_get_address(int instruction_size);
 
 /** 
  * @brief get command index from the commands table
- * @param ins current instruction
+ * @param ins current instruction_t
  * @return command index , if command not found returns -1
  */
-int memory_instruction_get_command_index(instruction *ins);
+int memory_instruction_get_command_index(instruction_t *ins);
 
 /** 
  * @brief gets info about both operands , if they dont exists they are kept empty
  * @param input_operand current operand as written by user
  * @param operand_info writes operand's data 
  */
-void memory_operand_get_info(char * input_operand, operand_data *operand_info);
+void memory_operand_get_info(char * input_operand, operand_data_t *operand_info);
 
 /** 
  * @brief get addressing mode of operand
  * @param op operand string
  * @return addressing mode type
  */
-addressing_modes memory_operand_get_addressing_mode(char *op);
+addressing_modes_e memory_operand_get_addressing_mode(char *op);
 
 /** 
  * @brief get register number from operand
@@ -79,14 +79,14 @@ int memory_operand_get_register_index(char *op);
  * @param addr_mode addressing mode of op_data
  * @return returns data, if there is no data retutns 0
  */
-int memory_operand_get_data(operand_data *op_data, char *op, addressing_modes addr_mode);
+int memory_operand_get_data(operand_data_t *op_data, char *op, addressing_modes_e addr_mode);
 
 /** 
  * @brief gets size of instruction , or in other words the amont of words in instruction. it is canculated using addressing modes on each operand
- * @param ins_data current instruction
+ * @param ins_data current instruction_t
  * @return instruction size
  */
-uint16_t memory_instruction_get_size(instruction_data *ins_data);
+uint16_t memory_instruction_get_size(instruction_data_t *ins_data);
 
 /** 
  * @brief gets name of the varible using addressing mode INDEX, the part of the string before the brakets []
@@ -142,7 +142,7 @@ bool memory_is_addressing_mode_register_direct(char *op);
  * @param ins_data current instruction
  * @return SUCCSESS if instruction is valid otherwise FAILURE
  */
-memory_status memory_instruction_validation(instruction_data *ins_data);
+memory_status memory_instruction_validation(instruction_data_t *ins_data);
 
 /** 
  * @brief gets the string between brackets []
@@ -159,7 +159,7 @@ bool get_substring_between_brackets(const char *src, char *dest, size_t dest_siz
  * @param operand instruction's operand
  * @return size form operand's addressing mode
  */
-int memory_addressing_mode_instruction_size(operand_data * operand);
+int memory_addressing_mode_instruction_size(operand_data_t * operand);
 
 
 /**

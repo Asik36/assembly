@@ -45,7 +45,7 @@ static inline uint16_t machine_code_append_arg_to_word(uint16_t curr_val, uint16
  * @return uint16_t the instruction operand after correct memory ordering
  */
 
-static uint16_t machine_code_reorder_operand_word_content(operand_content operand_data_word)
+static uint16_t machine_code_reorder_operand_word_content(operand_content_t operand_data_word)
 {
     uint16_t ret = 0;
 
@@ -67,9 +67,9 @@ static uint16_t machine_code_reorder_operand_word_content(operand_content operan
  * @param new_item the symbol_call to add to one of the tables
  * @param type the type of the new item that determins to wich table to add the item to
  * @param func_name a string that is used to return this functions name to the caller function
- * @return machine_code_status status that represents wether the function was executed successfully or with wich errors
+ * @return machine_code_status status_e that represents wether the function was executed successfully or with wich errors
  */
-static machine_code_status add_item(symbol_call new_item, enum attribute_access_type_e type, const char **func_name)
+static machine_code_status add_item(symbol_call new_item, attribute_access_type_e type, const char **func_name)
 {
     *func_name = __func__;
 
@@ -113,7 +113,7 @@ static machine_code_status add_item(symbol_call new_item, enum attribute_access_
     return ret;
 }
 
-bool machine_code_main(char *base_file_name, symbol *symbol_list, int symbol_list_length, instruction_data *instruction_list, int instruction_list_length)
+bool machine_code_main(char *base_file_name, symbol_t *symbol_list, int symbol_list_length, instruction_data_t *instruction_list, int instruction_list_length)
 {
     memset(g_memory, 0, sizeof(g_memory));
     g_memory_word_index = STARTING_MEMORY_ADDRESS;
@@ -157,7 +157,7 @@ machine_code_status machine_code_write_machine_code(machine_code code, const cha
     return ret;
 }
 
-void machine_code_handle_instructions(symbol *symbol_list, int symbol_list_length, instruction_data *instruction_list, int instruction_list_length)
+void machine_code_handle_instructions(symbol_t *symbol_list, int symbol_list_length, instruction_data_t *instruction_list, int instruction_list_length)
 {
     const char *child_func_name;
     machine_code_status adding_instruction_status;
@@ -173,7 +173,7 @@ void machine_code_handle_instructions(symbol *symbol_list, int symbol_list_lengt
     }
 }
 
-void machine_code_handle_symbols(symbol *symbol_list, int symbol_list_length)
+void machine_code_handle_symbols(symbol_t *symbol_list, int symbol_list_length)
 {
     const char *child_func_name;
     machine_code_status child_status;
@@ -203,7 +203,7 @@ static bool flag_array_is_empty(bool flag_array[], int arr_length)
     return ret;
 }
 
-machine_code_status machine_code_add_instruction_code(symbol *symbol_list, int symbol_list_length, instruction_data current_instruction, const char **func_name)
+machine_code_status machine_code_add_instruction_code(symbol_t *symbol_list, int symbol_list_length, instruction_data_t current_instruction, const char **func_name)
 {
     const char *child_func_name;
     *func_name = __func__;
@@ -249,11 +249,11 @@ machine_code_status machine_code_add_instruction_code(symbol *symbol_list, int s
     return ret;
 }
 
-void machine_code_instructions_with_operand_word(machine_code *instruction_code, instruction_data current_instruction, symbol *symbol_list, int symbol_list_length, const char **func_name)
+void machine_code_instructions_with_operand_word(machine_code *instruction_code, instruction_data_t current_instruction, symbol_t *symbol_list, int symbol_list_length, const char **func_name)
 {
     const char *child_func_name;
     *func_name = __func__;
-    operand_content op;
+    operand_content_t op;
     command curr_command = commands[current_instruction.command_index];
     /*since this is the second word its word index is 1 (indexing starts from 0)*/
     int curr_word_index = 1;
@@ -299,7 +299,7 @@ void machine_code_instructions_with_operand_word(machine_code *instruction_code,
     }
 }
 
-machine_code_status machine_code_add_symbol_code(symbol current_symbol, const char **func_name)
+machine_code_status machine_code_add_symbol_code(symbol_t current_symbol, const char **func_name)
 {
     *func_name = __func__;
     const char *child_func_name;
@@ -364,9 +364,9 @@ machine_code_status machine_code_add_symbol_code(symbol current_symbol, const ch
     return ret;
 }
 
-symbol *machine_code_find_symbol(symbol *symbol_list, int symbol_list_length, const char *symbol_name)
+symbol_t *machine_code_find_symbol(symbol_t *symbol_list, int symbol_list_length, const char *symbol_name)
 {
-    symbol *ret = NULL;
+    symbol_t *ret = NULL;
     for (int symbol_index = 0; (!ret) && (symbol_index < symbol_list_length); symbol_index++)
     {
         if (strncmp(symbol_list[symbol_index].name, symbol_name, SYMBOL_MAX_SIZE) == 0)
@@ -377,7 +377,7 @@ symbol *machine_code_find_symbol(symbol *symbol_list, int symbol_list_length, co
     return ret;
 }
 
-machine_code_status machine_code_add_operand(symbol *symbol_list, int symbol_list_length, operand_data operand, machine_code *instruction_code, int *curr_word_index_ptr, const char **func_name)
+machine_code_status machine_code_add_operand(symbol_t *symbol_list, int symbol_list_length, operand_data_t operand, machine_code *instruction_code, int *curr_word_index_ptr, const char **func_name)
 {
     *func_name = __func__;
     const char *child_func_name;
@@ -386,8 +386,8 @@ machine_code_status machine_code_add_operand(symbol *symbol_list, int symbol_lis
 
     int curr_word_index = *curr_word_index_ptr;
     word_data * words = instruction_code->words;
-    are are_attribute = ABSOLUTE;
-    symbol *operand_symbol;
+    are_e are_attribute = ABSOLUTE;
+    symbol_t *operand_symbol;
 
     switch (operand.addressing_mode)
     {
@@ -464,7 +464,7 @@ machine_code_status machine_code_add_operand(symbol *symbol_list, int symbol_lis
     return ret;
 }
 
-uint16_t machine_code_get_operands_register(operand_data operand)
+uint16_t machine_code_get_operands_register(operand_data_t operand)
 {
     uint16_t ret = 0;
     if ((operand.addressing_mode == ADDRESSING_MODES_REGISTER_DIRECT) || (operand.addressing_mode == ADDRESSING_MODES_INDEX))

@@ -50,24 +50,24 @@ char *remove_spaces_from_start(char *line);
  * @param line this is the line we want to add
  * @return int retval - SUCCESS if the line was added successfully, FAILURE otherwise
  */
-status add_to_content(macro *macro_ptr, char *line);
+status_e add_to_content(macro *macro_ptr, char *line);
 
 /**
  * @brief this function puts into a hash table all the macros in the file
  * 
  * @param file_as_path the originial code file we recieve
- * @return status SUCCESS/FAILURE
+ * @return status_e SUCCESS/FAILURE
  */
-status list_macros(char *file_as_path);
+status_e list_macros(char *file_as_path);
 
 /**
  * @brief this function prints the content of a macro to a file.
  * 
  * @param file_am this is the file we write into 
  * @param line this is the line we read from the original code file
- * @return status SUCCESS/FAILURE
+ * @return status_e SUCCESS/FAILURE
  */
-status print_macro(FILE *file_am, char *line);
+status_e print_macro(FILE *file_am, char *line);
 
 /**
  * @brief Create a file am file
@@ -76,6 +76,6 @@ status print_macro(FILE *file_am, char *line);
  * @param file_am the new file we create 
  * @return int retval - SUCCESS if the file was created successfully, FAILURE otherwise
  */
-status create_file_am(char *file_as, char *file_am);
+status_e create_file_am(char *file_as, char *file_am);
 
 #endif 

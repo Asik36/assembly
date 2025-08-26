@@ -36,7 +36,7 @@ static special_base out_files_convert_to_special_base(word_data word)
 
     uint32_t are_bits  = ((uint32_t)word.are_attribute) & 0xF; /* make sure to keep only 4 bits*/
     uint32_t val_bits = ((uint32_t)word.content.value) & 0xFFFF; /* make sure to keep only 16 bits*/
-    uint32_t packed = (are_bits << 16) | val_bits; /* unite are bits and value bits*/
+    uint32_t packed = (are_bits << 16) | val_bits; /* unite are_e bits and value bits*/
 
 
 
@@ -84,7 +84,7 @@ static void out_files_write_machine_code_line(FILE * machine_code_f, int word_in
  * @param base_file_name the name of the base file (the name of the assembly file without the ending)
  * @param out_file a pointer to a pointer to a file that is used to pass up to the called function the opend file
  * @param func_name a string that is used to return this functions name to the caller function
- * @return out_file_status status that represents wether the function was executed successfully or with wich errors
+ * @return out_file_status status_e that represents wether the function was executed successfully or with wich errors
  */
 static out_file_status out_files_create_file(out_file_type f_type, char * base_file_name,FILE ** out_file, const char ** func_name)
 {

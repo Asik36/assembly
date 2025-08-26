@@ -34,13 +34,13 @@
 #define is_error(s) ((s) < 0)
 
 
-typedef enum symbol_status
+typedef enum 
 {
     FAILURE = -1,
     SUCCESS = 0
-}status;
+}status_e;
 
-typedef enum main_status_e
+typedef enum 
 {
     MAIN_STATUS_ERR_MACHINE_CODE = -7,
     MAIN_STATUS_ERR_SYMBOL,
@@ -50,9 +50,9 @@ typedef enum main_status_e
     MAIN_STATUS_ERR_OUT_FILES,
     MAIN_STATUS_ERR_IN_FILES,
     MAIN_STATUS_SUCCESS = 0
-}main_status;
+}main_status_e;
 
-enum attribute_data_type_e
+typedef enum
 {
 
     ATTRIBUTE_DATA_NONE = 0,
@@ -60,31 +60,32 @@ enum attribute_data_type_e
     ATTRIBUTE_STRING,
     ATTRIBUTE_CODE
 
-};
-enum attribute_access_type_e
+}attribute_data_type_e;
+
+typedef enum 
 {
     ATTRIBUTE_ACCESS_NONE = 0,
     ATTRIBUTE_EXTERN,
     ATTRIBUTE_ENTERY
-};
+}attribute_access_type_e;
 
-typedef enum are_e
+typedef enum 
 {
     ABSOLUTE    = 1 << 2, /*word is a value*/
     RELOCATABLE = 1 << 1, /*word value is taken from a memory address*/
     EXTERNAL    = 1 << 0  /*word value is taken from a diffrent file*/
-} are;
+} are_e;
 
-typedef enum addressing_modes_e
+typedef enum 
 {
     ADDRESSING_MODES_NONE = -1,
     ADDRESSING_MODES_IMMEDIATE,
     ADDRESSING_MODES_DIRECT,
     ADDRESSING_MODES_INDEX,
     ADDRESSING_MODES_REGISTER_DIRECT
-}addressing_modes;
+}addressing_modes_e;
 
-typedef struct instruction_s
+typedef struct 
 {
 
     char label          [SYMBOL_MAX_SIZE];
@@ -92,39 +93,39 @@ typedef struct instruction_s
     char src_operand    [SYMBOL_MAX_SIZE];
     char dest_operand   [SYMBOL_MAX_SIZE];
 
-} instruction;
+} instruction_t;
 
 
 
-typedef struct operand_data_s
+typedef struct 
 {
-    addressing_modes addressing_mode;
+    addressing_modes_e addressing_mode;
     char varible_name[SYMBOL_MAX_SIZE];
     int operand_data;       /* Number value OR register index */
 
-}operand_data;
+}operand_data_t;
 
 
-typedef struct directive_s
+typedef struct 
 {
     char variable_name       [SYMBOL_MAX_SIZE];   /* extern and entry shou*/
     uint32_t data_length;
     void * data;                                   /* chars or ints*/
-    enum attribute_access_type_e access_attribute; /* extern or entry */
-    enum attribute_data_type_e data_attribute;   /* data or string */
-} directive;
+    attribute_access_type_e access_attribute; /* extern or entry */
+    attribute_data_type_e data_attribute;   /* data or string */
+} directive_t;
 
 
 
-typedef struct instruction_data_s
+typedef struct 
 {
     uint16_t address : MEMORY_ADRESS_MAX_BITS;
     uint16_t size : MEMORY_ADRESS_MAX_BITS;
     int command_index;
-    operand_data dest_operand_data;
-    operand_data src_operand_data;
+    operand_data_t dest_operand_data;
+    operand_data_t src_operand_data;
 
-}instruction_data;
+}instruction_data_t;
 
 
 
@@ -135,21 +136,21 @@ typedef struct symbol_s
 
     char  name    [SYMBOL_MAX_SIZE];
     void * data; /*if data type int / if string type char*/
-    enum attribute_access_type_e access_attribute; /* extern or entry */
-    enum attribute_data_type_e data_attribute;   /* data or string */
+    attribute_access_type_e access_attribute; /* extern or entry */
+    attribute_data_type_e data_attribute;   /* data or string */
 
-} symbol;
-
-
+} symbol_t;
 
 
 
-typedef int16_t value_content;          /*Value data such as number or char */
-typedef uint16_t opcode_content;        /*Opcode of command*/
-typedef uint16_t offset_content;        /*Size of data in memory*/
-typedef uint16_t base_address_content;  /*Data location in memory*/
+
+
+typedef int16_t value_content_t;          /*Value data such as number or char */
+typedef uint16_t opcode_content_t;        /*Opcode of command*/
+typedef uint16_t offset_content_t;        /*Size of data in memory*/
+typedef uint16_t base_address_content_t;  /*Data location in memory*/
 /*Info about the operands of the command*/
-typedef struct operand_content_s
+typedef struct 
 {
     uint16_t funct             ;//          : FUNCT_MAX_BIT_SIZE;
     uint16_t src_register       ;//         : REGISTER_MAX_BIT_SIZE;         /*first operand*/
@@ -157,9 +158,9 @@ typedef struct operand_content_s
     uint16_t dest_register      ;//         : REGISTER_MAX_BIT_SIZE;         /*second operand*/
     uint16_t dest_operand_type ;//  : OPERAND_TYPE_MAX_BIT_SIZE;    /*second operand's type*/
 
-}operand_content;
+}operand_content_t;
 
-typedef enum opcode_types_e
+typedef enum 
 {
     OPCODE_MOV              = 1 << 0,
     OPCODE_CMP              = 1 << 1,
@@ -172,23 +173,23 @@ typedef enum opcode_types_e
     OPCODE_RTS              = 1 << 14,
     OPCODE_STOP             = 1 << 15
 
-}opcode_types;
+}opcode_types_e;
 
 
 
-typedef union word_content_u
+typedef union 
 {
-    opcode_content opcode;
-    operand_content operand;
-    base_address_content data_address;
-    offset_content offset;
-    value_content value;
-}word_content;
+    opcode_content_t opcode;
+    operand_content_t operand;
+    base_address_content_t data_address;
+    offset_content_t offset;
+    value_content_t value;
+}word_content_t;
 
 typedef struct word_data_s
 {
-    are are_attribute : ARE_MAX_BIT_SIZE; /*ARE flag*/
-    word_content content;                   /*can be : opcode/operand/adress/offset/value*/
+    are_e are_attribute : ARE_MAX_BIT_SIZE; /*ARE flag*/
+    word_content_t content;                   /*can be : opcode/operand/adress/offset/value*/
 }word_data;
 
 
@@ -204,7 +205,7 @@ typedef struct machine_code_s
 
 typedef struct command_s
 {
-    opcode_types opcode;
+    opcode_types_e opcode;
     uint16_t funct;
     char command_name[COMMAND_MAX_SIZE];
     bool src_operand_types[ADDRESSING_TYPES_AMOUNT];
@@ -231,11 +232,11 @@ static const command commands[COMMAND_AMONT] =
     {.opcode = OPCODE_STOP,.funct = 0,.command_name = "stop",.src_operand_types = {0} ,.dest_operand_types = {0}}
 
 };
-main_status assembly(char * file_name);
+main_status_e assembly(char * file_name);
 
-void free_lists(int directive_counter, directive *directive_list, instruction *instruction_list, instruction_data *instruction_data_list, symbol *symbol_list);
-status get_base_file_name(char * input_file , char * base_file_name);
-void main_error_check(main_status m_status);
+void free_lists(int directive_counter, directive_t *directive_list, instruction_t *instruction_list, instruction_data_t *instruction_data_list, symbol_t *symbol_list);
+status_e get_base_file_name(char * input_file , char * base_file_name);
+void main_error_check(main_status_e m_status);
 
 int get_command_index(char * command_name);
 

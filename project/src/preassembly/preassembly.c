@@ -52,9 +52,9 @@ char *remove_spaces_from_start(char *line)
 }
 
 
-status add_to_content(macro *macro_ptr, char *line)
+status_e add_to_content(macro *macro_ptr, char *line)
 {
-    status retval = SUCCESS;
+    status_e retval = SUCCESS;
     int size_of_line_read = strlen(line);
     int current_content_len = macro_ptr->content ? strlen(macro_ptr->content) : 0;
     int new_size = current_content_len + size_of_line_read + 1;
@@ -78,9 +78,9 @@ status add_to_content(macro *macro_ptr, char *line)
     return retval;
 }
 
-status check_is_macro (char *line)
+status_e check_is_macro (char *line)
 {
-    status retval;
+    status_e retval;
     regex_t regex;
     
     int ret_from_regcomp = regcomp(&regex,MACRO_PATTERN,REG_EXTENDED);
@@ -106,9 +106,9 @@ status check_is_macro (char *line)
     return retval;
 }
 
-status check_endm(char *line)
+status_e check_endm(char *line)
 {
-    status retval;
+    status_e retval;
     regex_t regex;
     
     int ret_from_regcomp = regcomp(&regex,ENDM_PATTERN,REG_EXTENDED);
@@ -136,9 +136,9 @@ status check_endm(char *line)
 
 
 
-status endm_handling(char *line, status *retval, macro *new_macro, FILE *file_as)
+status_e endm_handling(char *line, status_e *retval, macro *new_macro, FILE *file_as)
 {
-    status retval_func = FAILURE;
+    status_e retval_func = FAILURE;
     while(fgets(line,MAX_LINE,file_as) != NULL)
     {
         if(check_endm(line) == FAILURE)
@@ -163,15 +163,15 @@ status endm_handling(char *line, status *retval, macro *new_macro, FILE *file_as
     return retval_func;
 }
 
-status list_macros(char *file_as_path)
+status_e list_macros(char *file_as_path)
 {
     char *pointer_to_macro;
     macro *new_macro;
     char *name_ptr;
     ENTRY item;
     ENTRY *found;
-    status retval = SUCCESS;
-    status is_macro;
+    status_e retval = SUCCESS;
+    status_e is_macro;
     FILE* file_as = fopen(file_as_path,"r");
     if(!file_as)
     {
@@ -266,9 +266,9 @@ status list_macros(char *file_as_path)
     return retval;
 }
 
-status print_macro(FILE *file_am, char *line)
+status_e print_macro(FILE *file_am, char *line)
 {
-    status retval = SUCCESS;
+    status_e retval = SUCCESS;
     if(file_am != NULL)
     {
         char *word = strtok(line, " \t\n\0");
@@ -302,9 +302,9 @@ status print_macro(FILE *file_am, char *line)
 }
 
 
-status create_file_am(char *file_as, char *file_am)
+status_e create_file_am(char *file_as, char *file_am)
 {
-    status retval = SUCCESS;
+    status_e retval = SUCCESS;
     FILE* original_code = fopen(file_as,"r");
     if(!original_code)
     {
@@ -329,7 +329,7 @@ status create_file_am(char *file_as, char *file_am)
             {
                 if(is_macro_def == NOT_MACRO)
                 {
-                    status is_macro = check_is_macro(line);
+                    status_e is_macro = check_is_macro(line);
                     if(is_macro == SUCCESS)
                     {
                         is_macro_def = MACRO;
@@ -341,7 +341,7 @@ status create_file_am(char *file_as, char *file_am)
                 }
                 else
                 {
-                    status is_endm = check_endm(line);
+                    status_e is_endm = check_endm(line);
                     if(is_endm == SUCCESS)
                     {
                         is_macro_def = NOT_MACRO;

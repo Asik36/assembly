@@ -256,9 +256,9 @@ setnence_type_e process_line(char *line)
 
 }
 
-status fill_data_arr(char *data_start, directive **list, int* directive_counter, int *counter)
+status_e fill_data_arr(char *data_start, directive_t **list, int* directive_counter, int *counter)
 {
-    status retval = SUCCESS;
+    status_e retval = SUCCESS;
     int data_len = get_data_len(data_start);
 
     if (data_len <= 0)
@@ -315,9 +315,9 @@ status fill_data_arr(char *data_start, directive **list, int* directive_counter,
     return retval;
 }
 
-status fill_extern(char *line, directive **list, int *directive_counter)
+status_e fill_extern(char *line, directive_t **list, int *directive_counter)
 {
-    status retval = SUCCESS;
+    status_e retval = SUCCESS;
     char *extern_start = strstr(line,".extern");
     if(extern_start != NULL)
     {
@@ -344,9 +344,9 @@ status fill_extern(char *line, directive **list, int *directive_counter)
     return retval;
 }
 
-status fill_string(char *line,directive **list,int *directive_counter)
+status_e fill_string(char *line,directive_t **list,int *directive_counter)
 {
-    status retval = SUCCESS;
+    status_e retval = SUCCESS;
     char *is_label = strchr(line, ':'); 
     if(is_label)
     {
@@ -393,9 +393,9 @@ status fill_string(char *line,directive **list,int *directive_counter)
     return retval;
 }
 
-status fill_entry(char *line, directive **list, int *directive_counter)
+status_e fill_entry(char *line, directive_t **list, int *directive_counter)
 {
-    status retval = SUCCESS;
+    status_e retval = SUCCESS;
     (*list)[*directive_counter].access_attribute = ATTRIBUTE_ENTERY;
     char *entry_declaration = strstr(line,".entry");
     entry_declaration += ENTRY_WORD_LEN;
@@ -415,9 +415,9 @@ status fill_entry(char *line, directive **list, int *directive_counter)
     return retval;
 }
 
-status fill_data(char *line, directive **list, int *directive_counter)
+status_e fill_data(char *line, directive_t **list, int *directive_counter)
 {
-    status retval = SUCCESS;
+    status_e retval = SUCCESS;
     int counter = 0;
     char *is_label = strchr(line, ':'); 
     if(is_label)
@@ -438,7 +438,7 @@ status fill_data(char *line, directive **list, int *directive_counter)
 
     char *data_start = strstr(line, ".data"); 
     data_start += DATA_WORD_LEN + 1;
-    status is_data_filled = fill_data_arr(data_start,list,directive_counter,&counter);
+    status_e is_data_filled = fill_data_arr(data_start,list,directive_counter,&counter);
     if(is_data_filled == FAILURE)
     {
         retval = FAILURE;
@@ -446,17 +446,17 @@ status fill_data(char *line, directive **list, int *directive_counter)
     return retval;
 }
 
-status fill_directive_struct(char *line, directive ** list, int * directive_counter)
+status_e fill_directive_struct(char *line, directive_t ** list, int * directive_counter)
 {
-    status retval = SUCCESS;
-    *list = (directive *)realloc(*list, (*directive_counter + 1) * sizeof(directive));
+    status_e retval = SUCCESS;
+    *list = (directive_t *)realloc(*list, (*directive_counter + 1) * sizeof(directive_t));
     if(*list == NULL)
     {
         retval = FAILURE;
     }
     if(retval == SUCCESS)
     {
-        memset(*list+*directive_counter,0,sizeof(directive));
+        memset(*list+*directive_counter,0,sizeof(directive_t));
         /* we will have a case for each directive kind*/
         /* case of data directive */
         if(is_directive_data(line) == SENTENCE_TYPE_DIRECTIVE)
@@ -483,17 +483,17 @@ status fill_directive_struct(char *line, directive ** list, int * directive_coun
     return retval; 
 }
 
-status fill_instruction_struct(char *line, instruction **list_instructions, int * instruction_counter)
+status_e fill_instruction_struct(char *line, instruction_t **list_instructions, int * instruction_counter)
 {
-    status retval = SUCCESS;
-    *list_instructions = (instruction *)realloc(*list_instructions, (*instruction_counter + 1) * sizeof(instruction));
+    status_e retval = SUCCESS;
+    *list_instructions = (instruction_t *)realloc(*list_instructions, (*instruction_counter + 1) * sizeof(instruction_t));
     if(list_instructions == NULL)
     {
         retval = FAILURE;
     }
     else
     {  
-        memset(*list_instructions+ *instruction_counter,0,sizeof(instruction));
+        memset(*list_instructions+ *instruction_counter,0,sizeof(instruction_t));
         char * is_label = strstr(line,":");
         if(is_label)
         {
@@ -533,10 +533,10 @@ status fill_instruction_struct(char *line, instruction **list_instructions, int 
     return retval; 
 }
 
-status sentence_decider(char *file_am, instruction **list_instructions, directive **list_directives,
+status_e sentence_decider(char *file_am, instruction_t **list_instructions, directive_t **list_directives,
                     int * directive_counter, int * instruction_counter)
 {
-    status had_error = SUCCESS;
+    status_e had_error = SUCCESS;
     setnence_type_e retval = SUCCESS;
     FILE *file = fopen(file_am, "r");
     if (file == NULL)
@@ -573,11 +573,11 @@ status sentence_decider(char *file_am, instruction **list_instructions, directiv
     return had_error;
 }
 
-module_status_e check_processing_modules(char *file_as, char* base_file_name, directive **directive_list, 
-                instruction **instruction_list, int* instruction_counter, int * directive_counter)
+module_status_e check_processing_modules(char *file_as, char* base_file_name, directive_t **directive_list, 
+                instruction_t **instruction_list, int* instruction_counter, int * directive_counter)
 {
     module_status_e retval = MODULE_STATUS_SUCCESS;
-    status returned_val;
+    status_e returned_val;
     
     char file_am[FILE_NAME_MAX_LEN] = {0}; 
     strncpy(file_am,base_file_name,FILE_NAME_MAX_LEN);

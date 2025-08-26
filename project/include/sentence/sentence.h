@@ -44,13 +44,13 @@ typedef enum module_status
  * @brief this function fills the data arr 
  * 
  * @param data_start pointer to where the data starts
- * @param list pointer to pointer to the directive list
- * @param directive_counter pointer to the directive counter
+ * @param list pointer to pointer to the directive_t list
+ * @param directive_counter pointer to the directive_t counter
  * @param counter pointer to counter so we will know the length
- * @return status SUCCESS/FAILURE
+ * @return status_e SUCCESS/FAILURE
  */
 
-status fill_data_arr(char *data_start, directive **list, int* directive_counter, int *counter);
+status_e fill_data_arr(char *data_start, directive_t **list, int* directive_counter, int *counter);
 
 /**
  * @brief Get the length of string we are going to read
@@ -167,21 +167,21 @@ setnence_type_e process_line(char *line);
  * @param line this is the line which from we will get our content
  * @param list this is a pointer to pointer to the directive list(to allow safe reallocation)
  * @param directive_counter the counter counts how much directions we have found yet
- * @return status SUCCES/FAILURE
+ * @return status_e SUCCES/FAILURE
  */
 
-status fill_directive_struct(char *line, directive ** list, int * directive_counter);
+status_e fill_directive_struct(char *line, directive_t ** list, int * directive_counter);
 
 /**
  * @brief this function fills the instruction struct fields
  * 
  * @param line this is the line which from we will get our content
- * @param list this is a pointer to pointer to the instruction list(to allow safe reallocation)
+ * @param list this is a pointer to pointer to the instruction_t list(to allow safe reallocation)
  * @param directive_counter the counter counts how much instructions we have found yet
- * @return status SUCCES/FAILURE
+ * @return status_e SUCCES/FAILURE
  */
 
-status fill_instruction_struct(char *line, instruction **list_instructions, int * instruction_counter);
+status_e fill_instruction_struct(char *line, instruction_t **list_instructions, int * instruction_counter);
 
 /**
  * @brief this function responsible for going through the whole file and create 
@@ -194,10 +194,10 @@ status fill_instruction_struct(char *line, instruction **list_instructions, int 
  * (so reallocations can work safely)
  * @param directive_counter counts how much directins we had  
  * @param instruction_counter counts how much instructions we had
- * @return status SUCCESS/FAILURE that depends on if there was a syntax error from whatever line we read
+ * @return status_e SUCCESS/FAILURE that depends on if there was a syntax error from whatever line we read
  */
 
-status sentence_decider(char *file_am, instruction **list_instructions, directive **list_directives,
+status_e sentence_decider(char *file_am, instruction_t **list_instructions, directive_t **list_directives,
                     int * directive_counter, int * instruction_counter);
 
 /**
@@ -206,12 +206,12 @@ status sentence_decider(char *file_am, instruction **list_instructions, directiv
  * @param file_as the original assembly file
  * @param base_file_name base file name for the file .am that is going to be created
  * @param directive_list a pointer to pointer of directive list
- * @param instruction_list a pointer to pointer of instruction list
+ * @param instruction_list a pointer to pointer of instruction_t list
  * @param instruction_counter 
  * @param directive_counter 
  * @return module_status_e repsents code error or success of the compilation
  */
 
-module_status_e check_processing_modules(char *file_as, char* base_file_name, directive **directive_list, 
-                instruction **instruction_list, int* instruction_counter, int * directive_counter);
+module_status_e check_processing_modules(char *file_as, char* base_file_name, directive_t **directive_list, 
+                instruction_t **instruction_list, int* instruction_counter, int * directive_counter);
 #endif 

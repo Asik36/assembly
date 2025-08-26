@@ -8,13 +8,13 @@ static const char *register_names[OPERAND_AMONT] =
         "r13", "r14", "r15",
         "r16"
     };
-memory_status memory(instruction *instruction_line_table, int n, instruction_data **instruction_info_table)
+memory_status memory(instruction_t *instruction_line_table, int n, instruction_data_t **instruction_info_table)
 {
 
     memory_status retval = MEMORY_STATUS_SUCCESS;
-    *instruction_info_table = (instruction_data *)calloc(1, n * sizeof(instruction_data));
-    instruction_data *current_instruction_data;
-    instruction *current_instruction_line;
+    *instruction_info_table = (instruction_data_t *)calloc(1, n * sizeof(instruction_data_t));
+    instruction_data_t *current_instruction_data;
+    instruction_t *current_instruction_line;
 
     int i;
     for (i = 0; i < n && retval == MEMORY_STATUS_SUCCESS; i++)
@@ -31,9 +31,9 @@ memory_status memory(instruction *instruction_line_table, int n, instruction_dat
 
     return retval;
 }
-memory_status memory_instruction_assign(instruction *instruction_line, instruction_data *instruction_info)
+memory_status memory_instruction_assign(instruction_t *instruction_line, instruction_data_t *instruction_info)
 {
-    operand_data src_operand = {0}, dest_operand = {0};
+    operand_data_t src_operand = {0}, dest_operand = {0};
     instruction_info->command_index = memory_instruction_get_command_index(instruction_line);
     command current_command = commands[instruction_info->command_index];
 
@@ -68,12 +68,12 @@ uint16_t memory_instruction_get_address(int instruction_size)
     return new_address;
 }
 
-int memory_instruction_get_command_index(instruction *ins)
+int memory_instruction_get_command_index(instruction_t *ins)
 {
     return get_command_index(ins->commnand);
 }
 
-void memory_operand_get_info(char *input_operand, operand_data *operand_info)
+void memory_operand_get_info(char *input_operand, operand_data_t *operand_info)
 {
     operand_info->addressing_mode = memory_operand_get_addressing_mode(input_operand);
     if (operand_info->addressing_mode != ADDRESSING_MODES_NONE)
@@ -98,7 +98,7 @@ int memory_operand_get_register_index(char *op)
     return index;
 }
 
-int memory_operand_get_data(operand_data *op_data, char *op, addressing_modes addr_mode)
+int memory_operand_get_data(operand_data_t *op_data, char *op, addressing_modes_e addr_mode)
 {
     switch (addr_mode)
     {
@@ -138,11 +138,11 @@ int memory_operand_addressing_mode_index_data(char *op)
     return memory_operand_get_register_index(reg);
 }
 
-uint16_t memory_instruction_get_size(instruction_data *ins_data)
+uint16_t memory_instruction_get_size(instruction_data_t *ins_data)
 {
     uint16_t size = 1; /*defualt size , each command is at least one word long*/
-    operand_data *op_data_dest;
-    operand_data *op_data_src;
+    operand_data_t *op_data_dest;
+    operand_data_t *op_data_src;
 
     op_data_src = &ins_data->src_operand_data;
     op_data_dest = &ins_data->dest_operand_data;
@@ -157,7 +157,7 @@ uint16_t memory_instruction_get_size(instruction_data *ins_data)
     return size;
 }
 
-int memory_addressing_mode_instruction_size(operand_data *operand)
+int memory_addressing_mode_instruction_size(operand_data_t *operand)
 {
     int size = 0;
     if (operand != NULL)
@@ -183,9 +183,9 @@ int memory_addressing_mode_instruction_size(operand_data *operand)
     return size;
 }
 
-addressing_modes memory_operand_get_addressing_mode(char *op)
+addressing_modes_e memory_operand_get_addressing_mode(char *op)
 {
-    addressing_modes mode;
+    addressing_modes_e mode;
     if (*op == '\0')
     {
         mode = ADDRESSING_MODES_NONE;
@@ -254,7 +254,7 @@ bool memory_is_addressing_mode_direct(char *op)
     return is_direct;
 }
 
-memory_status memory_instruction_validation(instruction_data *ins_data)
+memory_status memory_instruction_validation(instruction_data_t *ins_data)
 {
     memory_status retval = MEMORY_STATUS_SUCCESS;
     int command_index = ins_data->command_index;

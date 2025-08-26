@@ -31,85 +31,85 @@ typedef enum symbol_status_e
 /**
  * @brief Creates symbol table from instructions and directive
  * @param instruction_data_table instruction data list
- * @param instruction_table instruction strings
+ * @param instruction_table instruction_t strings
  * @param instruction_num amont of instruction
- * @param directive_table list of directive sentence
+ * @param directive_table list of directive_t sentence
  * @param directive_num amont of drrective sentences
  * @param p_symbol_table pointer to list of symbols
  * @param p_symbol_counter pointer to number of symbols
- * @return return status that tells if symbol table created succssfully or not
+ * @return return status_e that tells if symbol table created succssfully or not
  */
-symbol_status symbol_create(instruction_data *instruction_data_table, instruction *instruction_table, int instruction_num,
-                       directive *directive_table, int directive_num,
-                       symbol **p_symbol_table, int *p_symbol_counter);
+symbol_status symbol_create(instruction_data_t *instruction_data_table, instruction_t *instruction_table, int instruction_num,
+                       directive_t *directive_table, int directive_num,
+                       symbol_t **p_symbol_table, int *p_symbol_counter);
 
 
 /**
  *
  * @brief fill symbols from instruction sentences
  * @param instruction_data_table instruction data list
- * @param instruction_table instruction strings
+ * @param instruction_table instruction_t strings
  * @param instruction_num amont of instruction
  * @param p_symbol_table pointer to list of symbols
  * @param p_symbol_counter pointer to number of symbols
- * @return status type of error on symbol creation or succsess
+ * @return status_e type of error on symbol creation or succsess
  */
-symbol_status symbol_instructions(instruction_data *instruction_data_table, instruction *instruction_table, int instruction_num,
-                             symbol **p_symbol_table, int *p_symbol_counter);
+symbol_status symbol_instructions(instruction_data_t *instruction_data_table, instruction_t *instruction_table, int instruction_num,
+                             symbol_t **p_symbol_table, int *p_symbol_counter);
 /**
  * @brief fill symbols from directive sentences
- * @param directive_table list of directive sentence
+ * @param directive_table list of directive_t sentence
  * @param directive_num amont of drrective sentences
  * @param p_symbol_table pointer to list of symbols
  * @param p_symbol_counter pointer to number of symbols
- * @return status type of error on symbol creation or succsess
+ * @return status_e type of error on symbol creation or succsess
  */
-symbol_status symbol_directive(directive *directive_table, int directive_num,
-                          symbol **p_symbol_table, int *p_symbol_counter);
+symbol_status symbol_directive(directive_t *directive_table, int directive_num,
+                          symbol_t **p_symbol_table, int *p_symbol_counter);
 
 /**
  * @brief fill the remaining unsigned address of symbols and checks for errors in the symbol table
  * @param p_symbol_table pointer to list of symbols
  * @param symbol_counter amont of symbols
  * @param start_address defualt start adress in that unisgined address and will start from
- * @return status type of error on existing symbol or succsess if no errors
+ * @return status_e type of error on existing symbol or succsess if no errors
  */
-symbol_status symbol_complete_table(symbol *p_symbol_table, int symbol_counter, int start_address);
+symbol_status symbol_complete_table(symbol_t *p_symbol_table, int symbol_counter, int start_address);
 
 /**
  * @brief get label from instruction and add it to list if it does not exists. includes the address of the current instruction
- * @param ins current instruction
+ * @param ins current instruction_t
  * @param ins_data current instruction data
  * @param symbol_table list of symbols
  * @param index offset of the current symbol
  * @return return error if label alredy exists otherwise return succsess
  */
-symbol_status symbol_get_instruction_labels(instruction *ins, instruction_data *ins_data, symbol *symbol_table, int index);
+symbol_status symbol_get_instruction_labels(instruction_t *ins, instruction_data_t *ins_data, symbol_t *symbol_table, int index);
 
 /**
  * @brief get label from directive and add it to list if. updatess data atterbiute or accsess attribute if alredy exists
- * @param dir current directive
+ * @param dir current directive_t
  * @param symbol_table list of symbols
  * @param index offset of the current symbol
  * @return return code error if label alredy exists or is unvaild, otherwise return succsess
  */
-symbol_status symbol_get_directive_labels(directive *dir, symbol *symbol_table, int index);
+symbol_status symbol_get_directive_labels(directive_t *dir, symbol_t *symbol_table, int index);
 
 /**
  * @brief copys data from instruction into symbol
  * 
  * @param new_symbol destination
- * @param ins source instruction for symbol name
+ * @param ins source instruction_t for symbol name
  * @param ins_data source instruction data for address
  */
-void symbol_extract_instruction(symbol *new_symbol, instruction *ins,instruction_data * ins_data);
+void symbol_extract_instruction(symbol_t *new_symbol, instruction_t *ins,instruction_data_t * ins_data);
 
 /**
  * @brief copys data from directive into symbol
  * @param new_symbol destination symbol
  * @param dir source directory
  */
-void symbol_extract_directive(symbol *new_symbol, directive *dir);
+void symbol_extract_directive(symbol_t *new_symbol, directive_t *dir);
 /**
  * @brief search for symbol index inside a hashmap using symbol name
  * @param symbol_name key name for searching in hashmap
@@ -129,58 +129,58 @@ int symbol_enter(char *symbol_name, int index);
  * @param new_symbol src symbol
  * @return succsess or type of error
  */
-symbol_status symbol_update(symbol *old_symbol, symbol *new_symbol);
+symbol_status symbol_update(symbol_t *old_symbol, symbol_t *new_symbol);
 
 /**
  * @brief checks for errors in case symbol has attribute extern
  * @param old_symbol symbol with attributre extern
  * @return error if extern is alredy defined inside the fille
  */
-symbol_status symbol_handle_extern_attribute(symbol *old_symbol);
+symbol_status symbol_handle_extern_attribute(symbol_t *old_symbol);
 /**
  * @brief checks for errors in case symbol has entery extern
  * @param old_symbol symbol with attributre extern
  * @return error if symbol alredy defined as extern
  */
-symbol_status symbol_handle_entry_attribute(symbol *old_symbol);
+symbol_status symbol_handle_entry_attribute(symbol_t *old_symbol);
 /**
  * @brief checks for errors in case symbol has entery data or string
  * @param old_symbol symbol with attributre extern
  * @return error if symbol alredy defined as extern or the symbol is used as label elsewhere
  */
-symbol_status symbol_handle_data_or_string(symbol *old_symbol, symbol *new_symbol);
+symbol_status symbol_handle_data_or_string(symbol_t *old_symbol, symbol_t *new_symbol);
 /**
  * @brief prints error messeges
- * @param status error code
+ * @param status_e error code
  */
-void symbol_error_handle(symbol_status status);
+void symbol_error_handle(symbol_status status_e);
 /**
  * @brief assign a symbol memory if it is not assigned alredy
  * @param s symbol without an adresss
  * @param address assigning address
  * @return returns the size of command
  */
-uint16_t symbol_assign_memory(symbol *s, int address);
+uint16_t symbol_assign_memory(symbol_t *s, int address);
 /**
  * @brief checks if symbol is of type entery and if it was not initilized in a file
  * @param s symbol
- * @return status if it was initilized or not
+ * @return status_e if it was initilized or not
  */
-symbol_status symbol_is_uninitilized_entery(symbol *s);
+symbol_status symbol_is_uninitilized_entery(symbol_t *s);
 /**
  * @brief gets the next avlible address form instructions list
  * @param instruction_data_table list of instructions
  * @param instruction_num amont of instructions
  * @return retutn the next avlible address or 100 if there is not instructions
  */
-int symbol_get_varibles_start_address(instruction_data *instruction_data_table, int instruction_num);
+int symbol_get_varibles_start_address(instruction_data_t *instruction_data_table, int instruction_num);
 /**
  * @brief increase the size of symbol table by one
  * @param p_symbol_table pointer to symbol table
  * @param p_symbol_counter pointer to symbol counter
  * @return status_e SYMBOL_STATUS_ERR_MEMORY_ALLOCATION if allocation failed
  */
-symbol_status symbol_table_grow(symbol **p_symbol_table, int *p_symbol_counter);
+symbol_status symbol_table_grow(symbol_t **p_symbol_table, int *p_symbol_counter);
 
 /**
  * @brief decreses the size of symbol table by one
@@ -189,7 +189,7 @@ symbol_status symbol_table_grow(symbol **p_symbol_table, int *p_symbol_counter);
  * @param p_symbol_counter pointer to symbol counter
  * @return status_e SYMBOL_STATUS_ERR_MEMORY_ALLOCATION if allocation failed
  */
-symbol_status symbol_table_shrink(symbol **p_symbol_table, int *p_symbol_counter);
+symbol_status symbol_table_shrink(symbol_t **p_symbol_table, int *p_symbol_counter);
 
 /**
  * @brief duplicates a string
